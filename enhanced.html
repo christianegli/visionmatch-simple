@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionMatch - See Without Limits</title>
+    <style>
+        :root {
+            --scroll-hue: 220;
+            --scroll-intensity: 0.5;
+            --scroll-wave: 0.5;
+            --mouse-x: 0.5;
+            --mouse-y: 0.5;
+            --mouse-hue: 30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, 
+                hsl(200, 40%, 95%) 0%,
+                hsl(220, 30%, 93%) 20%,
+                hsl(240, 25%, 96%) 40%,
+                hsl(280, 20%, 94%) 60%,
+                hsl(300, 30%, 92%) 80%,
+                hsl(320, 25%, 95%) 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.6s ease;
+        }
+
+        /* Dynamic iridescent background that changes on scroll */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%), 
+                    hsla(calc(var(--scroll-hue) + var(--mouse-hue)), 70%, 85%, calc(0.1 + var(--scroll-intensity) * 0.05)) 0%, 
+                    transparent 50%),
+                linear-gradient(calc(45deg + var(--scroll-wave) * 45deg),
+                    hsla(calc(var(--scroll-hue)), calc(40% + var(--scroll-intensity) * 20%), calc(85% + var(--scroll-wave) * 5%), 0.08) 0%,
+                    hsla(calc(var(--scroll-hue) + 60), calc(35% + var(--scroll-wave) * 15%), 83%, 0.06) 20%,
+                    hsla(calc(var(--scroll-hue) + 120), calc(30% + var(--scroll-intensity) * 10%), 87%, 0.08) 40%,
+                    hsla(calc(var(--scroll-hue) + 180), calc(40% + var(--scroll-wave) * 15%), 85%, 0.06) 60%,
+                    hsla(calc(var(--scroll-hue) + 240), calc(35% + var(--scroll-intensity) * 20%), 86%, 0.1) 80%,
+                    hsla(calc(var(--scroll-hue) + 300), calc(45% + var(--scroll-wave) * 10%), 84%, 0.08) 100%);
+            opacity: calc(0.4 + var(--scroll-intensity) * 0.3);
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Rippled glass texture with grainy effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 80% 60%, rgba(255, 255, 255, 0.2) 0%, transparent 35%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 30%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='rippleFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='6' stitchTiles='stitch'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='10'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23rippleFilter)' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+            background-size: 200px 200px, 300px 300px, 250px 250px, 120px 120px;
+            background-position: 0% 0%, 100% 100%, 50% 50%, 0% 0%;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1;
+            animation: rippleFlow 25s ease-in-out infinite;
+        }
+
+        @keyframes rippleFlow {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 100%, 50% 50%, 0% 0%;
+                transform: scale(1) rotate(0deg);
+            }
+            25% { 
+                background-position: 20% 10%, 80% 90%, 40% 60%, 10% 5%;
+                transform: scale(1.02) rotate(0.5deg);
+            }
+            50% { 
+                background-position: 40% 20%, 60% 80%, 30% 70%, 20% 10%;
+                transform: scale(1.01) rotate(-0.3deg);
+            }
+            75% { 
+                background-position: 60% 30%, 40% 70%, 60% 40%, 30% 15%;
+                transform: scale(1.03) rotate(0.2deg);
+            }
+        }
+
+
+
+        /* Floating Navigation with rounded edges */
+        .nav {
+            position: fixed;
+            top: 1.5rem;
+            left: 2rem;
+            right: 2rem;
+            z-index: 50;
+            backdrop-filter: blur(25px) saturate(200%);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.35) 0%,
+                rgba(255, 255, 255, 0.20) 50%,
+                rgba(255, 255, 255, 0.30) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 2rem;
+            padding: 1rem 2rem;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.1),
+                0 4px 20px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.15),
+                0 6px 25px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-image {
+            height: 32px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-text {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #1f2937, #374151);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #3b82f6;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10rem 2rem 2rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-content {
+            max-width: 1000px;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: bold;
+            line-height: 0.9;
+            margin-bottom: 2rem;
+            color: #1f2937;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .hero h2 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: bold;
+            margin-bottom: 3rem;
+            color: #1f2937;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        /* Hero CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1.25rem 3rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.125rem;
+            letter-spacing: 0.025em;
+            box-shadow: 
+                0 15px 35px rgba(59, 130, 246, 0.3),
+                0 8px 20px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-cta-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 25px 50px rgba(59, 130, 246, 0.4),
+                0 12px 30px rgba(59, 130, 246, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-subtitle {
+            margin-top: 1rem;
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .trust-indicators {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .avatars {
+            display: flex;
+            gap: -0.25rem;
+        }
+
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar:nth-child(1) { background: linear-gradient(45deg, #a855f7, #ec4899); }
+        .avatar:nth-child(2) { background: linear-gradient(45deg, #3b82f6, #a855f7); }
+        .avatar:nth-child(3) { background: linear-gradient(45deg, #10b981, #3b82f6); }
+
+        /* Sections with dramatic glass effects */
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4rem;
+            color: #1f2937;
+            line-height: 1.1;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(147, 197, 253, 0.02) 50%,
+                rgba(255, 255, 255, 0.05) 100%);
+        }
+
+        .benefits-list {
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateX(10px);
+        }
+
+        .benefit-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
+        }
+
+        .benefit-item span {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .price-highlight {
+            text-align: center;
+            background: linear-gradient(135deg,
+                rgba(59, 130, 246, 0.1) 0%,
+                rgba(30, 64, 175, 0.05) 100%);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 2rem;
+            padding: 3rem;
+            box-shadow: 
+                0 15px 40px rgba(59, 130, 246, 0.1),
+                inset 0 2px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .price-highlight h3 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        /* How It Works Section */
+        .how-it-works-section {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.02) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(147, 51, 234, 0.02) 100%);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .step-card {
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0.75) 100%);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.08),
+                0 8px 25px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.12),
+                0 12px 35px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .step-number {
+            width: 4rem;
+            height: 4rem;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .step-card h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .step-card p {
+            color: #6b7280;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* CTA Center */
+        .cta-center {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .section-cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 1.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 0.025em;
+            box-shadow: 
+                0 10px 25px rgba(59, 130, 246, 0.3),
+                0 5px 15px rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .section-cta-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 15px 35px rgba(59, 130, 246, 0.4),
+                0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Vision Profile Section */
+        .vision-profile-section {
+            background: linear-gradient(135deg, 
+                rgba(147, 51, 234, 0.02) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(236, 72, 153, 0.02) 100%);
+        }
+
+        .profile-features {
+            margin: 3rem 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.7) 0%,
+                rgba(255, 255, 255, 0.5) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-item h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            line-height: 1.4;
+        }
+
+        .profile-cta {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .profile-cta p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Protection Section */
+        .protection-section {
+            background: linear-gradient(135deg, 
+                rgba(236, 72, 153, 0.02) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(245, 158, 11, 0.02) 100%);
+        }
+
+        .protection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .protection-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .protection-item {
+            background: linear-gradient(135deg,
+                rgba(16, 185, 129, 0.1) 0%,
+                rgba(16, 185, 129, 0.05) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #059669;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.1);
+        }
+
+        .protection-comparison {
+            space-y: 1rem;
+        }
+
+        .comparison-item {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .comparison-item:first-child {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .comparison-item.highlight {
+            background: linear-gradient(135deg,
+                rgba(16, 185, 129, 0.15) 0%,
+                rgba(16, 185, 129, 0.1) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            color: #059669;
+            font-weight: 600;
+        }
+
+        /* Join Movement Section */
+        .join-section {
+            background: linear-gradient(135deg, 
+                rgba(245, 158, 11, 0.02) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(59, 130, 246, 0.02) 100%);
+        }
+
+        .join-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 2rem auto 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .email-input {
+            flex: 1;
+            min-width: 280px;
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .email-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .join-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            border: none;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .join-description {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .coming-soon {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .city-item {
+            background: linear-gradient(135deg,
+                rgba(59, 130, 246, 0.1) 0%,
+                rgba(59, 130, 246, 0.05) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .request-city {
+            color: #3b82f6;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .request-city:hover {
+            color: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg,
+                rgba(31, 41, 55, 0.95) 0%,
+                rgba(55, 65, 81, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            color: #f9fafb;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .trust-signals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .trust-item {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d1d5db;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #f9fafb;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                top: 1rem;
+                left: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+            
+            .logo-text {
+                font-size: 1.25rem;
+            }
+
+            .hero {
+                padding: 8rem 1rem 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: clamp(2.5rem, 8vw, 4rem);
+            }
+
+            .hero h2 {
+                font-size: clamp(1.5rem, 5vw, 2.5rem);
+            }
+
+            .steps-grid, .testimonials-grid, .pricing-grid, .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .protection-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .protection-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <!-- VisionMatch Logo SVG - Replace with: <img class="logo-image" src="path/to/your/logo.png" alt="VisionMatch"> -->
+                <svg class="logo-image" viewBox="0 0 80 48" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="circle1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#67e8f9;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="circle2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="20" cy="24" r="16" fill="url(#circle1)" opacity="0.9"/>
+                    <circle cx="36" cy="24" r="16" fill="url(#circle2)" opacity="0.8"/>
+                </svg>
+                <div class="logo-text">VISIONMATCH</div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+            </ul>
+            <a href="#quiz" class="nav-btn">Take Quiz</a>
+        </div>
+    </nav>
+
+    <section id="quiz" class="hero">
+        <div class="hero-content">
+            <h1>
+                See Without <span class="highlight">Limits</span>
+            </h1>
+            
+            <h2>Join the eyewear revolution</h2>
+            
+            <p>
+                Get all the glasses you need - when you need them.<br>
+                One simple monthly fee. Zero ownership stress.
+            </p>
+            
+            <div class="cta-section">
+                <a href="#quiz" class="hero-cta-btn">
+                    DISCOVER YOUR VISION MATCH →
+                </a>
+                <p class="cta-subtitle">3-minute personalized quiz</p>
+            </div>
+            
+            <div class="trust-indicators">
+                <div class="avatars">
+                    <div class="avatar"></div>
+                    <div class="avatar"></div>
+                    <div class="avatar"></div>
+                </div>
+                <p>Barcelona: 2,847 members and growing</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The New Way Section -->
+    <section class="benefits-section">
+        <div class="section-container">
+            <h2 class="section-title">Finally. Eyewear that adapts to your life.</h2>
+            
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <div class="benefit-icon">✓</div>
+                    <span>Multiple frames - always</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✓</div>
+                    <span>Free prescription updates</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✓</div>
+                    <span>Damage & loss protection included</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✓</div>
+                    <span>Switch styles whenever you want</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✓</div>
+                    <span>Contact lenses available</span>
+                </div>
+            </div>
+            
+            <div class="price-highlight">
+                <h3>From €19/month</h3>
+                <p>at participating opticians</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How VisionMatch Works Section -->
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="section-container">
+            <h2 class="section-title">How VisionMatch Works</h2>
+            
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Take the Quiz</h3>
+                    <p>Our AI analyzes your lifestyle and vision needs</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Get Your Match</h3>
+                    <p>Receive your personalized eyewear recommendation</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Visit Your Optician</h3>
+                    <p>Choose from 47 Barcelona locations</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Start Seeing Differently</h3>
+                    <p>Pick your frames. Change them anytime. Live freely.</p>
+                </div>
+            </div>
+            
+            <div class="cta-center">
+                <a href="#quiz" class="section-cta-btn">FIND MY VISION MATCH</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section">
+        <div class="section-container">
+            <h2 class="section-title">Real Members, Real Freedom</h2>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p>"I change my glasses with my outfits. Same monthly price as my gym membership."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div>
+                            <h4>Marina, 32</h4>
+                            <p>Gràcia</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p>"Broke my frames playing paddle. Got new ones same week. No extra cost."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div>
+                            <h4>David, 28</h4>
+                            <p>Eixample</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p>"My prescription changed after 6 months. Updated for free. This is the future."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div>
+                            <h4>Carmen, 45</h4>
+                            <p>Sant Gervasi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Profile Section -->
+    <section class="vision-profile-section">
+        <div class="section-container">
+            <h2 class="section-title">Your Personalized Vision Profile</h2>
+            <p class="section-subtitle">Not all eyes are the same. Neither should your solution be.</p>
+            
+            <div class="profile-features">
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <h4>Your daily activities and screen time</h4>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Style preferences and lifestyle</h4>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Vision challenges and needs</h4>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Budget and priorities</h4>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-cta">
+                <p>Get your free personalized recommendation in 3 minutes.<br>
+                   No obligation. No spam. Just clarity.</p>
+                <a href="#quiz" class="section-cta-btn">START THE QUIZ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Protection Section -->
+    <section class="protection-section">
+        <div class="section-container">
+            <h2 class="section-title">Protection That Actually Protects</h2>
+            <p class="section-subtitle">Life happens. We've got you covered.</p>
+            
+            <div class="protection-grid">
+                <div class="protection-list">
+                    <div class="protection-item">Theft ✓</div>
+                    <div class="protection-item">Loss ✓</div>
+                    <div class="protection-item">Damage ✓</div>
+                    <div class="protection-item">Prescription changes ✓</div>
+                    <div class="protection-item">Style regrets ✓</div>
+                </div>
+                
+                <div class="protection-comparison">
+                    <div class="comparison-item">
+                        <strong>Traditional insurance:</strong> €8-15/month + deductibles
+                    </div>
+                    <div class="comparison-item highlight">
+                        <strong>VisionMatch:</strong> Already included
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing-section">
+        <div class="section-container">
+            <h2 class="section-title">Transparent Pricing</h2>
+            <p class="section-subtitle">Choose your vision freedom:</p>
+            
+            <div class="pricing-grid">
+                <div class="plan-card">
+                    <h3>ESSENTIAL</h3>
+                    <div class="price">€19<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>2 frames always available</li>
+                        <li>Annual style change</li>
+                        <li>Basic protection</li>
+                    </ul>
+                </div>
+                
+                <div class="plan-card popular">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <h3>COMFORT</h3>
+                    <div class="price">€29<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>2-3 frames in rotation</li>
+                        <li>Unlimited style changes</li>
+                        <li>Full protection included</li>
+                        <li>Prescription updates free</li>
+                    </ul>
+                </div>
+                
+                <div class="plan-card">
+                    <h3>PREMIUM</h3>
+                    <div class="price">€39<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>3-4 frames available</li>
+                        <li>Contacts included</li>
+                        <li>Premium lens options</li>
+                        <li>Priority service</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="cta-center">
+                <a href="#quiz" class="section-cta-btn">QUIZ: FIND YOUR PERFECT PLAN</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Join Movement Section -->
+    <section class="join-section">
+        <div class="section-container">
+            <h2 class="section-title">Join the Movement</h2>
+            <p class="section-subtitle">Barcelona sees differently. You're next.</p>
+            
+            <div class="join-form">
+                <input type="email" placeholder="Enter your email" class="email-input">
+                <button class="join-btn">JOIN VISIONMATCH</button>
+            </div>
+            
+            <p class="join-description">
+                Get exclusive member benefits and be first to know when we launch in your neighborhood.
+            </p>
+            
+            <div class="coming-soon">
+                <div class="city-item">Madrid: Coming March 2025</div>
+                <div class="city-item">Valencia: Coming May 2025</div>
+                <a href="#request" class="request-city">REQUEST YOUR CITY</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="section-container">
+            <div class="trust-signals">
+                <div class="trust-item">✓ 2,847 active members</div>
+                <div class="trust-item">✓ 47 partner opticians</div>
+                <div class="trust-item">✓ 4.8★ member satisfaction</div>
+                <div class="trust-item">✓ Powered by OptiQa technology</div>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#faq">FAQ</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#stores">Find Stores</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Confirm enhanced version loaded
+        console.log("VisionMatch Enhanced - Iridescent Glass with Dynamic Gradients Loaded!");
+        
+        // Dynamic gradient changes based on scroll position
+        let ticking = false;
+        
+        function updateGradientOnScroll() {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const docHeight = document.body.scrollHeight;
+            const scrollPercent = scrollY / (docHeight - windowHeight);
+            
+            const backgroundOverlay = document.querySelector('body::before') || document.body;
+            
+            // Create different gradient phases based on scroll position
+            const phase1 = scrollPercent * 360; // Rotation angle
+            const phase2 = (scrollPercent * 2) % 1; // Opacity variation
+            const phase3 = Math.sin(scrollPercent * Math.PI * 3) * 0.5 + 0.5; // Wave pattern
+            
+            // Update body background gradient
+            const hue1 = (200 + scrollPercent * 120) % 360;
+            const hue2 = (240 + scrollPercent * 90) % 360;
+            const hue3 = (280 + scrollPercent * 150) % 360;
+            
+            document.body.style.background = `
+                linear-gradient(${135 + phase1 * 0.2}deg, 
+                    hsl(${hue1}, ${30 + phase3 * 20}%, 95%) 0%,
+                    hsl(${hue2}, ${25 + phase2 * 15}%, 93%) 25%,
+                    hsl(${hue3}, ${20 + phase3 * 10}%, 96%) 50%,
+                    hsl(${(hue1 + 60) % 360}, ${15 + phase2 * 20}%, 94%) 75%,
+                    hsl(${(hue2 + 40) % 360}, ${25 + phase3 * 15}%, 95%) 100%)
+            `;
+            
+            // Update overlay gradients through CSS variables
+            document.documentElement.style.setProperty('--scroll-hue', hue1);
+            document.documentElement.style.setProperty('--scroll-intensity', phase2);
+            document.documentElement.style.setProperty('--scroll-wave', phase3);
+            
+            ticking = false;
+        }
+        
+        function requestScrollUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(updateGradientOnScroll);
+                ticking = true;
+            }
+        }
+        
+        // Smooth scroll-based gradient changes
+        window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+        
+        // Initial gradient setup
+        updateGradientOnScroll();
+        
+        // Add shimmer effects on page load
+        setTimeout(() => {
+            document.querySelectorAll('.benefit-card').forEach((card, index) => {
+                setTimeout(() => {
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 800);
+                }, index * 200);
+            });
+        }, 1000);
+        
+        // Logo pulse effect on load
+        setTimeout(() => {
+            document.querySelector('.logo').style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                document.querySelector('.logo').style.transform = 'scale(1)';
+            }, 500);
+        }, 500);
+        
+        // Add mouse movement effect for extra interactivity
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            // Subtle mouse-based gradient shifts
+            const mouseHue = x * 60 + y * 30;
+            document.documentElement.style.setProperty('--mouse-x', x);
+            document.documentElement.style.setProperty('--mouse-y', y);
+            document.documentElement.style.setProperty('--mouse-hue', mouseHue);
+        });
+    </script>
+</body>
+</html> 

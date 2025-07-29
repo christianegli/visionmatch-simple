@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionMatch - Premium Eyewear Subscription</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, 
+                hsl(250, 80%, 88%) 0%,
+                hsl(260, 70%, 85%) 15%,
+                hsl(280, 60%, 82%) 35%,
+                hsl(320, 50%, 80%) 55%,
+                hsl(25, 85%, 78%) 80%,
+                hsl(15, 80%, 75%) 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #1f2937;
+        }
+
+        .nav-btn {
+            background: linear-gradient(to right, #8b5cf6, #a855f7);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            max-width: 1000px;
+        }
+
+        .hero h1 {
+            font-size: clamp(4rem, 8vw, 7rem);
+            font-weight: bold;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .hero .description {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            text-decoration: none;
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .location-badge {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 1rem 1.5rem;
+            display: inline-block;
+            color: #4b5563;
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4rem;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Benefits Section */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .benefits-list {
+            list-style: none;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+
+        .benefit-check {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .author-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+            margin-right: 1rem;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .testimonial-quote {
+            color: #4b5563;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-card.popular {
+            border: 2px solid #8b5cf6;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-period {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .plan-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #4b5563;
+        }
+
+        .feature-check {
+            width: 1.25rem;
+            height: 1.25rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: white;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .section {
+                padding: 3rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">🔍 VisionMatch</div>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#stores">Find Stores</a></li>
+            </ul>
+            <a href="#quiz" class="nav-btn">Take Quiz</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>
+                See Without 
+                <span class="highlight">Limits</span>
+            </h1>
+            
+            <p class="subtitle">Join the eyewear revolution</p>
+            
+            <p class="description">
+                Get all the glasses you need - when you need them.<br>
+                One simple monthly fee. Zero ownership stress.
+            </p>
+            
+            <a href="#discover" class="cta-button">
+                DISCOVER YOUR VISION MATCH →
+            </a>
+            
+            <div class="location-badge">
+                <strong>Barcelona:</strong> 2,847 members and growing
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Finally. Eyewear that adapts to your life.</h2>
+            
+            <div class="benefits-grid">
+                <ul class="benefits-list">
+                    <li class="benefit-item">
+                        <span class="benefit-check">✓</span>
+                        Multiple frames - always
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-check">✓</span>
+                        Free prescription updates
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-check">✓</span>
+                        Damage & loss protection included
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-check">✓</span>
+                        Switch styles whenever you want
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-check">✓</span>
+                        Contact lenses available
+                    </li>
+                </ul>
+                
+                <div class="pricing-card">
+                    <div class="price">From €19</div>
+                    <div class="price-subtitle">/month</div>
+                    <div class="price-subtitle">at participating opticians</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Real Members, Real Freedom</h2>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-name">Marina, 32, Gràcia</div>
+                    </div>
+                    <blockquote class="testimonial-quote">
+                        "I change my glasses with my outfits. Same monthly price as my gym membership."
+                    </blockquote>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);"></div>
+                        <div class="author-name">David, 28, Eixample</div>
+                    </div>
+                    <blockquote class="testimonial-quote">
+                        "Broke my frames playing paddle. Got new ones same week. No extra cost."
+                    </blockquote>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: linear-gradient(45deg, #10b981, #059669);"></div>
+                        <div class="author-name">Carmen, 45, Sant Gervasi</div>
+                    </div>
+                    <blockquote class="testimonial-quote">
+                        "My prescription changed after 6 months. Updated for free. This is the future."
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Transparent Pricing</h2>
+            <p style="text-align: center; font-size: 1.25rem; color: #6b7280; margin-bottom: 3rem;">
+                Choose your vision freedom:
+            </p>
+            
+            <div class="pricing-grid">
+                <div class="plan-card">
+                    <div class="plan-name">ESSENTIAL</div>
+                    <div class="plan-price">€19</div>
+                    <div class="plan-period">/month</div>
+                    <ul class="plan-features">
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            2 frames always available
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Annual style change
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Basic protection
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="plan-card popular">
+                    <div class="popular-badge">POPULAR</div>
+                    <div class="plan-name">COMFORT</div>
+                    <div class="plan-price">€29</div>
+                    <div class="plan-period">/month</div>
+                    <ul class="plan-features">
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            2-3 frames in rotation
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Unlimited style changes
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Full protection included
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Prescription updates free
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="plan-card">
+                    <div class="plan-name">PREMIUM</div>
+                    <div class="plan-price">€39</div>
+                    <div class="plan-period">/month</div>
+                    <ul class="plan-features">
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            3-4 frames available
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Contacts included
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Premium lens options
+                        </li>
+                        <li class="plan-feature">
+                            <span class="feature-check">✓</span>
+                            Priority service
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html> 

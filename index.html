@@ -1639,4 +1639,15 @@
                                 }
                             },
                                 currentStep === questions.length - 1 ? 'Get My Results' : 'Next',
-      
+                                React.createElement(ChevronRight, { style: { width: '20px', height: '20px' } })
+                            )
+                        )
+                )
+            );
+        };
+        
+        // Render the quiz
+        ReactDOM.render(React.createElement(VisionQuiz), document.getElementById('quiz-root'));
+    </script>
+</body>
+</html>

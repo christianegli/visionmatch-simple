@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionMatch - Multiple Glasses, One Monthly Price</title>
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #1e40af;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #64748b;
+            --bg-cream: #fffef7;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                radial-gradient(ellipse 1000px 800px at 20% 30%, rgba(255, 248, 220, 0.4) 0%, transparent 70%),
+                radial-gradient(ellipse 800px 600px at 80% 70%, rgba(250, 245, 195, 0.3) 0%, transparent 65%),
+                linear-gradient(135deg, 
+                    #fffef7 0%,
+                    #fefce8 25%,
+                    #fef3c7 50%,
+                    #fef3c7 75%,
+                    #fffef7 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 1.5rem;
+            left: 2rem;
+            right: 2rem;
+            z-index: 50;
+            backdrop-filter: blur(20px);
+            background: var(--bg-glass);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 2rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-medium);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 10rem 2rem 6rem 2rem;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 0.9;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            color: var(--text-medium);
+            margin-bottom: 3rem;
+            font-weight: 500;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            margin-bottom: 3rem;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            color: white;
+            padding: 1.25rem 2.5rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(59, 130, 246, 0.4);
+        }
+
+        .social-proof {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 3rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-medium);
+            text-align: center;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            background: rgba(248, 250, 252, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 3rem;
+            margin: 4rem auto;
+            padding: 4rem 2rem;
+        }
+
+        .problem-vs-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 900px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .problem-side, .solution-side {
+            text-align: center;
+        }
+
+        .problem-side h3 {
+            color: #dc2626;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .solution-side h3 {
+            color: #059669;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .problem-list, .solution-list {
+            list-style: none;
+            space-y: 1rem;
+        }
+
+        .problem-list li {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .solution-list li {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        /* How It Works */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+        }
+
+        .step h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .step p {
+            color: var(--text-medium);
+            font-size: 1rem;
+        }
+
+        /* Benefits Section */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .benefit {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .benefit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .benefit p {
+            color: var(--text-medium);
+            font-size: 0.95rem;
+        }
+
+        /* Pricing */
+        .pricing-highlight {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            color: white;
+            border-radius: 2rem;
+            padding: 3rem;
+            text-align: center;
+            margin: 4rem auto;
+            max-width: 600px;
+        }
+
+        .pricing-highlight .price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-highlight .price-detail {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-highlight .features {
+            font-size: 1rem;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .final-cta {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 3rem;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin: 4rem auto;
+        }
+
+        .location-info {
+            background: rgba(255, 235, 132, 0.3);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 500px;
+            font-weight: 500;
+            color: #92400e;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-dark);
+            color: #f1f5f9;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #f9fafb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                top: 1rem;
+                left: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 8rem 1.5rem 4rem 1.5rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .problem-vs-solution {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+                margin: 1rem 0;
+            }
+
+            .steps-grid, .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">V</div>
+                <span>VisionMatch</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#included">What's Included</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <a href="#quiz" class="nav-btn">Take Quiz</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Multiple Glasses.<br><span class="highlight">One Monthly Price.</span></h1>
+        <p class="subtitle">Get 2-3 pairs of prescription glasses for one affordable monthly fee. No more choosing between reading glasses or sunglasses.</p>
+        
+        <div class="hero-cta">
+            <a href="#quiz" class="cta-btn">See What You're Missing</a>
+        </div>
+        
+        <p class="social-proof">Join 3,200+ people who never worry about glasses again</p>
+    </section>
+
+    <!-- Problem vs Solution -->
+    <section class="section">
+        <div class="problem-section">
+            <h2 class="section-title">The Old Way vs. The Smart Way</h2>
+            
+            <div class="problem-vs-solution">
+                <div class="problem-side">
+                    <h3>❌ The Old Way</h3>
+                    <ul class="problem-list">
+                        <li>€300+ for one pair</li>
+                        <li>Outdated prescription</li>
+                        <li>Lost or broken = expensive</li>
+                        <li>Choose: reading OR sunglasses</li>
+                        <li>Compromise on what you really need</li>
+                    </ul>
+                </div>
+                
+                <div class="vs-divider">VS</div>
+                
+                <div class="solution-side">
+                    <h3>✅ The Smart Way</h3>
+                    <ul class="solution-list">
+                        <li>€19.90/month, multiple pairs</li>
+                        <li>Always up-to-date lenses</li>
+                        <li>Full coverage included</li>
+                        <li>Get ALL the glasses you need</li>
+                        <li>Professional fitting guaranteed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section">
+        <h2 class="section-title">How VisionMatch Works</h2>
+        <p class="section-subtitle">Get multiple glasses in 3 simple steps</p>
+        
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Take Our Assessment</h3>
+                <p>Tell us about your lifestyle and vision needs. Takes 2 minutes.</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Visit Partner Optician</h3>
+                <p>Get professionally fitted at one of 47 Barcelona locations.</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Enjoy Your Glasses</h3>
+                <p>Receive 2-3 pairs based on your needs. Swap, upgrade, or replace anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section id="included" class="section">
+        <h2 class="section-title">What's Included</h2>
+        <p class="section-subtitle">Everything you need for clear vision, covered</p>
+        
+        <div class="benefits-grid">
+            <div class="benefit">
+                <div class="benefit-icon">👓</div>
+                <h4>2-3 Pairs of Glasses</h4>
+                <p>Reading, computer, sunglasses, or distance - whatever you need</p>
+            </div>
+            
+            <div class="benefit">
+                <div class="benefit-icon">🔄</div>
+                <h4>Free Lens Updates</h4>
+                <p>Prescription changed? New lenses at no extra cost</p>
+            </div>
+            
+            <div class="benefit">
+                <div class="benefit-icon">🛡️</div>
+                <h4>Full Coverage</h4>
+                <p>Lost, stolen, or broken? Replaced immediately</p>
+            </div>
+            
+            <div class="benefit">
+                <div class="benefit-icon">⚡</div>
+                <h4>Instant Swaps</h4>
+                <p>Want a different style? Exchange anytime at any partner location</p>
+            </div>
+        </div>
+        
+        <div class="pricing-highlight">
+            <div class="price">€19.90</div>
+            <div class="price-detail">per month, all included</div>
+            <div class="features">Professional fitting • Premium lenses • Full coverage • Multiple pairs</div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2 class="section-title">Ready to See Differently?</h2>
+        <p class="section-subtitle">Don't miss out on the complete vision solution Barcelona is choosing</p>
+        
+        <a href="#quiz" class="cta-btn">See What You're Missing</a>
+    </section>
+
+    <!-- Barcelona Section -->
+    <section class="section" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 197, 253, 0.1)); border-radius: 3rem; margin: 4rem auto;">
+        <div style="text-align: center; padding: 3rem 2rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-dark);">Barcelona is Seeing Differently</h2>
+            <p style="font-size: 1.3rem; color: var(--text-medium); margin-bottom: 3rem; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6;">Join thousands of Catalans who've completed their vision setup and never look back. Professional opticians, premium lenses, complete coverage - all for one simple monthly price.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 800px; margin: 3rem auto; text-align: center;">
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary-blue); margin-bottom: 0.5rem;">47</div>
+                    <div style="color: var(--text-medium); font-weight: 600;">Partner Locations</div>
+                    <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">Across Barcelona</div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary-blue); margin-bottom: 0.5rem;">3,200+</div>
+                    <div style="color: var(--text-medium); font-weight: 600;">Happy Members</div>
+                    <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">Complete setups</div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary-blue); margin-bottom: 0.5rem;">€19.90</div>
+                    <div style="color: var(--text-medium); font-weight: 600;">Per Month</div>
+                    <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">Everything included</div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(251, 191, 36, 0.1); border: 2px solid rgba(251, 191, 36, 0.3); border-radius: 1.5rem; padding: 2rem; margin: 3rem auto; max-width: 600px;">
+                <h3 style="color: #92400e; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem;">🚀 Coming Soon</h3>
+                <p style="color: #92400e; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">Madrid - March 2025</p>
+                <p style="color: #92400e; font-weight: 600; font-size: 1.1rem;">Valencia - Summer 2025</p>
+                <p style="color: #a16207; font-size: 0.95rem; margin-top: 1rem;">Join the waitlist to be first in your city</p>
+            </div>
+            
+            <a href="#quiz" class="cta-btn" style="font-size: 1.2rem; padding: 1.5rem 3rem;">Complete Your Vision Setup</a>
+        </div>
+    </section>
+
+    <!-- Simple Quiz Placeholder -->
+    <section id="quiz" class="section" style="background: rgba(248, 250, 252, 0.8); border-radius: 3rem; margin: 4rem auto;">
+        <div style="text-align: center; padding: 4rem 2rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 2rem; color: var(--text-dark);">Vision Gap Assessment</h2>
+            <p style="font-size: 1.3rem; color: var(--text-medium); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">Our AI-powered assessment identifies exactly which glasses are missing from your current setup. Get personalized recommendations in 2 minutes.</p>
+            
+            <div style="display: flex; gap: 1rem; max-width: 400px; margin: 0 auto 2rem; flex-wrap: wrap; justify-content: center;">
+                <input type="email" placeholder="Enter your email" style="flex: 1; min-width: 250px; padding: 1rem 1.5rem; border-radius: 1.5rem; border: 2px solid rgba(59, 130, 246, 0.2); background: white; font-size: 1rem; outline: none;">
+                <button style="padding: 1rem 2rem; background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark)); color: white; border: none; border-radius: 1.5rem; font-weight: 600; cursor: pointer;">Get Assessment</button>
+            </div>
+            
+            <p style="color: var(--text-light); font-size: 0.9rem;">Join the waitlist • Assessment launches February 2025</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#included">What's Included</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+            <p>&copy; 2025 VisionMatch. Revolutionizing eyewear in Barcelona.</p>
+        </div>
+    </footer>
+</body>
+</html> 

@@ -1,0 +1,340 @@
+// Educational content generator based on current question and user answers
+            const getEducationalContent = (questionIndex, currentAnswers) => {
+                const question = questions[questionIndex];
+                if (!question || question.type === 'intro') return null;
+
+                // Get previous answers for context
+                const wearsGlasses = currentAnswers[0] && currentAnswers[0].includes('glasses');
+                const glassesCount = currentAnswers[1];
+                const currentGlasses = currentAnswers[2] || [];  
+                const primaryUpdated = currentAnswers[3];
+                const sunglassesUpdated = currentAnswers[4];
+                const glassesUse = currentAnswers[6] || [];
+                const freeTimeActivities = currentAnswers[7] || [];
+                const screenTime = currentAnswers[10];
+                const symptoms = currentAnswers[11] || [];
+
+                const educationalContent = {
+                    // Question about current prescription glasses
+                    1: {
+                        icon: '💡',
+                        title: 'Did you know?',
+                        content: wearsGlasses ? `
+                            <p>Most people who wear glasses actually need 2-3 different pairs for optimal vision throughout their day.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Reading glasses reduce eye strain for close work</div>
+                                <div class="education-benefit">Computer glasses filter blue light from screens</div>
+                                <div class="education-benefit">Prescription sunglasses protect eyes outdoors</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>💰 Subscription benefit:</strong> Build your complete glasses collection gradually without massive upfront costs, plus automatic coverage if any pair breaks.
+                            </div>
+                        ` : `
+                            <p>Even people with perfect vision often benefit from specialized glasses for computer work and UV protection.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Blue light glasses reduce digital eye strain</div>
+                                <div class="education-benefit">UV-blocking sunglasses prevent eye damage</div>
+                                <div class="education-benefit">Reading glasses can prevent future vision problems</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>✨ Subscription benefit:</strong> Start with one pair and add others as your needs evolve, with professional guidance every step of the way.
+                            </div>
+                        `
+                    },
+                    // Question about number of glasses - more conditional
+                    2: {
+                        icon: '👀',
+                        title: 'Vision insight',
+                        content: glassesCount === 'One' ? `
+                            <p>Using one pair of glasses for everything is like using one tool for every job - it can work, but specialized tools perform better.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Distance glasses aren't optimized for reading comfort</div>
+                                <div class="education-benefit">Indoor glasses lack UV protection outdoors</div>
+                                <div class="education-benefit">Regular glasses don't filter harmful blue light from screens</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🔄 Subscription benefit:</strong> Keep your current glasses as your foundation and add task-specific ones without replacing what already works.
+                            </div>
+                        ` : glassesCount === 'Two' ? `
+                            <p>Having two pairs shows you understand different visual needs - most people find a third pair completes their setup.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Each pair can be perfectly optimized for its purpose</div>
+                                <div class="education-benefit">Always have a backup when one needs repair</div>
+                                <div class="education-benefit">Extends the life of all your glasses through rotation</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🛡️ Subscription benefit:</strong> Protect your current investment while adding that missing piece to complete your vision system.
+                            </div>
+                        ` : `
+                            <p>You've discovered the secret - multiple specialized pairs reduce eye fatigue and improve visual comfort significantly.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Reduces wear and tear on any single pair</div>
+                                <div class="education-benefit">Each situation gets the optimal lens design</div>
+                                <div class="education-benefit">Better long-term eye health through proper support</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🏆 Subscription benefit:</strong> Comprehensive protection covers your entire collection with updates and replacements as needed.
+                            </div>
+                        `
+                    },
+                    // Question about what glasses they own - conditional on what they actually have
+                    3: {
+                        icon: '🔍',
+                        title: 'Gap analysis',
+                        content: (() => {
+                            const missingPieces = [];
+                            const hasProgressives = currentGlasses.includes('Progressive');
+                            const hasSunglasses = currentGlasses.some(g => g.includes('sunglasses'));
+                            const hasSingleVision = currentGlasses.includes('Single vision');
+                            
+                            if (!hasSunglasses) missingPieces.push('<div class="education-benefit">Prescription sunglasses provide clearer outdoor vision than clip-ons</div>');
+                            if (hasSingleVision && !hasProgressives) missingPieces.push('<div class="education-benefit">Progressive lenses could eliminate switching between reading and distance glasses</div>');
+                            if (!currentGlasses.length) missingPieces.push('<div class="education-benefit">Starting with the right foundation prevents future vision problems</div>');
+                            
+                            const generalBenefits = [
+                                '<div class="education-benefit">Anti-reflective coatings reduce glare by up to 99%</div>',
+                                '<div class="education-benefit">Blue light filters can improve sleep quality and reduce eye strain</div>'
+                            ];
+                            
+                            return `
+                                <p>${missingPieces.length > 0 ? 'Your current setup might be missing key pieces for your lifestyle:' : 'Let\'s optimize what you have with the latest lens technologies:'}</p>
+                                <div class="education-benefits">
+                                    ${[...missingPieces, ...generalBenefits].join('')}
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🔧 Subscription benefit:</strong> Upgrade existing lenses with premium coatings and add missing pieces to your collection over time.
+                                </div>
+                            `;
+                        })()
+                    },
+                    // Screen time question - conditional on actual screen time
+                    10: {
+                        icon: '💻',
+                        title: 'Screen health',
+                        content: screenTime === 'More than 8 hours' ? `
+                            <p>Extended screen time can cause permanent changes to your eye muscles and disrupt sleep patterns through blue light exposure.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Blue light suppresses melatonin production, affecting sleep quality</div>
+                                <div class="education-benefit">Computer glasses can reduce headaches by 60%</div>
+                                <div class="education-benefit">Proper screen glasses improve focus and productivity</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>💻 Subscription benefit:</strong> Dedicated computer glasses protect your screen health while keeping your regular glasses for other activities.
+                            </div>
+                        ` : screenTime === '5–8 hours' ? `
+                            <p>Moderate screen time still affects your eyes more than you might realize - symptoms often appear hours later.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Eye strain symptoms are often delayed, appearing after work</div>
+                                <div class="education-benefit">Computer glasses help maintain natural blink rates</div>
+                                <div class="education-benefit">Blue light affects sleep even from brief evening screen time</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>⚡ Subscription benefit:</strong> Add computer glasses to your routine without replacing your current prescription.
+                            </div>
+                        ` : screenTime === '2–4 hours' ? `
+                            <p>Even moderate screen use benefits from proper eye protection during focused work periods.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Blue light glasses can improve contrast and reduce eye strain</div>
+                                <div class="education-benefit">Anti-reflective coatings eliminate distracting screen glare</div>
+                                <div class="education-benefit">Reduces unconscious squinting and facial tension</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🎯 Subscription benefit:</strong> Try computer glasses risk-free - if they don't help, exchange for other specialized options.
+                            </div>
+                        ` : null // No education for <2 hours screen time
+                    },
+                    // Symptoms question - conditional on what symptoms they actually have
+                    11: {
+                        icon: '⚠️',
+                        title: 'Symptom insights',
+                        content: (() => {
+                            const hasMultipleSymptoms = symptoms.length > 2 && !symptoms.includes('None of these');
+                            const hasEyeStrain = symptoms.includes('Eye strain at screen');
+                            const hasHeadaches = symptoms.includes('Headaches related to eyesight');
+                            const hasGlareSensitivity = symptoms.includes('Glare sensitivity');
+                            const noSymptoms = symptoms.includes('None of these');
+                            
+                            if (noSymptoms) return `
+                                <p>Having no symptoms is great - this is the perfect time to optimize your vision before problems develop.</p>
+                                <div class="education-benefits">
+                                    <div class="education-benefit">Enhanced contrast can improve visual performance even with good vision</div>
+                                    <div class="education-benefit">UV protection prevents long-term eye damage you can't feel</div>
+                                    <div class="education-benefit">Specialized lenses can boost productivity and reduce fatigue</div>
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>⚡ Subscription benefit:</strong> Upgrade your vision performance with premium lenses and coatings while everything feels fine.
+                                </div>
+                            `;
+                            
+                            if (hasMultipleSymptoms) return `
+                                <p>Multiple vision symptoms suggest you need different optical solutions for different activities throughout your day.</p>
+                                <div class="education-benefits">
+                                    ${hasEyeStrain ? '<div class="education-benefit">Screen strain requires different solutions than general eye fatigue</div>' : ''}
+                                    ${hasGlareSensitivity ? '<div class="education-benefit">Glare sensitivity improves dramatically with proper anti-reflective coatings</div>' : ''}
+                                    ${hasHeadaches ? '<div class="education-benefit">Vision headaches often come from focusing effort, not just prescription issues</div>' : ''}
+                                    <div class="education-benefit">Most vision discomfort is preventable with the right glasses</div>
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🩺 Subscription benefit:</strong> Build a personalized system gradually - different symptoms need different solutions.
+                                </div>
+                            `;
+                            
+                            return `
+                                <p>Even minor vision discomfort can significantly impact your daily quality of life and productivity.</p>
+                                <div class="education-benefits">
+                                    <div class="education-benefit">Small vision issues compound over time if not addressed</div>
+                                    <div class="education-benefit">Proper glasses can eliminate most eye strain quickly</div>
+                                    <div class="education-benefit">Prevention is more effective and comfortable than treatment</div>
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🔍 Subscription benefit:</strong> Address issues early before they become chronic problems - flexibility to adjust as needed.
+                                </div>
+                            `;
+                        })()
+                    },
+                    // Question about prescription updates - conditional on their update status
+                    4: {
+                        icon: '📅',
+                        title: 'Prescription health',
+                        content: primaryUpdated === 'No' ? `
+                            <p>Outdated prescriptions don't just affect clarity - they can cause unnecessary eye strain and fatigue.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Most prescriptions change every 1-2 years, even subtly</div>
+                                <div class="education-benefit">Old prescriptions force your eyes to work harder than needed</div>
+                                <div class="education-benefit">Small prescription changes can eliminate headaches and eye strain</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🔄 Subscription benefit:</strong> Automatic lens updates when your prescription changes - never pay hundreds for new lenses again.
+                            </div>
+                        ` : primaryUpdated === 'Not sure' ? `
+                            <p>If you can't remember your last update, it's probably been too long - vision changes gradually and you adapt without noticing.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Your brain compensates for small prescription changes</div>
+                                <div class="education-benefit">Regular eye exams catch problems before they affect daily life</div>
+                                <div class="education-benefit">Updated prescriptions can improve night vision and reduce fatigue</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🔄 Subscription benefit:</strong> Regular prescription monitoring and updates keep your vision optimized automatically.
+                            </div>
+                        ` : null // No tip needed if recently updated
+                    },
+                    // Question about sunglasses updates - conditional on their sunglasses situation
+                    5: {
+                        icon: '🕶️',
+                        title: 'Sun protection',
+                        content: sunglassesUpdated === "I don't have prescription sunglasses" ? `
+                            <p>Prescription sunglasses aren't a luxury - they're essential for eye health and visual clarity outdoors.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Clip-on sunglasses reduce vision quality and don't protect peripheral vision</div>
+                                <div class="education-benefit">UV protection prevents cataracts and macular degeneration</div>
+                                <div class="education-benefit">Clear outdoor vision improves safety while driving and sports</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>☀️ Subscription benefit:</strong> Add prescription sunglasses to your plan - no more choosing between clear vision and sun protection.
+                            </div>
+                        ` : sunglassesUpdated === 'No' ? `
+                            <p>Outdated prescription sunglasses compromise both your vision and your eye protection when you need them most.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Old prescriptions reduce outdoor visual clarity</div>
+                                <div class="education-benefit">Outdated sunglasses often have inferior UV protection</div>
+                                <div class="education-benefit">Modern lens technologies improve contrast and comfort significantly</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🔄 Subscription benefit:</strong> Keep your sunglasses prescription current automatically with lens updates.
+                            </div>
+                        ` : null // No tip needed if recently updated
+                    },
+                    // Question about glasses usage - conditional on their usage patterns
+                    6: {
+                        icon: '🎯',
+                        title: 'Activity optimization',
+                        content: (() => {
+                            const uses = glassesUse;
+                            const isComputer = uses.includes("Screen/office work");
+                            const isDriving = uses.includes("Driving");
+                            const isSports = uses.includes("Sports or outdoors");
+                            const isReading = uses.includes("Reading");
+                            const alwaysWears = uses.includes("I always wear glasses");
+                            
+                            if (alwaysWears) return `
+                                <p>Since you wear glasses all the time, optimizing them for your most common activities can dramatically improve comfort.</p>
+                                <div class="education-benefits">
+                                    <div class="education-benefit">Progressive lenses can eliminate the need to take glasses on and off</div>
+                                    <div class="education-benefit">Anti-reflective coatings reduce eye strain in all lighting conditions</div>
+                                    <div class="education-benefit">Blue light filtering helps with extended wear comfort</div>
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>⚡ Subscription benefit:</strong> Upgrade your daily glasses with premium features while maintaining backup pairs.
+                                </div>
+                            `;
+                            
+                            if (isComputer && isDriving) return `
+                                <p>Computer work and driving have opposite optical requirements - specialized glasses for each activity perform much better.</p>
+                                <div class="education-benefits">
+                                    <div class="education-benefit">Computer glasses focus at arm's length with blue light filtering</div>
+                                    <div class="education-benefit">Driving glasses optimize distance vision with anti-glare coatings</div>
+                                    <div class="education-benefit">Each activity gets the perfect lens design for peak performance</div>
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🎯 Subscription benefit:</strong> Build activity-specific glasses without replacing what you already have.
+                                </div>
+                            `;
+                            
+                            return `
+                                <p>Different activities have unique visual demands - specialized glasses can significantly improve comfort and performance.</p>
+                                <div class="education-benefits">
+                                    ${isDriving ? '<div class="education-benefit">Driving glasses reduce glare and improve night vision safety</div>' : ''}
+                                    ${isComputer ? '<div class="education-benefit">Computer glasses reduce digital eye strain and improve focus</div>' : ''}
+                                    ${isSports ? '<div class="education-benefit">Sports glasses provide impact protection and secure fit during movement</div>' : ''}
+                                    ${isReading ? '<div class="education-benefit">Reading glasses reduce neck strain and improve comprehension</div>' : ''}
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🏆 Subscription benefit:</strong> Add task-specific glasses to optimize your performance in every activity.
+                                </div>
+                            `;
+                        })()
+                    },
+                    // Free time activities - only show if they do activities that could benefit from specialized glasses
+                    7: {
+                        icon: '🏃',
+                        title: 'Activity performance',
+                        content: (() => {
+                            const activities = freeTimeActivities;
+                            const doesSports = activities.includes("Exercise or play sports");
+                            const doesOutdoors = activities.includes("Spend time outdoors");
+                            const doesReading = activities.includes("Read/watch shows");
+                            const doesCreative = activities.includes("Create (music, art, crafts)");
+                            
+                            if (activities.includes("None of these")) return null; // No education needed
+                            
+                            return `
+                                <p>Your hobbies and activities might benefit from specialized eyewear for optimal performance and safety.</p>
+                                <div class="education-benefits">
+                                    ${doesSports ? '<div class="education-benefit">Sports glasses prevent 90% of eye injuries while improving performance</div>' : ''}
+                                    ${doesOutdoors ? '<div class="education-benefit">UV protection is critical during extended outdoor activities</div>' : ''}
+                                    ${doesReading ? '<div class="education-benefit">Reading glasses reduce neck strain and improve comprehension</div>' : ''}
+                                    ${doesCreative ? '<div class="education-benefit">Detail work glasses provide enhanced near vision and reduce fatigue</div>' : ''}
+                                </div>
+                                <div class="subscription-highlight">
+                                    <strong>🎨 Subscription benefit:</strong> Hobby-specific glasses improve your enjoyment and safety with full breakage protection.
+                                </div>
+                            `;
+                        })()
+                    },
+                    // Avoiding glasses - only show if they actually avoid them
+                    8: {
+                        icon: '🚫',
+                        title: 'Activity barriers',
+                        content: `
+                            <p>Avoiding glasses during activities means you're missing out on better performance, safety, and enjoyment.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Sports-specific frames stay secure during any movement</div>
+                                <div class="education-benefit">Impact-resistant lenses provide safety without compromising vision</div>
+                                <div class="education-benefit">Proper eyewear can actually enhance athletic performance through better vision</div>
+                            </div>
+                            <div class="subscription-highlight">
+                                <strong>🏅 Subscription benefit:</strong> Get activity-specific glasses designed not to get in your way - lightweight, secure, and durable.
+                            </div>
+                        `
+                    }
+                };

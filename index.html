@@ -3,58 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisionMatch - See Your World</title>
+    <title>VisionMatch - See Without Limits</title>
     <style>
+        :root {
+            --scroll-hue: 220;
+            --scroll-intensity: 0.5;
+            --scroll-wave: 0.5;
+            --mouse-x: 0.5;
+            --mouse-y: 0.5;
+            --mouse-hue: 30;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent-color: #8b5cf6;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --white: #ffffff;
-            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
-            color: var(--text-dark);
+            background: 
+                radial-gradient(ellipse 800px 600px at 15% 25%, rgba(255, 248, 220, 0.8) 0%, transparent 70%),
+                radial-gradient(ellipse 700px 500px at 80% 60%, rgba(250, 245, 195, 0.6) 0%, transparent 65%),
+                radial-gradient(ellipse 900px 700px at 45% 85%, rgba(255, 251, 235, 0.7) 0%, transparent 60%),
+                radial-gradient(ellipse 600px 400px at 90% 20%, rgba(147, 197, 253, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, 
+                    hsl(55, 80%, 98%) 0%,
+                    hsl(50, 70%, 97%) 20%,
+                    hsl(45, 60%, 96%) 40%,
+                    hsl(40, 55%, 95%) 60%,
+                    hsl(50, 50%, 97%) 80%,
+                    hsl(60, 70%, 99%) 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            position: relative;
             overflow-x: hidden;
+            transition: background 0.6s ease;
         }
 
-        /* Navigation */
+        /* Dynamic organic gradient background that changes on scroll */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: 
+                radial-gradient(ellipse 1200px 800px at calc(20% + var(--mouse-x) * 30%) calc(30% + var(--mouse-y) * 20%), 
+                    hsla(calc(220 + var(--mouse-hue)), 70%, 85%, calc(0.15 + var(--scroll-intensity) * 0.1)) 0%, 
+                    transparent 65%),
+                radial-gradient(ellipse 1000px 600px at calc(10% + var(--scroll-wave) * 15%) calc(15% + var(--scroll-intensity) * 10%), 
+                    hsla(50, 80%, 88%, calc(0.2 + var(--scroll-wave) * 0.08)) 0%, 
+                    transparent 50%),
+                radial-gradient(ellipse 1400px 900px at calc(85% - var(--scroll-intensity) * 20%) calc(75% + var(--scroll-wave) * 15%), 
+                    hsla(45, 75%, 90%, calc(0.18 + var(--scroll-intensity) * 0.1)) 0%, 
+                    transparent 60%),
+                radial-gradient(ellipse 800px 500px at calc(95% - var(--mouse-x) * 25%) calc(25% + var(--mouse-y) * 30%), 
+                    hsla(210, 60%, 92%, calc(0.12 + var(--scroll-wave) * 0.06)) 0%, 
+                    transparent 45%),
+                conic-gradient(from calc(var(--scroll-intensity) * 360deg) at calc(60% + var(--scroll-wave) * 20%) calc(40% + var(--scroll-intensity) * 30%), 
+                    hsla(55, 60%, 94%, 0.08) 0deg,
+                    hsla(220, 50%, 90%, 0.06) 90deg,
+                    hsla(50, 70%, 92%, 0.1) 180deg,
+                    hsla(210, 60%, 88%, 0.05) 270deg,
+                    hsla(55, 60%, 94%, 0.08) 360deg);
+            opacity: calc(0.6 + var(--scroll-intensity) * 0.3);
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.4s ease;
+            animation: organicFlow 40s ease-in-out infinite;
+        }
+
+        /* Enhanced organic texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            opacity: 0.3;
+            background-image: 
+                radial-gradient(ellipse 600px 400px at 20% 20%, rgba(255, 248, 220, 0.6) 0%, transparent 50%),
+                radial-gradient(ellipse 800px 600px at 80% 75%, rgba(250, 245, 195, 0.5) 0%, transparent 45%),
+                radial-gradient(ellipse 500px 300px at 40% 90%, rgba(147, 197, 253, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse 700px 450px at 90% 10%, rgba(191, 219, 254, 0.25) 0%, transparent 42%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='organicGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0.95 0.85 0 0.05 0.95 0.9 0.8 0 0.03 0.85 0.8 0.7 0 0.02 0 0 0 0.18 0'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23organicGrain)' fill='rgba(255,248,220,0.12)'/%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='fluidGlass'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='6' stitchTiles='stitch'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='15'/%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23fluidGlass)' fill='rgba(255,255,255,0.2)'/%3E%3C/svg%3E");
+            background-size: 400px 400px, 500px 500px, 350px 350px, 300px 300px, 200px 200px, 250px 250px;
+            background-position: 0% 0%, 100% 100%, 50% 50%, 25% 75%, 0% 0%, 75% 25%;
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            z-index: 1;
+            animation: organicFlow 35s ease-in-out infinite;
+        }
+
+        @keyframes organicFlow {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 100%, 50% 50%, 25% 75%, 0% 0%, 75% 25%;
+                transform: scale(1) rotate(0deg);
+            }
+            16% { 
+                background-position: 12% 8%, 88% 92%, 48% 52%, 28% 72%, 4% 2%, 78% 22%;
+                transform: scale(1.02) rotate(0.3deg);
+            }
+            33% { 
+                background-position: 25% 15%, 75% 85%, 45% 55%, 32% 68%, 8% 6%, 82% 18%;
+                transform: scale(1.008) rotate(-0.2deg);
+            }
+            50% { 
+                background-position: 40% 25%, 60% 75%, 40% 60%, 38% 62%, 15% 12%, 88% 12%;
+                transform: scale(1.025) rotate(0.15deg);
+            }
+            66% { 
+                background-position: 55% 35%, 45% 65%, 35% 65%, 42% 58%, 22% 18%, 92% 8%;
+                transform: scale(1.015) rotate(-0.1deg);
+            }
+            83% { 
+                background-position: 68% 42%, 32% 58%, 30% 70%, 48% 52%, 28% 22%, 96% 4%;
+                transform: scale(1.01) rotate(0.05deg);
+            }
+        }
+
+
+
+        /* Clean liquid glass navigation */
         .nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 1.5rem;
+            left: 2rem;
+            right: 2rem;
             z-index: 50;
-            backdrop-filter: blur(12px);
-            background: rgba(255, 255, 255, 0.95);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
+            backdrop-filter: blur(20px) saturate(160%);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.6) 0%,
+                rgba(255, 255, 255, 0.5) 50%,
+                rgba(255, 255, 255, 0.55) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.06),
+                0 2px 12px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .nav:hover {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.08),
+                0 4px 18px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
 
         .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-image {
+            height: 32px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #1f2937, #374151);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -62,34 +197,37 @@
 
         .nav-links {
             display: flex;
-            gap: 2rem;
             list-style: none;
+            gap: 2rem;
         }
 
         .nav-links a {
-            color: var(--text-light);
+            color: #374151;
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.2s;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
         }
 
         .nav-links a:hover {
-            color: var(--accent-color);
+            color: #3b82f6;
         }
 
         .nav-btn {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 1.5rem;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.2s;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+            transition: all 0.3s ease;
         }
 
         .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
         }
 
         /* Hero Section */
@@ -99,895 +237,1417 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, 
-                hsl(250, 80%, 88%) 0%,
-                hsl(260, 70%, 85%) 15%,
-                hsl(280, 60%, 82%) 35%,
-                hsl(320, 50%, 80%) 55%,
-                hsl(25, 85%, 78%) 80%,
-                hsl(15, 80%, 75%) 100%);
+            padding: 10rem 2rem 8rem 2rem;
+            position: relative;
+            z-index: 10;
         }
 
         .hero-content {
-            max-width: 800px;
+            max-width: 1000px;
         }
 
         .hero h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
-            margin-bottom: 1rem;
-            background: var(--primary-gradient);
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 3rem;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
 
-        .hero .subtitle {
-            font-size: clamp(1.25rem, 3vw, 1.75rem);
-            color: var(--text-light);
-            margin-bottom: 2rem;
+        .hero h2 {
+            font-size: clamp(1.3rem, 4vw, 2.2rem);
             font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            line-height: 1.2;
         }
 
-        .hero .description {
-            font-size: 1.125rem;
-            color: var(--text-light);
-            margin-bottom: 3rem;
+        .hero p {
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            color: #475569;
+            margin-bottom: 4rem;
+            line-height: 1.6;
+            font-weight: 400;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        .cta-primary {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 1rem;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1.125rem;
+        /* Hero CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .hero-cta-btn {
             display: inline-block;
-            transition: all 0.3s;
-            box-shadow: var(--shadow);
+            background: linear-gradient(135deg, 
+                #3b82f6 0%, 
+                #2563eb 30%,
+                #1d4ed8 70%,
+                #1e40af 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+            box-shadow: 
+                0 16px 35px rgba(59, 130, 246, 0.2),
+                0 8px 20px rgba(37, 99, 235, 0.15),
+                0 4px 12px rgba(29, 78, 216, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(30, 64, 175, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
         }
 
-        .cta-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
+        .hero-cta-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 24px 50px rgba(59, 130, 246, 0.3),
+                0 12px 30px rgba(37, 99, 235, 0.2),
+                0 6px 16px rgba(29, 78, 216, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(30, 64, 175, 0.4);
         }
 
-        .member-count {
-            margin-top: 2rem;
-            font-size: 0.875rem;
-            color: var(--text-light);
+        .cta-subtitle {
+            margin-top: 1rem;
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
-        /* Section Styles */
-        .section {
-            padding: 5rem 2rem;
+        .trust-indicators {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .avatars {
+            display: flex;
+            gap: -0.25rem;
+        }
+
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar:nth-child(1) { background: linear-gradient(45deg, #a855f7, #ec4899); }
+        .avatar:nth-child(2) { background: linear-gradient(45deg, #3b82f6, #a855f7); }
+        .avatar:nth-child(3) { background: linear-gradient(45deg, #10b981, #3b82f6); }
+
+        /* Sections with dramatic glass effects */
+        .section-container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 10rem 2rem;
+            position: relative;
+            z-index: 5;
         }
 
-        .section h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .section h3 {
-            font-size: clamp(1.5rem, 3vw, 2rem);
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        /* Problem Section */
-        .problem {
-            background: var(--white);
-        }
-
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .problem-item {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 1rem;
             text-align: center;
-            border: 2px solid #e2e8f0;
+            margin-bottom: 4rem;
+            color: #0f172a;
+            line-height: 1.2;
+            letter-spacing: -0.015em;
         }
-
-        .problem-item .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ef4444;
-            margin-bottom: 0.5rem;
-        }
-
-        .problem-item .description {
-            color: var(--text-light);
-        }
-
-        .total-cost {
-            background: var(--secondary-gradient);
-            color: white;
-            padding: 2rem;
-            border-radius: 1rem;
+        
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #475569;
             text-align: center;
-            margin-top: 2rem;
-            font-size: 1.25rem;
-            font-weight: 600;
+            margin-bottom: 4rem;
+            line-height: 1.6;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Solution Section */
-        .solution {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .solution h2 {
-            color: white;
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .benefit-card {
-            background: rgba(255, 255, 255, 0.1);
+        /* Clean benefits section */
+        .benefits-section {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.2) 100%);
             backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .benefit-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.15);
+        .benefits-list {
+            max-width: 600px;
+            margin: 0 auto 4rem;
         }
 
-        .benefit-card h3 {
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateX(10px);
+        }
+
+        .benefit-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
+        }
+
+        .benefit-item span {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .price-highlight {
+            text-align: center;
+            margin: 4rem auto;
+            max-width: 600px;
+            padding: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .price-highlight p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #475569;
+            margin-bottom: 2rem;
+        }
+        
+        .price-highlight h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
             margin-bottom: 1rem;
         }
 
-        .benefit-card ul {
-            list-style: none;
-            text-align: left;
+
+        /* Clean how it works section */
+        .how-it-works-section {
+            background: rgba(248, 250, 252, 0.5);
+            backdrop-filter: blur(10px);
         }
 
-        .benefit-card li {
-            margin-bottom: 0.5rem;
-            padding-left: 1.5rem;
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem 3rem;
+            margin-bottom: 4rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .step-card {
+            background: none;
+            border: none;
+            padding: 0;
+            text-align: center;
+            box-shadow: none;
+            transition: all 0.3s ease;
             position: relative;
         }
 
-        .benefit-card li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #10b981;
+        .step-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
             font-weight: bold;
+            margin: 0 auto 2rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
         }
 
-        /* Testimonials Section */
-        .testimonials {
-            background: var(--white);
-        }
-
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .testimonial-card {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 1rem;
-            border-left: 4px solid var(--accent-color);
-        }
-
-        .testimonial-quote {
-            font-style: italic;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-        .testimonial-author {
+        .step-card h3 {
+            font-size: 1.3rem;
             font-weight: 600;
-            color: var(--accent-color);
+            margin-bottom: 0.8rem;
+            color: #0f172a;
         }
 
-        .testimonial-role {
-            color: var(--text-light);
-            font-size: 0.875rem;
+        .step-card p {
+            color: #475569;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-weight: 400;
         }
 
-        /* Vision Profile Section */
-        .vision-profile {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        /* CTA Center */
+        .cta-center {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .section-cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, 
+                #3b82f6 0%, 
+                #2563eb 50%,
+                #1d4ed8 100%);
             color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 0.025em;
+            box-shadow: 
+                0 15px 35px rgba(59, 130, 246, 0.25),
+                0 8px 20px rgba(37, 99, 235, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(30, 64, 175, 0.3);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
         }
 
-        .vision-profile h2 {
-            color: white;
+        .section-cta-btn:hover {
+            transform: translateY(-3px) scale(1.06);
+            box-shadow: 
+                0 20px 45px rgba(59, 130, 246, 0.35),
+                0 12px 25px rgba(37, 99, 235, 0.25),
+                0 5px 15px rgba(29, 78, 216, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(30, 64, 175, 0.4);
         }
 
-        .profile-content {
+        /* Clean vision profile section */
+        .vision-profile-section {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            backdrop-filter: blur(8px);
+        }
+
+        .profile-features {
+            margin: 3rem 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto 4rem;
+        }
+
+        .feature-item {
+            background: none;
+            border: none;
+            padding: 2rem 1rem;
+            text-align: left;
+            box-shadow: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid #3b82f6;
+            padding-left: 2rem;
+        }
+
+        .feature-item:hover {
+            transform: translateX(5px);
+            border-left-color: #1e40af;
+        }
+
+        .feature-item h4 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #0f172a;
+            line-height: 1.4;
+        }
+
+        .profile-cta {
             text-align: center;
             max-width: 600px;
             margin: 0 auto;
         }
 
-        .profile-benefits {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
+        .profile-cta p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
         }
 
-        .profile-benefit {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
+        /* Clean questions section */
+        .protection-section {
+            background: rgba(248, 250, 252, 0.6);
+            backdrop-filter: blur(8px);
         }
-
-        /* Store Locator Section */
-        .store-locator {
-            background: var(--white);
+        
+        /* Quiz Section Styling */
+        .quiz-section {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.6) 0%,
+                rgba(248, 250, 252, 0.4) 100%);
+            backdrop-filter: blur(12px);
+            padding: 4rem 0;
         }
-
-        .map-placeholder {
-            background: #f1f5f9;
-            height: 300px;
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            padding: 3rem;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.1),
+                0 8px 25px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .quiz-progress {
+            background: rgba(59, 130, 246, 0.1);
             border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 2rem 0;
-            border: 2px dashed #cbd5e1;
+            height: 8px;
+            margin-bottom: 2rem;
+            overflow: hidden;
         }
-
-        .store-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
+        
+        .quiz-progress-bar {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            height: 100%;
+            border-radius: 1rem;
+            transition: width 0.3s ease;
         }
-
-        .store-stat {
-            text-align: center;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 0.5rem;
-        }
-
-        .store-stat .number {
+        
+        .quiz-question {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-color);
-        }
-
-        /* Pricing Section */
-        .pricing {
-            background: #f8fafc;
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .pricing-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
+            font-weight: 600;
+            color: #0f172a;
             text-align: center;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            border: 2px solid transparent;
+            margin-bottom: 2rem;
+            line-height: 1.3;
         }
-
-        .pricing-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
+        
+        .quiz-option {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(147, 197, 253, 0.2);
+            border-radius: 1rem;
+            text-align: left;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-
-        .pricing-card.featured {
-            border-color: var(--accent-color);
-            transform: scale(1.05);
+        
+        .quiz-option:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(147, 197, 253, 0.1);
+            transform: translateY(-2px);
         }
-
-        .pricing-card h3 {
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
+        
+        .quiz-option.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
         }
-
-        .price {
-            font-size: 2.5rem;
+        
+        .quiz-button {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+        }
+        
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.35);
+        }
+        
+        .quiz-button:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .quiz-results {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .quiz-insights {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.05) 0%,
+                rgba(147, 197, 253, 0.1) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .quiz-insights h3 {
+            color: #1e40af;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
-
-        .price .currency {
-            font-size: 1.5rem;
-            vertical-align: top;
+        
+        .quiz-insights p {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .price .period {
-            font-size: 1rem;
-            color: var(--text-light);
-            font-weight: 400;
-        }
-
-        .pricing-features {
-            list-style: none;
-            margin: 2rem 0;
-        }
-
-        .pricing-features li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .pricing-features li:last-child {
-            border-bottom: none;
-        }
-
-        /* Cost Comparison Section */
-        .cost-comparison {
-            background: var(--white);
-        }
-
-        .comparison-grid {
+        .protection-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .comparison-column {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 1rem;
+        .protection-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
         }
 
-        .comparison-column.current {
-            border: 2px solid #ef4444;
+        .protection-item {
+            background: linear-gradient(135deg,
+                rgba(255, 200, 150, 0.15) 0%,
+                rgba(255, 180, 120, 0.12) 50%,
+                rgba(255, 220, 180, 0.13) 100%);
+            backdrop-filter: blur(20px) saturate(150%);
+            border: 2px solid rgba(255, 180, 120, 0.25);
+            border-radius: 1.2rem;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #d97706;
+            box-shadow: 
+                0 8px 20px rgba(255, 150, 100, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
 
-        .comparison-column.visionmatch {
-            border: 2px solid #10b981;
+        .protection-comparison {
+            space-y: 1rem;
         }
 
         .comparison-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .comparison-total {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 2px solid #e5e7eb;
-        }
-
-        .savings-highlight {
-            background: var(--secondary-gradient);
-            color: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 1rem;
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .comparison-item:first-child {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .comparison-item.highlight {
+            background: linear-gradient(135deg,
+                rgba(16, 185, 129, 0.15) 0%,
+                rgba(16, 185, 129, 0.1) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            color: #059669;
             font-weight: 600;
         }
 
-        /* Community Section */
-        .community {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        /* Enhanced join section with flowing organic shapes */
+        .join-section {
+            background: 
+                radial-gradient(ellipse at 25% 10%, rgba(255, 220, 180, 0.1) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 90%, rgba(255, 190, 140, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 20%, rgba(255, 200, 150, 0.06) 0%, transparent 40%),
+                linear-gradient(135deg, 
+                    rgba(255, 240, 220, 0.06) 0%,
+                    rgba(255, 210, 170, 0.08) 25%,
+                    rgba(255, 180, 120, 0.05) 50%,
+                    rgba(255, 200, 150, 0.07) 75%,
+                    rgba(255, 230, 200, 0.06) 100%);
+            backdrop-filter: blur(22px);
         }
 
-        .community h2 {
-            color: white;
-        }
-
-        .community-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .community-stat {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 1rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .community-stat .number {
-            font-size: 2rem;
-            font-weight: 700;
-            display: block;
-        }
-
-        .expansion-timeline {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 1rem;
-            margin-top: 2rem;
-        }
-
-        .timeline-item {
+        .join-form {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 0.5rem;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 2rem auto 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        /* Footer */
-        .footer {
-            background: var(--text-dark);
+        .email-input {
+            flex: 1;
+            min-width: 280px;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            border: 2px solid rgba(255, 200, 150, 0.25);
+            background: linear-gradient(135deg,
+                rgba(255, 240, 220, 0.85) 0%,
+                rgba(255, 220, 180, 0.75) 50%,
+                rgba(255, 230, 200, 0.8) 100%);
+            backdrop-filter: blur(25px) saturate(150%);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 5px 15px rgba(255, 150, 100, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .email-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .join-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, 
+                #3b82f6 0%, 
+                #2563eb 50%,
+                #1d4ed8 100%);
             color: white;
-            padding: 3rem 2rem;
+            border: none;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 12px 30px rgba(59, 130, 246, 0.25),
+                0 6px 15px rgba(37, 99, 235, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        .join-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 
+                0 18px 40px rgba(59, 130, 246, 0.35),
+                0 9px 20px rgba(37, 99, 235, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .join-description {
             text-align: center;
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .coming-soon {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .city-item {
+            background: linear-gradient(135deg,
+                rgba(255, 200, 150, 0.12) 0%,
+                rgba(255, 180, 120, 0.08) 50%,
+                rgba(255, 220, 180, 0.1) 100%);
+            backdrop-filter: blur(18px) saturate(140%);
+            border: 2px solid rgba(255, 180, 120, 0.2);
+            border-radius: 1.2rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: #d97706;
+            box-shadow: 
+                0 4px 12px rgba(255, 150, 100, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .request-city {
+            color: #3b82f6;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .request-city:hover {
+            color: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        /* Clean footer */
+        .footer {
+            background: linear-gradient(135deg,
+                rgba(15, 23, 42, 0.95) 0%,
+                rgba(30, 41, 59, 0.92) 100%);
+            backdrop-filter: blur(20px);
+            color: #f1f5f9;
+            padding: 4rem 0 3rem;
+            margin-top: 6rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .trust-signals {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #cbd5e1;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            margin-bottom: 2rem;
             flex-wrap: wrap;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-links a {
             color: #9ca3af;
             text-decoration: none;
-            transition: color 0.2s;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
 
         .footer-links a:hover {
-            color: white;
+            color: #f9fafb;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
+            .nav {
+                top: 1rem;
+                left: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+
             .nav-links {
                 display: none;
             }
+            
+            .logo-text {
+                font-size: 0.95rem;
+            }
 
-            .comparison-grid {
+            .hero {
+                padding: 8rem 1.5rem 4rem 1.5rem;
+            }
+
+            .section-container {
+                padding: 6rem 1.5rem;
+            }
+
+            .steps-grid, .feature-grid {
                 grid-template-columns: 1fr;
+                gap: 3rem;
             }
 
-            .pricing-card.featured {
-                transform: none;
-            }
-
-            .timeline-item {
+            .trust-signals {
                 flex-direction: column;
-                text-align: center;
-                gap: 0.5rem;
+                gap: 1rem;
             }
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        /* Smooth Scrolling */
-        html {
-            scroll-behavior: smooth;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <div class="logo">VisionMatch</div>
+            <div class="logo">
+                <!-- VisionMatch Logo SVG - Replace with: <img class="logo-image" src="path/to/your/logo.png" alt="VisionMatch"> -->
+                <svg class="logo-image" viewBox="0 0 80 48" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="circle1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#67e8f9;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="circle2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="20" cy="24" r="16" fill="url(#circle1)" opacity="0.9"/>
+                    <circle cx="36" cy="24" r="16" fill="url(#circle2)" opacity="0.8"/>
+                </svg>
+                <div class="logo-text">VISIONMATCH</div>
+            </div>
             <ul class="nav-links">
                 <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#stores">Find Stores</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#included">What's Included</a></li>
+                <li><a href="#quiz">Assessment</a></li>
             </ul>
-            <a href="#vision-match" class="nav-btn">Get Started</a>
+                                <a href="#quiz" class="nav-btn">Find Gap</a>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content fade-in">
-            <h1>See Your World</h1>
-            <p class="subtitle">All the glasses you need. One monthly price.</p>
-            <p class="description">Finally, eyewear that adapts to your life. Not the other way around.</p>
-            <a href="#vision-match" class="cta-primary">FIND YOUR VISION MATCH → Takes 3 minutes</a>
-            <p class="member-count">Join 12,483 members who see differently</p>
-        </div>
-    </section>
-
-    <!-- Problem Section -->
-    <section class="section problem" id="problem">
-        <h2>Why Do We Still Buy Glasses Like Our Grandparents?</h2>
-        <div class="problem-grid">
-            <div class="problem-item">
-                <div class="price">€400</div>
-                <div class="description">for frames you'll hate in 6 months</div>
+        <div class="hero-content">
+            <h1>All the eyewear you need.<br><span class="highlight">One monthly price.</span></h1>
+            
+            <p>Get 2-3 pairs of prescription glasses for one affordable monthly fee. No more choosing between reading glasses or sunglasses.</p>
+            
+            <div class="cta-section">
+                <a href="#quiz" class="hero-cta-btn">See what you're missing</a>
             </div>
-            <div class="problem-item">
-                <div class="price">€200</div>
-                <div class="description">sunglasses you're terrified to wear</div>
-            </div>
-            <div class="problem-item">
-                <div class="price">€300</div>
-                <div class="description">prescription that's already outdated</div>
-            </div>
-            <div class="problem-item">
-                <div class="price">€150</div>
-                <div class="description">"backup pair" gathering dust</div>
-            </div>
-        </div>
-        <div class="total-cost">
-            = €1,050 locked in yesterday's choices
-        </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="#solution" class="cta-primary">There's a smarter way →</a>
-        </div>
-    </section>
-
-    <!-- Solution Section -->
-    <section class="section solution" id="solution">
-        <h2>Welcome to VisionMatch</h2>
-        <div class="benefits-grid">
-            <div class="benefit-card">
-                <h3>Always Fresh</h3>
-                <ul>
-                    <li>2-3 frames in rotation</li>
-                    <li>Change whenever you want</li>
-                    <li>This season's styles</li>
-                </ul>
-            </div>
-            <div class="benefit-card">
-                <h3>Always Right</h3>
-                <ul>
-                    <li>Prescription updates free</li>
-                    <li>Latest lens technology</li>
-                    <li>No outdated glasses</li>
-                </ul>
-            </div>
-            <div class="benefit-card">
-                <h3>Always Protected</h3>
-                <ul>
-                    <li>Lost? Replaced</li>
-                    <li>Broken? Covered</li>
-                    <li>Stolen? No problem</li>
-                </ul>
-            </div>
-            <div class="benefit-card">
-                <h3>Always You</h3>
-                <ul>
-                    <li>Match your mood</li>
-                    <li>Match your style</li>
-                    <li>Match your life</li>
-                </ul>
+            
+            <div class="trust-indicators">
+                <p>Join 3,200+ people who never worry about glasses again</p>
             </div>
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section class="section testimonials" id="testimonials">
-        <h2>Real Members, Real Freedom</h2>
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-quote">"I've had 12 different frames this year. My glasses finally match my creativity. Same €29 monthly price."</div>
-                <div class="testimonial-author">Sarah, 28</div>
-                <div class="testimonial-role">Fashion Designer</div>
+    <!-- Problem vs Solution -->
+    <section class="benefits-section">
+        <div class="section-container">
+            <h2 class="section-title">The Old Way vs. The Smart Way</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; max-width: 900px; margin: 0 auto; align-items: center;">
+                <div style="text-align: center;">
+                    <h3 style="color: #dc2626; font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">❌ The Old Way</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 1rem; padding: 1rem; color: #dc2626; font-weight: 500;">€300+ for one pair</div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 1rem; padding: 1rem; color: #dc2626; font-weight: 500;">Outdated prescription</div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 1rem; padding: 1rem; color: #dc2626; font-weight: 500;">Lost or broken = expensive</div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 1rem; padding: 1rem; color: #dc2626; font-weight: 500;">Choose: reading OR sunglasses</div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 1rem; padding: 1rem; color: #dc2626; font-weight: 500;">Compromise on what you really need</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: var(--text-light);">VS</div>
+                
+                <div style="text-align: center;">
+                    <h3 style="color: #059669; font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">✅ The Smart Way</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 1rem; padding: 1rem; color: #059669; font-weight: 500;">€19.90/month, multiple pairs</div>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 1rem; padding: 1rem; color: #059669; font-weight: 500;">Always up-to-date lenses</div>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 1rem; padding: 1rem; color: #059669; font-weight: 500;">Full coverage included</div>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 1rem; padding: 1rem; color: #059669; font-weight: 500;">Get ALL the glasses you need</div>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 1rem; padding: 1rem; color: #059669; font-weight: 500;">Professional fitting guaranteed</div>
+                    </div>
+                </div>
             </div>
-            <div class="testimonial-card">
-                <div class="testimonial-quote">"Prescription changed twice this year. Updated both times for free. This is how everything should work."</div>
-                <div class="testimonial-author">Marco, 45</div>
-                <div class="testimonial-role">Startup CEO</div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-quote">"Lost my sunglasses at the beach. New pair delivered next day. Zero stress, zero guilt."</div>
-                <div class="testimonial-author">Lisa, 33</div>
-                <div class="testimonial-role">Yoga Instructor</div>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="#testimonials" class="cta-primary">SEE MORE STORIES</a>
         </div>
     </section>
 
-    <!-- Vision Profile Section -->
-    <section class="section vision-profile" id="vision-match">
-        <h2>Your Vision Profile</h2>
-        <div class="profile-content">
-            <p style="font-size: 1.25rem; margin-bottom: 2rem;">Everyone's vision needs are unique. So is our recommendation.</p>
-            <p style="margin-bottom: 2rem;">In 3 minutes, discover:</p>
-            <div class="profile-benefits">
-                <div class="profile-benefit">✓ Your ideal frame rotation</div>
-                <div class="profile-benefit">✓ Your lifestyle matches</div>
-                <div class="profile-benefit">✓ Your perfect plan</div>
-                <div class="profile-benefit">✓ Your nearest optician</div>
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="section-container">
+            <h2 class="section-title">How VisionMatch Works</h2>
+            <p class="section-subtitle">Get multiple glasses in 3 simple steps</p>
+            
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Take Our Assessment</h3>
+                    <p>Tell us about your lifestyle and vision needs. Takes 2 minutes.</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Visit Partner Optician</h3>
+                    <p>Get professionally fitted at one of 47 Barcelona locations.</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Enjoy Your Glasses</h3>
+                    <p>Receive 2-3 pairs based on your needs. Swap, upgrade, or replace anytime.</p>
+                </div>
             </div>
-            <p style="margin: 2rem 0;">No spam. No obligations. Just clarity.</p>
-            <a href="#vision-match" class="cta-primary">GET MY PERSONALIZED MATCH</a>
         </div>
     </section>
 
-    <!-- Store Locator Section -->
-    <section class="section store-locator" id="stores">
-        <h2>Available Everywhere You Shop</h2>
-        <p style="text-align: center; font-size: 1.25rem; margin-bottom: 2rem;">47 Barcelona Opticians. Your Neighborhood.</p>
-        
-        <div class="map-placeholder">
-            <div style="text-align: center; color: var(--text-light);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
-                <div>Interactive Map Coming Soon</div>
-                <div style="font-size: 0.875rem; margin-top: 0.5rem;">47 locations in Barcelona</div>
+    <!-- What's Included Section -->
+    <section id="included" class="vision-profile-section">
+        <div class="section-container">
+            <h2 class="section-title">What's Included</h2>
+            <p class="section-subtitle">Everything you need for clear vision, covered</p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>👓 2-3 Pairs of Glasses<br><span style="font-weight: 400; font-size: 0.95rem; color: #475569;">Reading, computer, sunglasses, or distance - whatever you need</span></h4>
+                </div>
+                <div class="feature-item">
+                    <h4>🔄 Free Lens Updates<br><span style="font-weight: 400; font-size: 0.95rem; color: #475569;">Prescription changed? New lenses at no extra cost</span></h4>
+                </div>
+                <div class="feature-item">
+                    <h4>🛡️ Full Coverage<br><span style="font-weight: 400; font-size: 0.95rem; color: #475569;">Lost, stolen, or broken? Replaced immediately</span></h4>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ Instant Swaps<br><span style="font-weight: 400; font-size: 0.95rem; color: #475569;">Want a different style? Exchange anytime at any partner location</span></h4>
+                </div>
             </div>
-        </div>
-
-        <div class="store-stats">
-            <div class="store-stat">
-                <div class="number">⚡</div>
-                <div>Same-day service</div>
+            
+            <div style="background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; border-radius: 2rem; padding: 3rem; text-align: center; margin: 4rem auto; max-width: 600px;">
+                <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">€19.90</div>
+                <div style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 1.5rem;">per month, all included</div>
+                <div style="font-size: 1rem; opacity: 0.95; line-height: 1.6;">Professional fitting • Premium lenses • Full coverage • Multiple pairs</div>
             </div>
-            <div class="store-stat">
-                <div class="number">👥</div>
-                <div>Personal consultation</div>
+            
+            <div class="cta-center">
+                <a href="#quiz" class="section-cta-btn">Find the Gap in Your Eyewear Setup</a>
             </div>
-            <div class="store-stat">
-                <div class="number">⭐ 4.8</div>
-                <div>member rating</div>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="#stores" class="cta-primary">FIND STORES NEAR ME</a>
-            <p style="margin-top: 1rem;">
-                Your optician missing? <a href="#contact" style="color: var(--accent-color); text-decoration: none;">SUGGEST A STORE</a>
-            </p>
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section class="section pricing" id="pricing">
-        <h2>Simple, Transparent Pricing</h2>
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <h3>ESSENTIAL</h3>
-                <div class="price">
-                    <span class="currency">€</span>19<span class="period">/month</span>
-                </div>
-                <p style="color: var(--text-light); margin-bottom: 2rem;">Perfect for getting started</p>
-                <ul class="pricing-features">
-                    <li>2 frames available</li>
-                    <li>Annual switches</li>
-                    <li>Basic protection</li>
-                </ul>
+    <!-- Final CTA -->
+    <section class="protection-section">
+        <div class="section-container">
+            <h2 class="section-title">Ready to See Differently?</h2>
+            <p class="section-subtitle">Don't miss out on the complete vision solution Barcelona is choosing</p>
+            
+            <div class="cta-center">
+                <a href="#quiz" class="section-cta-btn">Find the Gap in Your Eyewear Setup</a>
             </div>
-            <div class="pricing-card featured">
-                <h3>COMFORT</h3>
-                <div class="price">
-                    <span class="currency">€</span>29<span class="period">/month</span>
-                </div>
-                <p style="color: var(--text-light); margin-bottom: 2rem;">The freedom you want</p>
-                <ul class="pricing-features">
-                    <li>3 frames in rotation</li>
-                    <li>Switch anytime</li>
-                    <li>Full protection included</li>
-                    <li>Prescription updates free</li>
-                </ul>
-            </div>
-            <div class="pricing-card">
-                <h3>PREMIUM</h3>
-                <div class="price">
-                    <span class="currency">€</span>39<span class="period">/month</span>
-                </div>
-                <p style="color: var(--text-light); margin-bottom: 2rem;">Maximum flexibility</p>
-                <ul class="pricing-features">
-                    <li>4 frames + contacts</li>
-                    <li>Premium lenses</li>
-                    <li>Priority service</li>
-                    <li>Personal stylist</li>
-                </ul>
-            </div>
-        </div>
-        <p style="text-align: center; margin-top: 2rem; color: var(--text-light);">No contracts. Cancel anytime.</p>
-    </section>
-
-    <!-- Cost Comparison Section -->
-    <section class="section cost-comparison" id="comparison">
-        <h2>The Math Is Simple</h2>
-        <div class="comparison-grid">
-            <div class="comparison-column current">
-                <h3>What You Spend Now:</h3>
-                <div class="comparison-item">
-                    <span>New frames every 2 years:</span>
-                    <span>€450</span>
-                </div>
-                <div class="comparison-item">
-                    <span>Prescription sunglasses:</span>
-                    <span>€350</span>
-                </div>
-                <div class="comparison-item">
-                    <span>Lost/broken replacements:</span>
-                    <span>€200</span>
-                </div>
-                <div class="comparison-item">
-                    <span>Prescription updates:</span>
-                    <span>€150</span>
-                </div>
-                <div class="comparison-total">
-                    <span>Annual cost:</span>
-                    <span>€575</span>
-                </div>
-            </div>
-            <div class="comparison-column visionmatch">
-                <h3>What You'll Spend With VisionMatch:</h3>
-                <div class="comparison-item">
-                    <span>Annual cost:</span>
-                    <span>€348</span>
-                </div>
-                <div class="comparison-total">
-                    <span>Savings:</span>
-                    <span>€227</span>
-                </div>
-            </div>
-        </div>
-        <div class="savings-highlight">
-            Plus: No stress, no regrets, no limits.
-        </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="#vision-match" class="cta-primary">START SAVING TODAY</a>
         </div>
     </section>
 
-    <!-- Community Section -->
-    <section class="section community" id="community">
-        <h2>Join The Movement</h2>
-        <p style="text-align: center; font-size: 1.25rem; margin-bottom: 2rem;">Barcelona sees differently. You're next.</p>
-        
-        <div class="community-stats">
-            <div class="community-stat">
-                <span class="number">47</span>
-                <div>Members joined today</div>
+    <!-- Barcelona Section -->
+    <section class="how-it-works-section">
+        <div class="section-container">
+            <h2 class="section-title">Barcelona is Seeing Differently</h2>
+            <p class="section-subtitle">Join thousands of Catalans who've completed their vision setup and never look back. Professional opticians, premium lenses, complete coverage - all for one simple monthly price.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 800px; margin: 3rem auto; text-align: center;">
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 0.5rem;">47</div>
+                    <div style="color: #475569; font-weight: 600;">Partner Locations</div>
+                    <div style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">Across Barcelona</div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 0.5rem;">3,200+</div>
+                    <div style="color: #475569; font-weight: 600;">Happy Members</div>
+                    <div style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">Complete setups</div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 0.5rem;">€19.90</div>
+                    <div style="color: #475569; font-weight: 600;">Per Month</div>
+                    <div style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">Everything included</div>
+                </div>
             </div>
-            <div class="community-stat">
-                <span class="number">312</span>
-                <div>Frames switched this week</div>
+            
+            <div style="background: rgba(251, 191, 36, 0.1); border: 2px solid rgba(251, 191, 36, 0.3); border-radius: 1.5rem; padding: 2rem; margin: 3rem auto; max-width: 600px; text-align: center;">
+                <h3 style="color: #92400e; font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem;">🚀 Coming Soon</h3>
+                <p style="color: #92400e; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">Madrid - March 2025</p>
+                <p style="color: #92400e; font-weight: 600; font-size: 1.1rem;">Valencia - Summer 2025</p>
+                <p style="color: #a16207; font-size: 0.95rem; margin-top: 1rem;">Join the waitlist to be first in your city</p>
             </div>
-            <div class="community-stat">
-                <span class="number">€14,000</span>
-                <div>Money saved this month</div>
+            
+            <div class="cta-center">
+                <a href="#quiz" class="section-cta-btn" style="font-size: 1.2rem; padding: 1.5rem 3rem;">Find the Gap in Your Eyewear Setup</a>
             </div>
         </div>
+    </section>
 
-        <div class="expansion-timeline">
-            <h3 style="margin-bottom: 1rem;">Coming Soon:</h3>
-            <div class="timeline-item">
-                <div>Madrid - March 2025</div>
-                <a href="#waitlist" class="cta-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Join Waitlist</a>
-            </div>
-            <div class="timeline-item">
-                <div>Valencia - May 2025</div>
-                <a href="#notify" class="cta-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Get Notified</a>
-            </div>
-        </div>
 
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="#vision-match" class="cta-primary">FIND YOUR VISION MATCH</a>
+    <!-- Simple Quiz Placeholder -->
+    <section id="quiz" class="quiz-section">
+        <div class="section-container">
+            <div style="text-align: center; padding: 4rem 2rem; background: rgba(248, 250, 252, 0.8); border-radius: 3rem; margin: 4rem auto;">
+                <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 2rem; color: #0f172a;">Vision Gap Assessment</h2>
+                <p style="font-size: 1.3rem; color: #475569; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">Find the gaps in your current eyewear setup. Our assessment identifies exactly which glasses you're missing and provides personalized recommendations in 2 minutes.</p>
+                
+                <div style="display: flex; gap: 1rem; max-width: 400px; margin: 0 auto 2rem; flex-wrap: wrap; justify-content: center;">
+                    <input type="email" placeholder="Enter your email" style="flex: 1; min-width: 250px; padding: 1rem 1.5rem; border-radius: 1.5rem; border: 2px solid rgba(59, 130, 246, 0.2); background: white; font-size: 1rem; outline: none;">
+                    <button style="padding: 1rem 2rem; background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; border: none; border-radius: 1.5rem; font-weight: 600; cursor: pointer;">Get Assessment</button>
+                </div>
+                
+                <p style="color: #64748b; font-size: 0.9rem;">Join the waitlist • Vision Gap Assessment launches February 2025</p>
+            </div>
+            
+            <div id="quiz-root"></div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-links">
-            <a href="#faq">FAQ</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#stores">Find Stores</a>
-            <a href="#contact">Contact</a>
+        <div class="section-container">
+            <div class="trust-signals">
+                <div class="trust-item">
+                    <a href="#how-it-works" style="color: #9ca3af; text-decoration: none;">How It Works</a>
+                </div>
+                <div class="trust-item">
+                    <a href="#included" style="color: #9ca3af; text-decoration: none;">What's Included</a>
+                </div>
+                <div class="trust-item">
+                    <a href="#quiz" style="color: #9ca3af; text-decoration: none;">Pricing</a>
+                </div>
+                <div class="trust-item">
+                    <a href="#" style="color: #9ca3af; text-decoration: none;">Privacy</a>
+                </div>
+                <div class="trust-item">
+                    <a href="#" style="color: #9ca3af; text-decoration: none;">Terms</a>
+                </div>
+                <div class="trust-item">
+                    <a href="#" style="color: #9ca3af; text-decoration: none;">Contact</a>
+                </div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 2rem; color: #9ca3af;">&copy; 2025 VisionMatch. Revolutionizing eyewear in Barcelona.</p>
         </div>
-        <p>VisionMatch. See Your World.</p>
     </footer>
 
     <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Add fade-in animation to sections on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all sections
-        document.querySelectorAll('.section').forEach(section => {
-            observer.observe(section);
-        });
-
-        // Add hover effects to benefit cards
-        document.querySelectorAll('.benefit-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px) scale(1.02)';
-            });
+        // Confirm enhanced version loaded
+        console.log("VisionMatch Enhanced - Iridescent Glass with Dynamic Gradients Loaded!");
+        
+        // Dynamic gradient changes based on scroll position
+        let ticking = false;
+        
+        function updateGradientOnScroll() {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const docHeight = document.body.scrollHeight;
+            const scrollPercent = scrollY / (docHeight - windowHeight);
             
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
+            const backgroundOverlay = document.querySelector('body::before') || document.body;
+            
+            // Create different gradient phases based on scroll position
+            const phase1 = scrollPercent * 360; // Rotation angle
+            const phase2 = (scrollPercent * 2) % 1; // Opacity variation
+            const phase3 = Math.sin(scrollPercent * Math.PI * 3) * 0.5 + 0.5; // Wave pattern
+            
+            // Update body background gradient
+            const hue1 = (200 + scrollPercent * 120) % 360;
+            const hue2 = (240 + scrollPercent * 90) % 360;
+            const hue3 = (280 + scrollPercent * 150) % 360;
+            
+            document.body.style.background = `
+                radial-gradient(ellipse 800px 600px at ${15 + phase3 * 10}% ${25 + phase2 * 15}%, rgba(255, 248, 220, ${0.8 + phase1 * 0.1}) 0%, transparent 70%),
+                radial-gradient(ellipse 700px 500px at ${80 - phase2 * 15}% ${60 + phase3 * 10}%, rgba(250, 245, 195, ${0.6 + phase2 * 0.1}) 0%, transparent 65%),
+                radial-gradient(ellipse 900px 700px at ${45 + phase1 * 15}% ${85 - phase3 * 10}%, rgba(255, 251, 235, ${0.7 + phase3 * 0.1}) 0%, transparent 60%),
+                radial-gradient(ellipse 600px 400px at ${90 - phase2 * 10}% ${20 + phase1 * 15}%, rgba(147, 197, 253, ${0.15 + phase3 * 0.05}) 0%, transparent 50%),
+                linear-gradient(${135 + phase1 * 0.2}deg, 
+                    hsl(${55 + phase2 * 8}, ${80 + phase3 * 5}%, 98%) 0%,
+                    hsl(${50 + phase1 * 6}, ${70 + phase2 * 8}%, 97%) 20%,
+                    hsl(${45 + phase3 * 4}, ${60 + phase1 * 5}%, 96%) 40%,
+                    hsl(${40 + phase2 * 5}, ${55 + phase3 * 8}%, 95%) 60%,
+                    hsl(${50 + phase1 * 8}, ${50 + phase2 * 10}%, 97%) 80%,
+                    hsl(${60 + phase3 * 5}, ${70 + phase1 * 10}%, 99%) 100%)
+            `;
+            
+            // Update blue gradient variables
+            const blueHue = 220 + phase2 * 40;
+            document.documentElement.style.setProperty('--scroll-hue', blueHue);
+            document.documentElement.style.setProperty('--scroll-intensity', phase2);
+            document.documentElement.style.setProperty('--scroll-wave', phase3);
+            
+            ticking = false;
+        }
+        
+        function requestScrollUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(updateGradientOnScroll);
+                ticking = true;
+            }
+        }
+        
+        // Smooth scroll-based gradient changes
+        window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+        
+        // Initial gradient setup
+        updateGradientOnScroll();
+        
+        // Add shimmer effects on page load
+        setTimeout(() => {
+            document.querySelectorAll('.benefit-card').forEach((card, index) => {
+                setTimeout(() => {
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 800);
+                }, index * 200);
             });
+        }, 1000);
+        
+        // Logo pulse effect on load
+        setTimeout(() => {
+            document.querySelector('.logo').style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                document.querySelector('.logo').style.transform = 'scale(1)';
+            }, 500);
+        }, 500);
+        
+        // Add mouse movement effect for extra interactivity
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            // Subtle mouse-based gradient shifts
+            const mouseHue = x * 60 + y * 30;
+            document.documentElement.style.setProperty('--mouse-x', x);
+            document.documentElement.style.setProperty('--mouse-y', y);
+            document.documentElement.style.setProperty('--mouse-hue', mouseHue);
         });
-
-        // Add click handlers for CTAs (placeholder for future functionality)
-        document.querySelectorAll('.cta-primary').forEach(cta => {
-            cta.addEventListener('click', function(e) {
-                // Prevent default only for non-anchor links
-                if (!this.getAttribute('href') || this.getAttribute('href') === '#') {
-                    e.preventDefault();
-                    alert('This feature is coming soon!');
+    </script>
+    
+    <!-- React and Quiz Implementation -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA&callback=initMap&libraries=places"></script>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        // Define initMap globally for Google Maps
+        window.initMap = function() {
+            console.log("Google Maps API loaded successfully");
+        };
+        
+        // SVG Components
+        const ChevronRight = ({ className, style }) => React.createElement('svg', { className, style, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'm9 18 6-6-6-6' }));
+        const ChevronLeft = ({ className, style }) => React.createElement('svg', { className, style, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'm15 18-6-6 6-6' }));
+        const Glasses = ({ className, style }) => React.createElement('svg', { className, style, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('circle', { cx: 6, cy: 15, r: 4 }), React.createElement('circle', { cx: 18, cy: 15, r: 4 }), React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'm6 11-2-2 1.5-1.5a2 2 0 0 1 1.414-.586H8.5m6 0h1.586a2 2 0 0 1 1.414.586L19 9l-2 2M10 15h4' }));
+        const Sparkles = ({ className, style }) => React.createElement('svg', { className, style, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z' }));
+        
+        const VisionQuiz = () => {
+            const [currentStep, setCurrentStep] = useState(0);
+            const [answers, setAnswers] = useState({});
+            const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+            const [aiInsights, setAiInsights] = useState('');
+            const [loadingProgress, setLoadingProgress] = useState(0);
+            
+            const questions = [
+                {
+                    type: 'intro',
+                    title: "Vision Gap Assessment",
+                    subtitle: "Find the gaps in your current eyewear setup. We'll identify exactly which glasses you're missing and provide personalized recommendations.",
+                    note: "Professional analysis • Takes 3 minutes • Personalized recommendations"
+                },
+                {
+                    type: 'single',
+                    question: "Do you currently wear glasses or lenses?",
+                    options: ["Yes, I wear glasses", "Yes, I wear both glasses and contact lenses", "No, but I think I need them", "No, and I don't think I need them"]
+                },
+                {
+                    type: 'single',
+                    question: "How many hours per day are you in front of a screen?",
+                    options: ["Less than 2 hours", "2–4 hours", "5–8 hours", "More than 8 hours"]
+                },
+                {
+                    type: 'multiple',
+                    question: "Do you ever experience any of the following?",
+                    options: ["Headaches", "Tired eyes", "Glare sensitivity", "Eye strain at screen", "None of these"]
+                },
+                {
+                    type: 'multiple',
+                    question: "What do you usually do in your free time?",
+                    options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"]
+                },
+                {
+                    type: 'single',
+                    question: "Do you wear sunglasses with prescription?",
+                    options: ["Yes", "No, but I'd like to", "No"]
                 }
-            });
-        });
+            ];
+            
+            const updateAnswer = (questionNum, value) => {
+                setAnswers(prev => ({
+                    ...prev,
+                    [questionNum]: value
+                }));
+            };
+            
+            const isAnswered = () => {
+                if (currentStep === 0) return true;
+                if (currentStep >= questions.length) return true;
+                
+                const answer = answers[currentStep];
+                const question = questions[currentStep];
+                
+                if (question?.type === 'multiple') {
+                    return Array.isArray(answer) && answer.length > 0;
+                }
+                
+                return answer !== undefined && answer !== null && answer !== '';
+            };
+            
+            const getProgress = () => {
+                const totalQuestions = questions.length - 1; // Exclude intro
+                const completedQuestions = Object.keys(answers).filter(key => parseInt(key) > 0).length;
+                return (completedQuestions / totalQuestions) * 100;
+            };
+            
+            const generateAIInsights = async () => {
+                setIsGeneratingInsights(true);
+                setLoadingProgress(0);
+                
+                const progressInterval = setInterval(() => {
+                    setLoadingProgress(prev => {
+                        if (prev >= 95) {
+                            clearInterval(progressInterval);
+                            return 95;
+                        }
+                        return prev + Math.random() * 15;
+                    });
+                }, 200);
+                
+                // Simulate AI processing
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    setLoadingProgress(100);
+                    
+                    setTimeout(() => {
+                        const insight = generatePersonalizedInsight();
+                        setAiInsights(insight);
+                        setIsGeneratingInsights(false);
+                    }, 500);
+                }, 3000);
+            };
+            
+            const generatePersonalizedInsight = () => {
+                const screenTime = answers[2];
+                const symptoms = answers[3] || [];
+                const activities = answers[4] || [];
+                const sunglasses = answers[5];
+                
+                let recommendation = "Based on your responses, here's your personalized eyewear setup:\n\n";
+                
+                // Primary glasses recommendation
+                if (screenTime === "More than 8 hours" || screenTime === "5–8 hours") {
+                    recommendation += "**Primary Glasses:** Computer glasses with blue light filtering and anti-reflective coating for your extensive screen work.\n\n";
+                } else {
+                    recommendation += "**Primary Glasses:** All-purpose glasses with premium lenses and anti-reflective coating for daily activities.\n\n";
+                }
+                
+                // Secondary recommendation based on activities
+                if (activities.includes("Exercise or play sports") || activities.includes("Spend time outdoors")) {
+                    recommendation += "**Secondary:** Sport-specific glasses with impact-resistant lenses and secure fit for your active lifestyle.\n\n";
+                } else if (sunglasses === "No, but I'd like to") {
+                    recommendation += "**Secondary:** Prescription sunglasses with UV protection and polarized lenses for outdoor comfort.\n\n";
+                } else {
+                    recommendation += "**Secondary:** Reading glasses or backup pair for specific tasks and emergency situations.\n\n";
+                }
+                
+                // Specific advice based on symptoms
+                if (symptoms.includes("Eye strain at screen") || symptoms.includes("Tired eyes")) {
+                    recommendation += "**Special Considerations:** Your eye strain symptoms suggest you'd benefit greatly from specialized computer lenses and regular breaks from screen work.";
+                } else if (symptoms.includes("Headaches")) {
+                    recommendation += "**Special Considerations:** Headaches often indicate prescription changes or eye strain - we recommend a comprehensive eye exam.";
+                } else {
+                    recommendation += "**Special Considerations:** Your symptom-free profile suggests good eye health - let's optimize your setup for long-term comfort.";
+                }
+                
+                return recommendation;
+            };
+            
+            const nextStep = () => {
+                if (currentStep === questions.length - 1) {
+                    setCurrentStep(currentStep + 1);
+                    generateAIInsights();
+                } else {
+                    setCurrentStep(currentStep + 1);
+                }
+            };
+            
+            const prevStep = () => {
+                setCurrentStep(Math.max(0, currentStep - 1));
+            };
+            
+            const renderQuestion = () => {
+                if (currentStep >= questions.length) {
+                    if (isGeneratingInsights) {
+                        return React.createElement('div', { className: 'quiz-results' },
+                            React.createElement('div', { style: { width: '80px', height: '80px', background: 'linear-gradient(135deg, #3b82f6, #1e40af)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' } },
+                                React.createElement('div', { style: { animation: 'spin 1s linear infinite', borderRadius: '50%', height: '40px', width: '40px', border: '2px solid transparent', borderTopColor: 'white' } })
+                            ),
+                            React.createElement('h2', { style: { fontSize: '2rem', fontWeight: '700', color: '#0f172a', marginBottom: '1rem' } }, "Analyzing Your Vision Gaps"),
+                            React.createElement('p', { style: { color: '#475569', fontSize: '1.2rem', marginBottom: '2rem' } }, "Identifying gaps in your eyewear setup..."),
+                            React.createElement('div', { className: 'quiz-progress' },
+                                React.createElement('div', { className: 'quiz-progress-bar', style: { width: `${loadingProgress}%` } })
+                            ),
+                            React.createElement('p', { style: { color: '#6b7280', fontSize: '0.9rem' } }, `${Math.round(loadingProgress)}% complete`)
+                        );
+                    }
+                    
+                    return React.createElement('div', { className: 'quiz-results' },
+                        React.createElement('div', { style: { width: '80px', height: '80px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' } },
+                            React.createElement(Sparkles, { style: { width: '40px', height: '40px', color: 'white' } })
+                        ),
+                        React.createElement('h2', { style: { fontSize: '2.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '2rem' } }, "Your Vision Gap Analysis"),
+                        React.createElement('div', { className: 'quiz-insights' },
+                            React.createElement('h3', null, "🎯 Personalized Recommendations"),
+                            React.createElement('div', { style: { textAlign: 'left', whiteSpace: 'pre-line' } },
+                                aiInsights
+                            )
+                        ),
+                        React.createElement('div', { style: { marginTop: '2rem' } },
+                            React.createElement('button', { 
+                                className: 'quiz-button',
+                                style: { padding: '1.2rem 2.5rem', fontSize: '1.1rem' },
+                                onClick: () => window.location.href = '#how-it-works'
+                            }, "Explore VisionMatch Plans")
+                        )
+                    );
+                }
+                
+                const q = questions[currentStep];
+                
+                if (q.type === 'intro') {
+                    return React.createElement('div', { style: { textAlign: 'center', padding: '2rem 0' } },
+                        React.createElement('div', { style: { width: '100px', height: '100px', background: 'linear-gradient(135deg, #3b82f6, #1e40af)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' } },
+                            React.createElement(Glasses, { style: { width: '50px', height: '50px', color: 'white' } })
+                        ),
+                        React.createElement('h2', { style: { fontSize: '3rem', fontWeight: '800', color: '#0f172a', marginBottom: '1.5rem' } }, q.title),
+                        React.createElement('p', { style: { fontSize: '1.3rem', color: '#475569', marginBottom: '2rem', lineHeight: '1.6' } }, q.subtitle),
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', fontSize: '0.9rem', color: '#3b82f6', fontWeight: '500' } },
+                            q.note.split(' • ').map((item, index) => 
+                                React.createElement('span', { key: index, style: { display: 'flex', alignItems: 'center' } },
+                                    index > 0 && React.createElement('div', { style: { width: '4px', height: '4px', background: '#3b82f6', borderRadius: '50%', marginRight: '2rem' } }),
+                                    item
+                                )
+                            )
+                        )
+                    );
+                }
+                
+                return React.createElement('div', { style: { padding: '1rem 0' } },
+                    React.createElement('h3', { className: 'quiz-question' }, q.question),
+                    React.createElement('div', { style: { marginBottom: '2rem' } },
+                        q.options.map((option, index) =>
+                            React.createElement('button', {
+                                key: index,
+                                className: `quiz-option ${
+                                    q.type === 'multiple'
+                                        ? (answers[currentStep] || []).includes(option) ? 'selected' : ''
+                                        : answers[currentStep] === option ? 'selected' : ''
+                                }`,
+                                onClick: () => {
+                                    if (q.type === 'multiple') {
+                                        const current = answers[currentStep] || [];
+                                        const updated = current.includes(option)
+                                            ? current.filter(item => item !== option)
+                                            : [...current, option];
+                                        updateAnswer(currentStep, updated);
+                                    } else {
+                                        updateAnswer(currentStep, option);
+                                    }
+                                }
+                            }, option)
+                        )
+                    )
+                );
+            };
+            
+            return React.createElement('div', { className: 'quiz-container' },
+                currentStep > 0 && currentStep < questions.length && React.createElement('div', { className: 'quiz-progress', style: { marginBottom: '2rem' } },
+                    React.createElement('div', { className: 'quiz-progress-bar', style: { width: `${getProgress()}%` } })
+                ),
+                
+                renderQuestion(),
+                
+                currentStep < questions.length && React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' } },
+                    currentStep === 0 ? 
+                        React.createElement('div', { style: { width: '100%', display: 'flex', justifyContent: 'center' } },
+                            React.createElement('button', {
+                                className: 'quiz-button',
+                                style: { padding: '1.2rem 3rem', fontSize: '1.2rem' },
+                                onClick: nextStep
+                            }, "Start Assessment")
+                        ) :
+                        React.createElement(React.Fragment, null,
+                            React.createElement('button', {
+                                onClick: prevStep,
+                                style: {
+                                    background: 'none',
+                                    border: '2px solid #e5e7eb',
+                                    color: '#6b7280',
+                                    padding: '0.8rem 1.5rem',
+                                    borderRadius: '0.8rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    fontWeight: '500'
+                                }
+                            },
+                                React.createElement(ChevronLeft, { style: { width: '20px', height: '20px' } }),
+                                "Previous"
+                            ),
+                            React.createElement('button', {
+                                className: 'quiz-button',
+                                disabled: !isAnswered(),
+                                onClick: nextStep,
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.8rem 1.5rem'
+                                }
+                            },
+                                currentStep === questions.length - 1 ? 'Get My Results' : 'Next',
+                                React.createElement(ChevronRight, { style: { width: '20px', height: '20px' } })
+                            )
+                        )
+                )
+            );
+        };
+        
+        // Render the quiz
+        ReactDOM.render(React.createElement(VisionQuiz), document.getElementById('quiz-root'));
     </script>
 </body>
 </html> 

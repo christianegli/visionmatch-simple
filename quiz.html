@@ -1303,41 +1303,28 @@
                             body: JSON.stringify({
                                 contents: [{
                                     parts: [{
-                                        text: `You're a vision expert analyzing someone's current glasses setup and helping them optimize it. Based on their questionnaire, provide personalized recommendations for what to keep, what to change, and what to add.
-
-Their answers: ${JSON.stringify(answers, null, 2)}
-Detail answers: ${JSON.stringify(detailAnswers, null, 2)}
-
-ANALYSIS FRAMEWORK:
-1. Current Setup Analysis: What glasses they currently own and how satisfied they are
-2. Usage Pattern Analysis: How they actually use their current glasses
-3. Gap Analysis: What situations/activities aren't covered by current setup
-4. Update/Upgrade Needs: Which current glasses need prescription updates or replacements
-5. Addition Needs: What new glasses would complete their setup
-
-RECOMMENDATION STRUCTURE:
-1. KEEP: Which current glasses are working well and should be maintained
-2. UPDATE/UPGRADE: Which current glasses need changes (new prescription, better lenses, etc.)
-3. ADD: What new glasses are missing from their setup
-4. OPTICIAN VISIT: Why they should visit our partner opticians
-
-Focus on their CURRENT setup as the baseline and build recommendations from there. Be specific about what they currently have vs. what they need.
-
-IMPORTANT: Only show what the end user should read, not you thought process! talk directly to them, be helpful and friendly. you are a seasoned eyewear professional. 
-
-Structure your response like this:
-
-**Your Current Setup Analysis:** [Analyze what they currently have and how it's performing]
-
-**What to Keep:** [Which current glasses are working well]
-
-**What to Update/Upgrade:** [Current glasses that need changes - prescription updates, better lenses, etc.]
-
-**What to Add:** [New glasses needed to complete their vision system]
-
-**Next Steps:** [Why visiting our partner opticians will help them protect current frames they want to keep and get the new ones they need]
-
-`
+                                        text: "You're a vision expert analyzing someone's current glasses setup and helping them optimize it. Based on their questionnaire, provide personalized recommendations for what to keep, what to change, and what to add.\n\n" +
+                                            "Their answers: " + JSON.stringify(answers, null, 2) + "\n" +
+                                            "Detail answers: " + JSON.stringify(detailAnswers, null, 2) + "\n\n" +
+                                            "ANALYSIS FRAMEWORK:\n" +
+                                            "1. Current Setup Analysis: What glasses they currently own and how satisfied they are\n" +
+                                            "2. Usage Pattern Analysis: How they actually use their current glasses\n" +
+                                            "3. Gap Analysis: What situations/activities aren't covered by current setup\n" +
+                                            "4. Update/Upgrade Needs: Which current glasses need prescription updates or replacements\n" +
+                                            "5. Addition Needs: What new glasses would complete their setup\n\n" +
+                                            "RECOMMENDATION STRUCTURE:\n" +
+                                            "1. KEEP: Which current glasses are working well and should be maintained\n" +
+                                            "2. UPDATE/UPGRADE: Which current glasses need changes (new prescription, better lenses, etc.)\n" +
+                                            "3. ADD: What new glasses are missing from their setup\n" +
+                                            "4. OPTICIAN VISIT: Why they should visit our partner opticians\n\n" +
+                                            "Focus on their CURRENT setup as the baseline and build recommendations from there. Be specific about what they currently have vs. what they need.\n\n" +
+                                            "IMPORTANT: Only show what the end user should read, not you thought process! talk directly to them, be helpful and friendly. you are a seasoned eyewear professional.\n\n" +
+                                            "Structure your response like this:\n\n" +
+                                            "**Your Current Setup Analysis:** [Analyze what they currently have and how it's performing]\n\n" +
+                                            "**What to Keep:** [Which current glasses are working well]\n\n" +
+                                            "**What to Update/Upgrade:** [Current glasses that need changes - prescription updates, better lenses, etc.]\n\n" +
+                                            "**What to Add:** [New glasses needed to complete their vision system]\n\n" +
+                                            "**Next Steps:** [Why visiting our partner opticians will help them protect current frames they want to keep and get the new ones they need]"
                                     }]
                                 }]
                             })
@@ -1502,7 +1489,9 @@ Structure your response like this:
                 const addSection = addRecommendations.length > 0 ?
                     `**What to Add:**\n${addRecommendations.map(rec => `• ${rec}`).join('\n')}\n\n` : '';
 
-                return `**Your Current Setup Analysis:** ${currentSetupAnalysis}Let's optimize what you have and fill the gaps.\n\n${keepSection}${updateSection}${addSection}**Next Steps:** Visit one of our 47 Barcelona partner opticians to protect your current frames with our coverage plan and get professionally fitted for your new glasses. They'll help you seamlessly integrate new eyewear into your routine while keeping what's already working for you.`;
+                const nextSteps = "**Next Steps:** Visit one of our 47 Barcelona partner opticians to protect your current frames with our coverage plan and get professionally fitted for your new glasses. They'll help you seamlessly integrate new eyewear into your routine while keeping what's already working for you.";
+                
+                return "**Your Current Setup Analysis:** " + currentSetupAnalysis + "Let's optimize what you have and fill the gaps.\n\n" + keepSection + updateSection + addSection + nextSteps;
             };
 
             const bookExamSlot = (slot) => {
@@ -3283,10 +3272,10 @@ Structure your response like this:
                 });
 
                 const infoWindow = new google.maps.InfoWindow({
-                    content: `<div class="p-2">
-                        <h3 class="font-bold text-gray-800">${store.name}</h3>
-                        <p class="text-sm text-gray-600">Click for directions</p>
-                    </div>`
+                    content: '<div class="p-2">' +
+                        '<h3 class="font-bold text-gray-800">' + store.name + '</h3>' +
+                        '<p class="text-sm text-gray-600">Click for directions</p>' +
+                        '</div>'
                 });
 
                 marker.addListener('click', () => {

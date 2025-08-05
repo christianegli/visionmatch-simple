@@ -889,10 +889,21 @@
                     type: 'multiple',
                     section: "What You Need",
                     question: "What is your work environment?",
-                    options: ["Office", "Hospitality", "Production (indoors)", "Construction", "Driving", "Other outdoor", "Other indoor"],
+                    options: ["Office", "Hospitality", "Production (indoors)", "Construction", "Driving", "Education", "Other"],
                     textField: {
                         question: "Tell us more about your work environment:",
                         placeholder: "e.g., open office with bright lights, restaurant kitchen, factory floor, outdoor construction sites, delivery driving..."
+                    },
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "What specific aspects of your work environment affect your vision?",
+                            options: ["Bright lighting", "Computer screens", "Outdoor conditions", "Close-up work", "Distance viewing", "Safety requirements", "None specifically"]
+                        },
+                        textField: {
+                            question: "Describe your work environment in detail:",
+                            placeholder: "e.g., classroom with 30 students, delivery van with GPS, construction site with safety glasses, office with multiple monitors..."
+                        }
                     }
                 },
                 {
@@ -952,7 +963,7 @@
                     question: "Are you happy with your current glasses?",
                     sliderLabels: ["Not happy at all", "Very happy"],
                     sliderDefault: 50,
-                    conditional: () => false,
+                    conditional: () => false, // Skip this question
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -971,7 +982,7 @@
                     question: "Do you think your current setup covers all your needs?",
                     sliderLabels: ["Not at all", "Perfectly"],
                     sliderDefault: 50,
-                    conditional: () => false,
+                    conditional: () => false, // Skip this question
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -2692,6 +2703,20 @@
                                                 React.createElement('div', { className: "w-2 h-2 bg-white rounded-full" })
                                         )
                                     )
+                                )
+                            ),
+                            
+                            // Conditional text field for "Other" option in work environment question
+                            q.type === 'multiple' && currentStep === 8 && (answers[currentStep] || []).includes("Other") && React.createElement('div', { className: "mt-4" },
+                                React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-lg p-4" },
+                                    React.createElement('h4', { className: "font-semibold text-gray-800 mb-3" }, "Please describe your work environment:"),
+                                    React.createElement('textarea', {
+                                        value: answers[`${currentStep}_other`] || '',
+                                        onChange: (e) => updateAnswer(`${currentStep}_other`, e.target.value),
+                                        placeholder: "e.g., remote work from home, hybrid office setup, outdoor field work, laboratory environment, retail store, etc.",
+                                        className: "w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none",
+                                        rows: 3
+                                    })
                                 )
                             ),
                             

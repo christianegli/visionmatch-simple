@@ -32,6 +32,8 @@
         // Define initMap globally before Google Maps loads
         window.initMap = function() {
             console.log("Google Maps API loaded successfully");
+            console.log("🔥 QUIZ FILE LOADED - VERSION 2024-LATEST - CHANGES APPLIED");
+            console.log("🔍 DEBUG: Setting up quiz debugging...");
         };
         
         // Fallback for Google Maps API loading errors
@@ -853,13 +855,20 @@
                     progress: "You're halfway there"
                 },
                 {
-                    type: 'multiple',
+                    type: 'single',
                     section: "What You Need",
-                    question: "What do you usually do in your free time?",
-                    options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"],
-                    textField: {
-                        question: "Tell us about your special activities or spare time:",
-                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening..."
+                    question: "How many hours per day are you in front of a screen?",
+                    options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "6-8 hours", "More than 8 hours"],
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "What type of screens do you use most?",
+                            options: ["Computer/laptop", "Smartphone", "Tablet", "TV", "Gaming console", "Multiple devices throughout the day"]
+                        },
+                        textField: {
+                            question: "Tell us about your screen usage patterns:",
+                            placeholder: "e.g., work from home on computer all day, constantly checking phone, evening TV watching, gaming sessions..."
+                        }
                     }
                 },
                 {
@@ -874,8 +883,7 @@
                     conditional: (answers) => {
                         const wearsGlasses = answers[0] && answers[0].includes('glasses');
                         const uses = answers[6] || [];
-                        const freeTime = answers[7] || [];
-                        const doesSports = uses.includes("Sports or outdoors") || freeTime.includes("Exercise or play sports") || freeTime.includes("Spend time outdoors");
+                        const doesSports = uses.includes("Sports or outdoors");
                         return wearsGlasses && doesSports;
                     },
                     details: {
@@ -917,23 +925,6 @@
                     question: "Tell us about your specific activities and hobbies",
                     placeholder: "e.g., tennis twice a week, coding 8+ hours daily, reading novels, cycling, gaming, cooking, woodworking, etc.",
                     alwaysVisible: true
-                },
-                {
-                    type: 'single',
-                    section: "What You Need",
-                    question: "How many hours per day are you in front of a screen?",
-                    options: ["<2 hours", "2–4 hours", "5–8 hours", "More than 8 hours"],
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "What types of screens do you use most?",
-                            options: ["Desktop computer", "Laptop", "Smartphone", "Tablet", "TV", "Gaming monitor", "Multiple monitors"]
-                        },
-                        textField: {
-                            question: "Describe your screen usage and any discomfort:",
-                            placeholder: "e.g., mostly Excel work, gaming in evenings, video calls all day, eyes feel dry after work..."
-                        }
-                    }
                 },
                 {
                     type: 'multiple',
@@ -1244,6 +1235,81 @@
                             </div>
                             <div class="education-highlight">
                                 <strong>💡 Pro tip:</strong> Activity-specific glasses are designed to stay secure and comfortable during movement, so you can focus on your performance.
+                            </div>
+                        `
+                    },
+                    11: {
+                        icon: '😴',
+                        title: 'Eye symptoms',
+                        content: `
+                            <p>Eye discomfort often signals that your current vision setup isn't optimal for your daily activities.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Headaches can indicate prescription changes or eye strain</div>
+                                <div class="education-benefit">Tired eyes often mean you need specialized glasses for different tasks</div>
+                                <div class="education-benefit">Glare sensitivity suggests you need better lens coatings or sunglasses</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> These symptoms are your eyes telling you they need better support - the right glasses can eliminate most eye discomfort.
+                            </div>
+                        `
+                    },
+                    12: {
+                        icon: '📊',
+                        title: 'Vision satisfaction',
+                        content: `
+                            <p>Being satisfied with your glasses is great, but there might still be opportunities to optimize your vision experience.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Even satisfied glasses wearers often discover improvements with specialized pairs</div>
+                                <div class="education-benefit">New lens technologies can enhance comfort and visual quality</div>
+                                <div class="education-benefit">Task-specific glasses can reduce eye strain you didn't know you had</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Satisfaction doesn't mean perfection - small upgrades can make a surprising difference in daily comfort.
+                            </div>
+                        `
+                    },
+                    13: {
+                        icon: '🔧',
+                        title: 'Complete vision setup',
+                        content: `
+                            <p>A complete vision setup means having the right glasses for every important situation in your life.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Most people need 2-3 pairs to cover all their vision needs optimally</div>
+                                <div class="education-benefit">Specialized glasses perform better than "one-size-fits-all" solutions</div>
+                                <div class="education-benefit">The right setup reduces eye strain and improves quality of life</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Think of it like having the right tools for different jobs - each pair serves a specific purpose perfectly.
+                            </div>
+                        `
+                    },
+                    14: {
+                        icon: '☀️',
+                        title: 'Sunglasses essentials',
+                        content: `
+                            <p>Quality sunglasses are essential for eye health and comfort, not just a fashion accessory.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">UV protection prevents long-term eye damage and cataracts</div>
+                                <div class="education-benefit">Polarized lenses reduce glare for safer driving and outdoor activities</div>
+                                <div class="education-benefit">Prescription sunglasses combine vision correction with sun protection</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Invest in quality sunglasses with proper UV protection - your eyes will thank you decades later.
+                            </div>
+                        `
+                    },
+                    15: {
+                        icon: '🎯',
+                        title: 'Complete your vision setup',
+                        content: `
+                            <p>Most people discover they need 2-3 different pairs of glasses for their complete lifestyle.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Work glasses optimize screen comfort and focus</div>
+                                <div class="education-benefit">Social glasses enhance confidence and style</div>
+                                <div class="education-benefit">Activity-specific glasses improve performance and safety</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Final insight:</strong> Your perfect vision setup is unique to your lifestyle - that's what makes this assessment so valuable.
                             </div>
                         `
                     }
@@ -2685,11 +2751,13 @@
                                 React.createElement('button', {
                                     key: index,
                                     onClick: () => {
+                                        console.log(`🔍 OPTION CLICKED: Step ${currentStep}, Option: "${option}", Question type: ${q.type}`);
                                         if (q.type === 'multiple') {
                                             const current = answers[currentStep] || [];
+                                            console.log(`🔍 Current answers for step ${currentStep}:`, current);
                                             
-                                            // Special handling for Q7/index 6 (glasses usage) - "I always wear glasses"
-                                            if (currentStep === 6 && option === "I always wear glasses") {
+                                            // Special handling for Q6/index 5 (glasses usage) - "I always wear glasses"
+                                            if (currentStep === 5 && option === "I always wear glasses") {
                                                 console.log('🔍 Q7 (index 6): "I always wear glasses" clicked, current selections:', current);
                                                 console.log('🔍 All available options:', q.options);
                                                 if (current.includes(option)) {
@@ -2703,7 +2771,7 @@
                                                     console.log('✅ AUTO-SELECTING ALL OPTIONS: Checking "I always wear glasses", selecting all options:', allOptions);
                                                     updateAnswer(currentStep, allOptions);
                                                 }
-                                            } else if (currentStep === 6 && current.includes("I always wear glasses")) {
+                                            } else if (currentStep === 5 && current.includes("I always wear glasses")) {
                                                 // If "I always wear glasses" is already selected and user clicks another option
                                                 const updated = current.includes(option)
                                                     ? current.filter(item => item !== option)
@@ -2749,8 +2817,17 @@
                             ),
                             
                             
-                            // General textField for multiple choice questions when "Other" is selected
-                            q.type === 'multiple' && q.textField && (answers[currentStep] || []).includes("Other") && React.createElement('div', { className: "mt-4" },
+                            // General textField for multiple choice questions when "Other" is selected OR alwaysVisible is true
+                            (() => {
+                                const hasOther = (answers[currentStep] || []).includes("Other");
+                                const isAlwaysVisible = q.textField && q.textField.alwaysVisible;
+                                const shouldShow = q.type === 'multiple' && q.textField && (hasOther || isAlwaysVisible);
+                                console.log(`🔍 TextField check - Step ${currentStep}, Question: "${q.question}", Type: ${q.type}, Has textField: ${!!q.textField}, Current answers:`, answers[currentStep], `Has "Other": ${hasOther}, Always visible: ${isAlwaysVisible}, Should show: ${shouldShow}`);
+                                if (q.textField) {
+                                    console.log(`🔍 TextField config:`, q.textField);
+                                }
+                                return shouldShow;
+                            })() && React.createElement('div', { className: "mt-4" },
                                 React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-lg p-4" },
                                     React.createElement('h4', { className: "font-semibold text-gray-800 mb-3" }, q.textField.question),
                                     React.createElement('textarea', {
@@ -3021,7 +3098,9 @@
 
                 // Step 2: Personal result + data capture
                 if (resultStep === 'result') {
-                    const personalizedResult = generatePersonalizedResult();
+                    // Use cached result directly or fallback
+                    const personalizedResult = window.teaserCache || generateTeaserFallback();
+                    console.log('📊 Result screen - using teaser result:', personalizedResult);
                     
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
                         React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Here's your Vision Match result 👇"),
@@ -3273,20 +3352,62 @@
                                     React.createElement('div', { className: "border-t border-gray-200 pt-6 mb-6" },
                                         React.createElement('h4', { className: "text-xl font-bold text-gray-800 mb-4" }, "📊 Your Vision Match Results"),
                                         React.createElement('div', { className: "bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl" },
-                                            React.createElement('div', { className: "text-lg font-semibold text-primary-blue mb-3" }, 
-                                                emailPersonalizedResult.result
-                                            ),
-                                            React.createElement('p', { className: "text-gray-700 mb-4" }, 
-                                                emailPersonalizedResult.insight
-                                            ),
-                                            React.createElement('div', { className: "text-sm text-gray-600" },
-                                                React.createElement('p', { className: "mb-2" }, "Based on your responses:"),
-                                                React.createElement('ul', { className: "list-disc list-inside space-y-1" },
-                                                    React.createElement('li', {}, `Current glasses: ${answers[0] ? (answers[0].includes('glasses') ? 'Yes' : 'No') : 'Not specified'}`),
-                                                    React.createElement('li', {}, `Daily screen time: ${answers[9] || 'Not specified'}`),
-                                                    React.createElement('li', {}, `Work environment: ${answers[7] || 'Not specified'}`),
-                                                    React.createElement('li', {}, `Last eye exam: ${answers[4] || 'Not specified'}`)
-                                                )
+                                            React.createElement('div', { className: "space-y-4" },
+                                                React.createElement('h5', { className: "text-lg font-bold text-primary-blue mb-3" }, "Your Personal Vision Recommendation"),
+                                                
+                                                // Main recommendation
+                                                React.createElement('div', { className: "bg-white p-4 rounded-lg border-l-4 border-primary-blue" },
+                                                    React.createElement('p', { className: "text-gray-800 font-semibold text-base mb-2" },
+                                                        emailPersonalizedResult.result
+                                                    ),
+                                                    React.createElement('p', { className: "text-gray-700 text-sm" },
+                                                        emailPersonalizedResult.insight
+                                                    )
+                                                ),
+                                                
+                                                // Specific recommendations based on their answers
+                                                (() => {
+                                                    const recs = [];
+                                                    
+                                                    // Screen work recommendation
+                                                    if (answers[8] && answers[8].includes("Office")) {
+                                                        recs.push("💻 Computer glasses with blue light filtering will reduce eye strain during your office work");
+                                                    }
+                                                    
+                                                    // Sunglasses recommendation
+                                                    const hasGlasses = answers[0] && answers[0].includes('glasses');
+                                                    const hasPlainSunglasses = answers[2] && answers[2].includes("Plain sunglasses");
+                                                    if (hasGlasses && hasPlainSunglasses) {
+                                                        recs.push("🕶️ Prescription sunglasses will give you clear vision outdoors - no more switching between glasses");
+                                                    }
+                                                    
+                                                    // Progressive recommendation
+                                                    const isOver40 = answers[11] && (answers[11].includes("40-50") || answers[11].includes("Over 50"));
+                                                    const hasReadingIssues = answers[10] && answers[10].includes("Reading");
+                                                    if (isOver40 && hasReadingIssues) {
+                                                        recs.push("📖 Progressive lenses will handle both distance and reading in one comfortable pair");
+                                                    }
+                                                    
+                                                    // Sports/activity recommendation
+                                                    const doesSports = answers[7] && answers[7].includes("Exercise or play sports");
+                                                    if (doesSports && hasGlasses) {
+                                                        recs.push("⚽ Sport-specific eyewear will improve your performance and protect your eyes during activities");
+                                                    }
+                                                    
+                                                    if (recs.length === 0) {
+                                                        recs.push("👓 A comprehensive eye exam will identify exactly what improvements your vision needs");
+                                                    }
+                                                    
+                                                    return React.createElement('div', { className: "space-y-2" },
+                                                        React.createElement('h6', { className: "font-semibold text-gray-800 text-sm" }, "What this means for you:"),
+                                                        recs.map((rec, index) => 
+                                                            React.createElement('div', { key: index, className: "flex items-start space-x-2 text-sm" },
+                                                                React.createElement('span', { className: "text-xs mt-1" }, "•"),
+                                                                React.createElement('span', { className: "text-gray-700" }, rec)
+                                                            )
+                                                        )
+                                                    );
+                                                })()
                                             )
                                         )
                                     ),

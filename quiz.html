@@ -909,27 +909,7 @@
                         }
                     }
                 },
-                {
-                    type: 'multiple',
-                    section: "What You Need",
-                    question: "What is your work environment?",
-                    options: ["Office", "Hospitality", "Production (indoors)", "Construction", "Driving", "Education", "Other"],
-                    textField: {
-                        question: "Tell us more about your work environment:",
-                        placeholder: "e.g., open office with bright lights, restaurant kitchen, factory floor, outdoor construction sites, delivery driving..."
-                    },
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "What specific aspects of your work environment affect your vision?",
-                            options: ["Bright lighting", "Computer screens", "Outdoor conditions", "Close-up work", "Distance viewing", "Safety requirements", "None specifically"]
-                        },
-                        textField: {
-                            question: "Describe your work environment in detail:",
-                            placeholder: "e.g., classroom with 30 students, delivery van with GPS, construction site with safety glasses, office with multiple monitors..."
-                        }
-                    }
-                },
+
                 {
                     type: 'text',
                     section: "What You Need",
@@ -3381,7 +3361,7 @@
                                                     const recs = [];
                                                     
                                                     // Screen work recommendation
-                                                    if (answers[8] && answers[8].includes("Office")) {
+                                                    if (answers[8] && answers[8].includes("Office with natural light")) {
                                                         recs.push("💻 Computer glasses with blue light filtering will reduce eye strain during your office work");
                                                     }
                                                     

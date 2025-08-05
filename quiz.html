@@ -744,25 +744,19 @@
                     section: "What You Have",
                     question: "Do you currently wear prescription glasses or lenses?",
                     options: ["Yes, I wear glasses", "Yes, I wear both glasses and contact lenses", "No, but I think I need them", "No, and I don't think I need them"],
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "What type of vision correction do you use?",
-                            options: ["Distance vision only", "Reading/close work only", "Progressive lenses", "Bifocals", "Multifocal contact lenses", "Daily disposable contacts", "Monthly contacts"]
-                        },
-                        textField: {
-                            question: "Tell us about your vision needs or any specific concerns:",
-                            placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text..."
-                        }
+                    textField: {
+                        question: "💡 Get better insights with more details → Tell us about your personal vision needs and specific concerns:",
+                        placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text, headaches, dry eyes, glare sensitivity...",
+                        alwaysVisible: true
                     }
                 },
                 {
                     type: 'single',
                     section: "What You Have",
-                    question: "How many pairs of glasses do you regularly use, including sunglasses?",
+                    question: "Give us more details on your current setup - How many pairs of glasses do you regularly use, including sunglasses?",
                     options: ["One", "Two", "Three or more"],
                     details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        prompt: "Many of us have to change glasses many times during the day - from reading glasses at breakfast, to computer glasses at work, to sunglasses for the commute home. Common setups often fail because one pair can't handle every situation perfectly.",
                         multipleChoice: {
                             question: "Which situations do you struggle with your current glasses?",
                             options: ["Reading small text", "Computer work", "Driving at night", "Bright sunlight", "Sports/activities", "Switching between distances", "No struggles"]
@@ -774,21 +768,17 @@
                     }
                 },
                 {
+                    type: 'text',
+                    section: "What You Have",
+                    question: "Where did you buy your current frames, what brand are they, and why did you choose these specific frames?",
+                    placeholder: "e.g., bought Ray-Ban frames from Alain Afflelou because I liked the classic style, got Lindberg frames from local optician for their lightweight comfort, purchased online from Warby Parker for the affordable price...",
+                    alwaysVisible: true
+                },
+                {
                     type: 'multiple',
                     section: "What You Have",
                     question: "What glasses do you own?",
-                    options: ["Single vision", "Progressive", "Single vision sunglasses", "Progressive sunglasses", "Plain sunglasses"],
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "Where did you get your current glasses?",
-                            options: ["Local optician", "Chain store (Specsavers, etc.)", "Online (Warby Parker, etc.)", "Hospital/clinic", "Inherited/gift", "Other"]
-                        },
-                        textField: {
-                            question: "Tell us about your experience with your current glasses:",
-                            placeholder: "e.g., love the frames but lenses scratch easily, progressives take time to adjust, sunglasses are perfect..."
-                        }
-                    }
+                    options: ["Single vision", "Progressive", "Single vision sunglasses", "Progressive sunglasses", "Plain sunglasses"]
                 },
                 {
                     type: 'single',
@@ -796,7 +786,7 @@
                     question: "When were your primary glasses last updated?",
                     options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years"],
                     details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        prompt: "Understanding your prescription history helps us provide better recommendations.",
                         multipleChoice: {
                             question: "What prompted your last glasses update?",
                             options: ["Prescription changed", "Glasses broke/lost", "Wanted new style", "Eye exam recommendation", "Visit to Alain Afflelou", "Visit to Multiópticas", "Visit to General Óptica", "Visit to local optician", "Still using old glasses", "Other"]
@@ -814,7 +804,7 @@
                     options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years", "I don't have prescription sunglasses"],
                     conditional: (answers) => {
                         // Show this question only if user has prescription sunglasses (progressive or single vision)
-                        const question3Answers = answers[2] || [];
+                        const question3Answers = answers[3] || [];
                         return question3Answers.includes("Single vision sunglasses") || question3Answers.includes("Progressive sunglasses");
                     },
                     details: {
@@ -829,8 +819,13 @@
                         }
                     }
                 },
-
-
+                {
+                    type: 'text',
+                    section: "What You Have",
+                    question: "Do you feel like you need to change any of these glasses? Is there a specific need you haven't covered right now?",
+                    placeholder: "e.g., my reading glasses aren't strong enough for computer work, my sunglasses don't have prescription so I can't see clearly outdoors, I need something for driving at night, my progressives are hard to adjust to...",
+                    alwaysVisible: true
+                },
                 {
                     type: 'multiple',
                     section: "What You Have",
@@ -861,7 +856,8 @@
                     options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"],
                     textField: {
                         question: "Tell us about your special activities or spare time:",
-                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening..."
+                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening...",
+                        alwaysVisible: true
                     },
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
@@ -899,12 +895,13 @@
                     options: ["Yes", "Sometimes", "No"],
                     textField: {
                         question: "Tell us more about when you avoid wearing glasses:",
-                        placeholder: "e.g., during exercise, while cooking, when going out socially, at work..."
+                        placeholder: "e.g., during exercise, while cooking, when going out socially, at work...",
+                        alwaysVisible: true
                     },
                     conditional: (answers) => {
                         const wearsGlasses = answers[0] && answers[0].includes('glasses');
                         const uses = answers[6] || [];
-                        const freeTime = answers[7] || [];
+                        const freeTime = answers[8] || [];
                         const doesSports = uses.includes("Sports or outdoors") || freeTime.includes("Exercise or play sports") || freeTime.includes("Spend time outdoors");
                         return wearsGlasses && doesSports;
                     },
@@ -920,7 +917,6 @@
                         }
                     }
                 },
-
                 {
                     type: 'text',
                     section: "What You Need",
@@ -932,10 +928,11 @@
                     type: 'multiple',
                     section: "What You Need",
                     question: "What describes your working environment?",
-                    options: ["Office with natural light", "Office with artificial lighting", "Home office", "Outdoor work", "Mixed environments", "Customer-facing role", "Workshop/lab environment", "Driving", "Education", "Other"],
+                    options: ["Office", "Indoors", "Outdoors", "Mixed environments", "Customer-facing role", "Workshop/lab environment", "Driving", "Education", "Other"],
                     textField: {
                         question: "Tell us more about your work environment:",
-                        placeholder: "e.g., open office with bright LED lights, home office by a window, outdoor construction work, laboratory with specialized lighting..."
+                        placeholder: "e.g., open office with bright LED lights, home office by a window, outdoor construction work, laboratory with specialized lighting...",
+                        alwaysVisible: true
                     }
                 },
                 {
@@ -1036,11 +1033,34 @@
                 {
                     type: 'multiple',
                     section: "What You Need",
+                    question: "What style do you prefer on glasses? Let's get personal about what makes you feel confident and comfortable.",
+                    options: ["Classic and timeless", "Modern and minimalist", "Bold and statement-making", "Sporty and functional", "Luxury and premium", "Trendy and fashion-forward", "Professional and conservative", "Creative and artistic", "No specific preference"],
+                    textField: {
+                        question: "Tell us more about your personal style and what you're really looking for:",
+                        placeholder: "e.g., I want to feel confident in meetings, need something that matches my personality, want frames that make me look approachable, prefer something that works with my face shape and lifestyle...",
+                        alwaysVisible: true
+                    },
+                    details: {
+                        prompt: "Let's go deeper and get more personal - your perfect style is unique to you.",
+                        multipleChoice: {
+                            question: "Based on your style choice, what specific brands or materials interest you?",
+                            options: ["Ray-Ban (classic heritage)", "Lindberg (minimalist luxury)", "Tom Ford (bold luxury)", "Oakley (sporty performance)", "Oliver Peoples (understated premium)", "Local artisan frames (unique character)", "No brand preference - focus on fit and comfort"]
+                        },
+                        textField: {
+                            question: "Describe what glasses mean to you personally:",
+                            placeholder: "e.g., I want to feel like myself but better, need something that boosts my confidence, want frames that become part of my identity, looking for glasses that tell my story..."
+                        }
+                    }
+                },
+                {
+                    type: 'multiple',
+                    section: "What You Need",
                     question: "What matters most to you in sunglasses?",
                     options: ["UV protection", "Style and fashion", "Durability", "Comfort for all-day wear", "Clear vision while driving", "Sports performance", "Price/value", "Brand prestige", "Other"],
                     textField: {
                         question: "Any specific sunglasses preferences or experiences?",
-                        placeholder: "e.g., need polarized lenses for driving, prefer wraparound style for sports, had issues with cheap sunglasses breaking..."
+                        placeholder: "e.g., need polarized lenses for driving, prefer wraparound style for sports, had issues with cheap sunglasses breaking...",
+                        alwaysVisible: true
                     },
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
@@ -1098,31 +1118,30 @@
                         icon: '👀',
                         title: 'Vision insight',
                         content: `
-                            <p>Using one pair of glasses for everything is like using one tool for every job - it can work, but specialized tools perform better.</p>
+                            <p>Many of us have to change glasses many times during the day - from reading glasses at breakfast, to computer glasses at work, to sunglasses for the commute home.</p>
                             <div class="education-benefits">
-                                <div class="education-benefit">Distance glasses aren't optimized for reading comfort</div>
-                                <div class="education-benefit">Indoor glasses lack UV protection outdoors</div>
-                                <div class="education-benefit">Regular glasses don't filter harmful blue light from screens</div>
+                                <div class="education-benefit">Common setups fail: reading glasses don't work for computer distance</div>
+                                <div class="education-benefit">Regular glasses don't protect from screen glare and blue light</div>
+                                <div class="education-benefit">Sunglasses without prescription mean blurry outdoor vision</div>
                             </div>
                             <div class="education-highlight">
-                                <strong>💡 Pro tip:</strong> You can keep your current glasses and add task-specific ones to complement what already works for you.
+                                <strong>💡 Pro tip:</strong> The right combination of specialized glasses eliminates the constant switching and gives you optimal vision for every situation.
                             </div>
                         `
                     },
-                    // Question about what glasses they own
+                    // Question about frame purchase details (new Q3)
                     3: {
-                        icon: '🔍',
-                        title: 'Gap analysis',
+                        icon: '🛒',
+                        title: 'Purchase insights',
                         content: `
-                            <p>Your current setup might be missing key pieces for your lifestyle:</p>
+                            <p>Understanding where and why you bought your current frames helps us recommend the right approach for your next pair.</p>
                             <div class="education-benefits">
-                                <div class="education-benefit">Prescription sunglasses provide clearer outdoor vision than clip-ons</div>
-                                <div class="education-benefit">Progressive lenses could eliminate switching between reading and distance glasses</div>
-                                <div class="education-benefit">Anti-reflective coatings reduce glare by up to 99%</div>
-                                <div class="education-benefit">Blue light filters can improve sleep quality and reduce eye strain</div>
+                                <div class="education-benefit">Chain stores offer convenience but limited personalization</div>
+                                <div class="education-benefit">Local opticians provide expert fitting and ongoing care</div>
+                                <div class="education-benefit">Online options can save money but lack professional fitting</div>
                             </div>
                             <div class="education-highlight">
-                                <strong>💡 Pro tip:</strong> Modern lens technologies like anti-reflective coatings and blue light filters can significantly improve your visual comfort.
+                                <strong>💡 Pro tip:</strong> The right combination of professional fitting and quality frames ensures both comfort and style.
                             </div>
                         `
                     },
@@ -1158,8 +1177,25 @@
                             </div>
                         `
                     },
-                    // Question about prescription updates
+                    // Question about what glasses they own (now Q4)
                     4: {
+                        icon: '🔍',
+                        title: 'Gap analysis',
+                        content: `
+                            <p>Your current setup might be missing key pieces for your lifestyle:</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Prescription sunglasses provide clearer outdoor vision than clip-ons</div>
+                                <div class="education-benefit">Progressive lenses could eliminate switching between reading and distance glasses</div>
+                                <div class="education-benefit">Anti-reflective coatings reduce glare by up to 99%</div>
+                                <div class="education-benefit">Blue light filters can improve sleep quality and reduce eye strain</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Modern lens technologies like anti-reflective coatings and blue light filters can significantly improve your visual comfort.
+                            </div>
+                        `
+                    },
+                    // Question about prescription updates (now Q5)
+                    5: {
                         icon: '📅',
                         title: 'Prescription health',
                         content: `
@@ -1174,8 +1210,8 @@
                             </div>
                         `
                     },
-                    // Question about sunglasses updates
-                    5: {
+                    // Question about sunglasses updates (now Q6)
+                    6: {
                         icon: '🕶️',
                         title: 'Sun protection',
                         content: `
@@ -1190,8 +1226,8 @@
                             </div>
                         `
                     },
-                    // Question about glasses usage
-                    6: {
+                    // Question about glasses usage (now Q7)
+                    7: {
                         icon: '🎯',
                         title: 'Activity optimization',
                         content: `
@@ -1207,8 +1243,24 @@
                             </div>
                         `
                     },
-                    // Free time activities
-                    7: {
+                    // New question about changing glasses needs (Q8)
+                    8: {
+                        icon: '🔄',
+                        title: 'Setup gaps',
+                        content: `
+                            <p>Identifying what's missing from your current setup is the first step to complete vision optimization.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Most people discover they need 2-3 specialized pairs</div>
+                                <div class="education-benefit">Common gaps: computer glasses, prescription sunglasses, reading glasses</div>
+                                <div class="education-benefit">Small changes can eliminate daily vision frustrations</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> The right combination of glasses eliminates the need to constantly switch or compromise on vision quality.
+                            </div>
+                        `
+                    },
+                    // Free time activities (now Q10)
+                    10: {
                         icon: '🏃',
                         title: 'Activity performance',
                         content: `
@@ -1224,8 +1276,24 @@
                             </div>
                         `
                     },
-                    // Avoiding glasses - only show if they actually avoid them
-                    8: {
+                    // Screen time question (now Q11)
+                    11: {
+                        icon: '💻',
+                        title: 'Screen health',
+                        content: `
+                            <p>Extended screen time can cause permanent changes to your eye muscles and disrupt sleep patterns through blue light exposure.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Blue light suppresses melatonin production, affecting sleep quality</div>
+                                <div class="education-benefit">Computer glasses can reduce headaches by 60%</div>
+                                <div class="education-benefit">Proper screen glasses improve focus and productivity</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Dedicated computer glasses can reduce digital eye strain and improve your focus during extended screen time.
+                            </div>
+                        `
+                    },
+                    // Avoiding glasses question (now Q12)
+                    12: {
                         icon: '🚫',
                         title: 'Activity barriers',
                         content: `
@@ -1240,7 +1308,8 @@
                             </div>
                         `
                     },
-                    11: {
+                    // Symptoms question (now Q13)
+                    13: {
                         icon: '😴',
                         title: 'Eye symptoms',
                         content: `
@@ -1255,37 +1324,42 @@
                             </div>
                         `
                     },
-                    12: {
-                        icon: '📊',
-                        title: 'Vision satisfaction',
-                        content: `
-                            <p>Being satisfied with your glasses is great, but there might still be opportunities to optimize your vision experience.</p>
-                            <div class="education-benefits">
-                                <div class="education-benefit">Even satisfied glasses wearers often discover improvements with specialized pairs</div>
-                                <div class="education-benefit">New lens technologies can enhance comfort and visual quality</div>
-                                <div class="education-benefit">Task-specific glasses can reduce eye strain you didn't know you had</div>
-                            </div>
-                            <div class="education-highlight">
-                                <strong>💡 Pro tip:</strong> Satisfaction doesn't mean perfection - small upgrades can make a surprising difference in daily comfort.
-                            </div>
-                        `
-                    },
-                    13: {
-                        icon: '🔧',
-                        title: 'Complete vision setup',
-                        content: `
-                            <p>A complete vision setup means having the right glasses for every important situation in your life.</p>
-                            <div class="education-benefits">
-                                <div class="education-benefit">Most people need 2-3 pairs to cover all their vision needs optimally</div>
-                                <div class="education-benefit">Specialized glasses perform better than "one-size-fits-all" solutions</div>
-                                <div class="education-benefit">The right setup reduces eye strain and improves quality of life</div>
-                            </div>
-                            <div class="education-highlight">
-                                <strong>💡 Pro tip:</strong> Think of it like having the right tools for different jobs - each pair serves a specific purpose perfectly.
-                            </div>
-                        `
-                    },
+                    // Working environment question (now Q14)
                     14: {
+                        icon: '🏢',
+                        title: 'Work environment',
+                        content: `
+                            <p>Your work environment has unique visual demands that specialized glasses can address.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Office environments need computer glasses for screen comfort</div>
+                                <div class="education-benefit">Outdoor work requires UV protection and impact resistance</div>
+                                <div class="education-benefit">Mixed environments benefit from photochromic lenses</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Work-specific glasses can significantly improve your productivity and reduce eye strain during long work hours.
+                            </div>
+                        `
+                    },
+                    
+                    // Style preferences question (now Q16)
+                    16: {
+                        icon: '🎨',
+                        title: 'Style expression',
+                        content: `
+                            <p>Your glasses are an extension of your personality and style - they should make you feel confident and comfortable.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Frame materials affect both style and comfort</div>
+                                <div class="education-benefit">Different styles work better for different face shapes</div>
+                                <div class="education-benefit">Quality frames last longer and maintain their style</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> The right style can boost your confidence and make wearing glasses a pleasure rather than a necessity.
+                            </div>
+                        `
+                    },
+                    
+                    // Sunglasses preferences question (now Q17)
+                    17: {
                         icon: '☀️',
                         title: 'Sunglasses essentials',
                         content: `
@@ -1300,7 +1374,9 @@
                             </div>
                         `
                     },
-                    15: {
+                    
+                    // Final completion
+                    18: {
                         icon: '🎯',
                         title: 'Complete your vision setup',
                         content: `

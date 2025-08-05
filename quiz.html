@@ -855,6 +855,16 @@
                     progress: "You're halfway there"
                 },
                 {
+                    type: 'multiple',
+                    section: "What You Need",
+                    question: "What do you usually do in your free time?",
+                    options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"],
+                    textField: {
+                        question: "Tell us about your special activities or spare time:",
+                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening..."
+                    }
+                },
+                {
                     type: 'single',
                     section: "What You Need",
                     question: "How many hours per day are you in front of a screen?",
@@ -883,7 +893,8 @@
                     conditional: (answers) => {
                         const wearsGlasses = answers[0] && answers[0].includes('glasses');
                         const uses = answers[6] || [];
-                        const doesSports = uses.includes("Sports or outdoors");
+                        const freeTime = answers[7] || [];
+                        const doesSports = uses.includes("Sports or outdoors") || freeTime.includes("Exercise or play sports") || freeTime.includes("Spend time outdoors");
                         return wearsGlasses && doesSports;
                     },
                     details: {

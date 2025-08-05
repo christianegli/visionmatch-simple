@@ -810,6 +810,11 @@
                     section: "What You Have",
                     question: "When were your sunglasses last updated?",
                     options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years", "I don't have prescription sunglasses"],
+                    conditional: (answers) => {
+                        // Show this question only if user has prescription sunglasses (progressive or single vision)
+                        const question3Answers = answers[2] || [];
+                        return question3Answers.includes("Single vision sunglasses") || question3Answers.includes("Progressive sunglasses");
+                    },
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -2825,6 +2830,42 @@
                 );
             };
 
+            const generatePersonalizedResult = () => {
+                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const glassesCount = answers[1] || 'One';
+                const screenTime = answers[9] || 'Unknown'; // Screen time question index
+                const workEnvironment = answers[8] || 'Unknown'; // Work environment we added
+                const activities = answers[6] || ''; // Free time activities
+                
+                // Create personalized result based on answers
+                let result = "";
+                let insight = "";
+                
+                if (screenTime.includes('More than 8') || screenTime.includes('5–8')) {
+                    if (hasGlasses) {
+                        result = "You need dedicated computer glasses. Your current setup isn't optimized for your heavy screen use.";
+                        insight = "Blue light filtering + anti-reflective coating will reduce eye strain significantly.";
+                    } else {
+                        result = "You definitely need computer glasses. 8+ hours of screen time without protection is damaging your eyes.";
+                        insight = "Even if you don't need prescription, computer glasses will transform your work experience.";
+                    }
+                } else if (activities.includes('Sports') || activities.includes('outdoors')) {
+                    result = "You're missing sports/outdoor vision protection. Your active lifestyle needs specialized eyewear.";
+                    insight = "Impact-resistant frames + UV protection will keep you safe and performing at your best.";
+                } else if (glassesCount === 'One' && hasGlasses) {
+                    result = "You're trying to do everything with one pair. That's like using one tool for every job.";
+                    insight = "Most people need 2-3 specialized pairs for optimal vision throughout their day.";
+                } else if (!hasGlasses) {
+                    result = "Based on your answers, you likely have undiagnosed vision needs.";
+                    insight = "A professional eye exam will reveal exactly what you're missing.";
+                } else {
+                    result = "Your vision setup needs optimization. Small changes can make a huge difference.";
+                    insight = "We've identified specific gaps in your current approach.";
+                }
+                
+                return { result, insight };
+            };
+
             const renderResults = () => {
                 // Step 1: Transition screen  
                 if (resultStep === 'transition') {
@@ -2843,14 +2884,19 @@
 
                 // Step 2: Personal result + data capture
                 if (resultStep === 'result') {
+                    const personalizedResult = generatePersonalizedResult();
+                    
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
                         React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Here's your Vision Match result 👇"),
                         
                         React.createElement('div', { className: "visionmatch-card p-6 shadow-lg bg-blue-50 border-l-4 border-primary-blue mb-8" },
-                            React.createElement('p', { className: "text-lg text-blue-900 mb-4" }, 
-                                "You probably need 2 pairs of glasses: one for everyday use + one for screens."
+                            React.createElement('p', { className: "text-lg text-blue-900 mb-4 font-semibold" }, 
+                                personalizedResult.result
                             ),
                             React.createElement('p', { className: "text-blue-800" },
+                                personalizedResult.insight
+                            ),
+                            React.createElement('p', { className: "text-blue-700 mt-4 text-sm font-medium" },
                                 "Good news: With OptiQa you'll never pay for lens upgrades — they're free for life."
                             )
                         ),
@@ -3011,9 +3057,137 @@
                                 className: "visionmatch-button py-3 px-6 font-semibold"
                             }, "Add to Calendar"),
                             React.createElement('button', {
+                                onClick: () => setResultStep('emailConfirmation'),
+                                className: "visionmatch-button py-3 px-6 font-semibold"
+                            }, "View Email Confirmation"),
+                            React.createElement('button', {
                                 onClick: () => setResultStep('result'),
                                 className: "py-3 px-6 border border-primary-blue text-primary-blue rounded-lg font-semibold hover:bg-blue-50"
                             }, "See My Result Again")
+                        )
+                    );
+                }
+
+                // Step 6: Email Confirmation Screen
+                if (resultStep === 'emailConfirmation') {
+                    const personalizedResult = generatePersonalizedResult();
+                    const today = new Date();
+                    const examDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week from now
+                    const formattedDate = examDate.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+
+                    return React.createElement('div', { className: "space-y-8 max-w-4xl mx-auto" },
+                        React.createElement('div', { className: "text-center mb-8" },
+                            React.createElement('div', { className: "w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6" },
+                                React.createElement('div', { className: "text-4xl" }, "✉️")
+                            ),
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, "Email Confirmation Preview"),
+                            React.createElement('p', { className: "text-gray-600" }, "This is what you'll receive in your inbox:")
+                        ),
+                        
+                        // Email mockup container
+                        React.createElement('div', { className: "bg-gray-50 p-8 rounded-xl border-2 border-dashed border-gray-300" },
+                            React.createElement('div', { className: "bg-white rounded-lg shadow-lg max-w-2xl mx-auto overflow-hidden" },
+                                // Email header
+                                React.createElement('div', { className: "bg-primary-blue text-white p-6 text-center" },
+                                    React.createElement('h3', { className: "text-2xl font-bold mb-2" }, "🎉 Your Free Eye Exam Is Confirmed"),
+                                    React.createElement('p', { className: "text-blue-100" }, "OptiQa Vision Match Results")
+                                ),
+                                
+                                // Email body
+                                React.createElement('div', { className: "p-8" },
+                                    React.createElement('p', { className: "text-lg text-gray-800 mb-6" }, 
+                                        `Hi ${formData.name || 'there'},`
+                                    ),
+                                    
+                                    React.createElement('p', { className: "text-gray-700 mb-6" }, 
+                                        "Thanks for completing your Vision Match! Based on your answers, we've prepared a free in-depth eye exam for you at:"
+                                    ),
+                                    
+                                    // Appointment details
+                                    React.createElement('div', { className: "bg-blue-50 p-6 rounded-xl mb-6" },
+                                        React.createElement('div', { className: "flex items-center space-x-3 mb-3" },
+                                            React.createElement('div', { className: "text-xl" }, "📍"),
+                                            React.createElement('span', { className: "font-semibold text-gray-800" }, selectedOptician?.name || "Your Selected Optician")
+                                        ),
+                                        React.createElement('div', { className: "flex items-center space-x-3 mb-3" },
+                                            React.createElement('div', { className: "text-xl" }, "📅"),
+                                            React.createElement('span', { className: "text-gray-700" }, formattedDate)
+                                        ),
+                                        React.createElement('div', { className: "flex items-center space-x-3" },
+                                            React.createElement('div', { className: "text-xl" }, "🕒"),
+                                            React.createElement('span', { className: "text-gray-700" }, selectedSlot || "Your selected time slot")
+                                        )
+                                    ),
+                                    
+                                    React.createElement('p', { className: "text-gray-700 mb-6" }, 
+                                        "Your optician will contact you if they need to adjust your time, but you're all set."
+                                    ),
+                                    
+                                    // Your Vision Match Results section
+                                    React.createElement('div', { className: "border-t border-gray-200 pt-6 mb-6" },
+                                        React.createElement('h4', { className: "text-xl font-bold text-gray-800 mb-4" }, "📊 Your Vision Match Results"),
+                                        React.createElement('div', { className: "bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl" },
+                                            React.createElement('div', { className: "text-lg font-semibold text-primary-blue mb-3" }, 
+                                                personalizedResult.result
+                                            ),
+                                            React.createElement('p', { className: "text-gray-700 mb-4" }, 
+                                                personalizedResult.insight
+                                            ),
+                                            React.createElement('div', { className: "text-sm text-gray-600" },
+                                                React.createElement('p', { className: "mb-2" }, "Based on your responses:"),
+                                                React.createElement('ul', { className: "list-disc list-inside space-y-1" },
+                                                    React.createElement('li', {}, `Current glasses: ${answers[0] ? (answers[0].includes('glasses') ? 'Yes' : 'No') : 'Not specified'}`),
+                                                    React.createElement('li', {}, `Daily screen time: ${answers[9] || 'Not specified'}`),
+                                                    React.createElement('li', {}, `Work environment: ${answers[8] || 'Not specified'}`),
+                                                    React.createElement('li', {}, `Last eye exam: ${answers[4] || 'Not specified'}`)
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    
+                                    React.createElement('div', { className: "bg-green-50 p-6 rounded-xl mb-6" },
+                                        React.createElement('h5', { className: "font-semibold text-gray-800 mb-3" }, "Why this exam matters:"),
+                                        React.createElement('ul', { className: "space-y-2 text-gray-700" },
+                                            React.createElement('li', { className: "flex items-start space-x-2" },
+                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
+                                                React.createElement('span', {}, "Confirms your Vision Match result with medical precision")
+                                            ),
+                                            React.createElement('li', { className: "flex items-start space-x-2" },
+                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
+                                                React.createElement('span', {}, "Free of charge, no strings attached")
+                                            ),
+                                            React.createElement('li', { className: "flex items-start space-x-2" },
+                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
+                                                React.createElement('span', {}, "Unlocks the benefits of OptiQa: free lens upgrades for life + no upfront payment for glasses")
+                                            )
+                                        )
+                                    ),
+                                    
+                                    React.createElement('div', { className: "text-center" },
+                                        React.createElement('p', { className: "text-gray-700 mb-4" }, "Next Step:"),
+                                        React.createElement('button', {
+                                            onClick: () => alert('Calendar integration would be implemented here'),
+                                            className: "visionmatch-button py-3 px-8 font-semibold mb-4"
+                                        }, "👉 Add to Calendar"),
+                                        React.createElement('p', { className: "text-sm text-gray-600" }, 
+                                            "We'll also send you a reminder by SMS before your appointment."
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        
+                        // Back button
+                        React.createElement('div', { className: "text-center" },
+                            React.createElement('button', {
+                                onClick: () => setResultStep('confirmation'),
+                                className: "py-3 px-6 border border-primary-blue text-primary-blue rounded-lg font-semibold hover:bg-blue-50"
+                            }, "← Back to Confirmation")
                         )
                     );
                 }

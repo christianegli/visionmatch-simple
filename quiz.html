@@ -6,7 +6,6 @@
     <title>VisionMatch - Professional Vision Assessment</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Configure Tailwind with VisionMatch brand colors
@@ -701,7 +700,7 @@
     </nav>
     <div id="root"></div>
 
-    <script type="text/babel">
+    <script type="text/javascript">
         const { useState } = React;
         
         // SVG icon components with OptiQa styling
@@ -2698,8 +2697,8 @@
                             
                             // Detail sections with multiple choice and text field
                             q.details && React.createElement('div', { className: "mt-8" },
-                                React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4" },
-                                    React.createElement('p', { className: "text-blue-800 text-sm mb-3 font-medium" }, "💡 Get better insights with more details"),
+                                React.createElement('div', { className: "bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4" },
+                                    React.createElement('p', { className: "text-gray-700 text-sm mb-3 font-medium" }, "💡 Get better insights with more details"),
                                     React.createElement('button', {
                                         onClick: () => {
                                             setExpandedDetails(prev => ({
@@ -2707,7 +2706,7 @@
                                                 [currentStep]: !prev[currentStep]
                                             }));
                                         },
-                                        className: "inline-flex items-center space-x-2 px-6 py-3 bg-primary-blue text-white hover:bg-primary-blue-dark rounded-lg transition-all font-semibold shadow-sm"
+                                        className: "inline-flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 rounded-lg transition-all font-medium shadow-sm"
                                     },
                                     React.createElement('span', null, expandedDetails[currentStep] ? "Hide details" : q.details.prompt),
                                     React.createElement('svg', { 

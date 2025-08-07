@@ -6,6 +6,7 @@
     <title>VisionMatch - Professional Vision Assessment</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Configure Tailwind with VisionMatch brand colors
@@ -32,8 +33,6 @@
         // Define initMap globally before Google Maps loads
         window.initMap = function() {
             console.log("Google Maps API loaded successfully");
-            console.log("🔥 QUIZ FILE LOADED - VERSION 2024-LATEST - CHANGES APPLIED");
-            console.log("🔍 DEBUG: Setting up quiz debugging...");
         };
         
         // Fallback for Google Maps API loading errors
@@ -273,77 +272,16 @@
             box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
         }
 
-        /* Educational Tip Styles - Always Highlighted & Bigger */
+        /* Educational Tip Styles - Subtle Design */
         .education-panel {
-            background: linear-gradient(135deg, rgba(236, 242, 255, 0.9), rgba(255, 247, 237, 0.8));
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
+            background: rgba(248, 250, 252, 0.6);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+            border-radius: 1rem;
+            padding: 1.25rem;
             margin: 1.5rem 0;
             backdrop-filter: blur(5px);
             position: relative;
             z-index: 5;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
-            overflow: hidden;
-        }
-
-        .education-panel:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.25);
-        }
-
-        /* Always highlighted text - bigger fonts */
-        .education-panel p {
-            color: #1e40af;
-            font-weight: 500;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .education-panel .education-icon {
-            background: rgba(59, 130, 246, 0.2);
-            transform: scale(1.05);
-            transition: all 0.3s ease;
-            width: 2rem;
-            height: 2rem;
-            font-size: 0.9rem;
-        }
-
-        .education-panel .education-title {
-            color: #1e40af;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        /* Always highlight emotional words */
-        .education-content {
-            position: relative;
-            animation: subtle-glow 3s ease-in-out infinite;
-        }
-
-        @keyframes subtle-glow {
-            0%, 100% { text-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
-            50% { text-shadow: 0 0 12px rgba(59, 130, 246, 0.6), 0 0 18px rgba(255, 215, 0, 0.4); }
-        }
-
-        /* Always show colorful top border */
-        .education-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f59e0b);
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-        }
-
-        .education-panel:hover::before {
-            opacity: 1;
         }
 
         .education-header {
@@ -373,15 +311,13 @@
         }
 
         .education-content {
-            color: #1e40af;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            font-weight: 500;
+            color: #6b7280;
+            line-height: 1.5;
+            font-size: 0.85rem;
         }
 
         .education-content p {
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
         }
 
         .education-content p:last-child {
@@ -626,15 +562,11 @@
             }
 
             .education-title {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
             .education-content {
-                font-size: 0.85rem;
-            }
-
-            .education-content p {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
             }
 
             .education-benefit {
@@ -769,10 +701,10 @@
     </nav>
     <div id="root"></div>
 
-    <script type="text/javascript">
+    <script type="text/babel">
         const { useState } = React;
         
-        // SVG icon components with VisionMatch styling
+        // SVG icon components with OptiQa styling
         const ChevronRight = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'm9 18 6-6-6-6' }));
         const ChevronLeft = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'm15 18-6-6 6-6' }));
         const Eye = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z' }), React.createElement('circle', { cx: 12, cy: 12, r: 3 }));
@@ -811,21 +743,33 @@
                     section: "What You Have",
                     question: "Do you currently wear prescription glasses or lenses?",
                     options: ["Yes, I wear glasses", "Yes, I wear both glasses and contact lenses", "No, but I think I need them", "No, and I don't think I need them"],
-                    textField: {
-                        question: "Tell us about your personal vision needs and specific concerns:",
-                        placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text, headaches, dry eyes, glare sensitivity...",
-                        alwaysVisible: true
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "What type of vision correction do you use?",
+                            options: ["Distance vision only", "Reading/close work only", "Progressive lenses", "Bifocals", "Multifocal contact lenses", "Daily disposable contacts", "Monthly contacts"]
+                        },
+                        textField: {
+                            question: "Tell us about your vision needs or any specific concerns:",
+                            placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text..."
+                        }
                     }
                 },
                 {
                     type: 'single',
                     section: "What You Have",
-                    question: "Give us more details on your current setup - How many pairs of glasses do you regularly use, including sunglasses?",
+                    question: "How many pairs of glasses do you regularly use, including sunglasses?",
                     options: ["One", "Two", "Three or more"],
-                    textField: {
-                        question: "Give us more details on your current eyewear setup:",
-                        placeholder: "e.g., I have reading glasses from 2019, use contacts most days but wear glasses for computer work, my prescription sunglasses are scratched...",
-                        alwaysVisible: true
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "Which situations do you struggle with your current glasses?",
+                            options: ["Reading small text", "Computer work", "Driving at night", "Bright sunlight", "Sports/activities", "Switching between distances", "No struggles"]
+                        },
+                        textField: {
+                            question: "Describe your ideal glasses setup:",
+                            placeholder: "e.g., one pair for work, another for reading, prescription sunglasses for driving..."
+                        }
                     }
                 },
                 {
@@ -833,87 +777,40 @@
                     section: "What You Have",
                     question: "What glasses do you own?",
                     options: ["Single vision", "Progressive", "Single vision sunglasses", "Progressive sunglasses", "Plain sunglasses"],
-                    textField: {
-                        question: "Care to give us more details on your current eyewear setup?",
-                        placeholder: "e.g., prescription strength, when you got them, how often you wear them, any issues or preferences...",
-                        alwaysVisible: true
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "Where did you get your current glasses?",
+                            options: ["Local optician", "Chain store (Specsavers, etc.)", "Online (Warby Parker, etc.)", "Hospital/clinic", "Inherited/gift", "Other"]
+                        },
+                        textField: {
+                            question: "Tell us about your experience with your current glasses:",
+                            placeholder: "e.g., love the frames but lenses scratch easily, progressives take time to adjust, sunglasses are perfect..."
+                        }
                     }
                 },
                 {
-                    type: 'multi-step',
+                    type: 'single',
                     section: "What You Have",
-                    question: "Tell us about your main pair of glasses",
-                    steps: [
-                        {
-                            question: "Where did you buy your main pair of glasses?",
-                            type: 'single',
-                            options: ["Alain Afflelou", "Multiópticas", "General Óptica", "Óptica 2000", "Cottet", "Óptica Universitaria", "Visionlab", "Local optician", "Online store", "Department store", "Other"],
-                            textField: {
-                                question: "Please specify where:",
-                                placeholder: "e.g., specific store name, online retailer, etc.",
-                                showWhen: "Other"
-                            }
-                        },
-                        {
-                            question: "What brand are your main glasses?",
-                            type: 'single',
-                            options: ["Ray-Ban", "Oakley", "Tom Ford", "Oliver Peoples", "Lindberg", "Silhouette", "I don't know", "Other brand"],
-                            textField: {
-                                question: "Please specify the brand:",
-                                placeholder: "e.g., Persol, Dior, local brand name, etc.",
-                                showWhen: "Other brand"
-                            }
-                        },
-                        {
-                            question: "Why did you choose these specific frames?",
-                            type: 'multiple',
-                            options: ["Optician recommended", "Liked the style", "Good price", "Comfortable fit", "Brand reputation", "Previous experience", "Only option", "Friend recommended", "Other"],
-                            textField: {
-                                question: "Tell us more about why you chose these frames:",
-                                placeholder: "e.g., they matched my face shape, needed something professional for work, had a prescription change and needed new frames quickly...",
-                                showWhen: "Other"
-                            }
-                        }
-                    ]
-                },
-                {
-                    type: 'multi-step',
-                    section: "What You Have",
-                    question: "Tell us about your glasses history",
-                    steps: [
-                        {
-                            question: "When were your primary glasses last updated?",
-                            type: 'single',
-                            options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years"],
-                            fullWidth: true
-                        },
-                        {
+                    question: "When were your primary glasses last updated?",
+                    options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years"],
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
                             question: "What prompted your last glasses update?",
-                            type: 'single',
-                            options: ["Prescription changed", "Glasses broke/lost", "Wanted new style", "Eye exam recommendation", "Visited optician", "Still using old glasses", "Other"],
-                            fullWidth: true,
-                            textField: {
-                                question: "Can you tell us what prompted your last glasses update?",
-                                placeholder: "e.g., prescription gets stronger each year, stayed stable for years, got progressives recently...",
-                                alwaysVisible: true
-                            }
+                            options: ["Prescription changed", "Glasses broke/lost", "Wanted new style", "Eye exam recommendation", "Visit to Alain Afflelou", "Visit to Multiópticas", "Visit to General Óptica", "Visit to local optician", "Still using old glasses", "Other"]
+                        },
+                        textField: {
+                            question: "Tell us about your prescription history:",
+                            placeholder: "e.g., prescription gets stronger each year, stayed stable for years, got progressives recently..."
                         }
-                    ]
+                    }
                 },
                 {
                     type: 'single',
                     section: "What You Have",
                     question: "When were your sunglasses last updated?",
                     options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years", "I don't have prescription sunglasses"],
-                    conditional: (answers) => {
-                        // Show this question only if user has prescription sunglasses (progressive or single vision)
-                        const question3Answers = answers[3] || [];
-                        console.log('Sunglasses conditional - answers[3]:', question3Answers, 'Type:', typeof question3Answers, 'Is array:', Array.isArray(question3Answers));
-                        if (!Array.isArray(question3Answers)) {
-                            return false;
-                        }
-                        return question3Answers.includes("Single vision sunglasses") || question3Answers.includes("Progressive sunglasses");
-                    },
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -926,44 +823,23 @@
                         }
                     }
                 },
-                {
-                    type: 'multi-step',
-                    section: "What You Have",
-                    question: "Tell us about changes you might need",
-                    steps: [
-                        {
-                            question: "Do you feel like you need to change any of your current glasses?",
-                            type: 'multiple',
-                            options: ["My prescription needs updating", "Need new/additional pairs", "Current glasses are uncomfortable", "No changes needed"],
-                            fullWidth: true,
-                            textField: {
-                                question: "Tell us more about the changes you need:",
-                                placeholder: "e.g., my reading glasses aren't strong enough for computer work, frames are too heavy, want prescription sunglasses...",
-                                alwaysVisible: true
-                            }
-                        },
-                        {
-                            question: "Is there a specific need you haven't covered right now?",
-                            type: 'multiple',
-                            options: ["Better vision for specific activities", "Comfort/fit issues", "Style preferences", "All needs are covered"],
-                            fullWidth: true,
-                            textField: {
-                                question: "Describe your specific uncovered needs:",
-                                placeholder: "e.g., need something for driving at night, my progressives are hard to adjust to, can't see clearly outdoors, need computer glasses...",
-                                alwaysVisible: true
-                            }
-                        }
-                    ]
-                },
+
+
                 {
                     type: 'multiple',
                     section: "What You Have",
                     question: "What do you mostly use your glasses for?",
                     options: ["I always wear glasses", "Everyday wear", "Screen/office work", "Driving", "Sports or outdoors", "Reading", "Fashion", "Sunglasses"],
-                    textField: {
-                        question: "Tell us more about your glasses usage:",
-                        placeholder: "e.g., need reading glasses at work but wear distance glasses, sunglasses aren't strong enough, switch between multiple pairs...",
-                        alwaysVisible: true
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "When do you find your current glasses most helpful?",
+                            options: ["All day long", "Close-up work", "Distance viewing", "Computer work", "Outdoor activities", "Driving at night", "Reading books/papers"]
+                        },
+                        textField: {
+                            question: "Describe situations where you wish you had different glasses:",
+                            placeholder: "e.g., need reading glasses at work but wear distance glasses, sunglasses aren't strong enough, switch between multiple pairs..."
+                        }
                     }
                 },
                 {
@@ -979,25 +855,7 @@
                     options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"],
                     textField: {
                         question: "Tell us about your special activities or spare time:",
-                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening...",
-                        alwaysVisible: true
-                    }
-                },
-                {
-                    type: 'single',
-                    section: "What You Need",
-                    question: "How many hours per day are you in front of a screen?",
-                    options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "6-8 hours", "More than 8 hours"],
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "What type of screens do you use most?",
-                            options: ["Computer/laptop", "Smartphone", "Tablet", "TV", "Gaming console", "Multiple devices throughout the day"]
-                        },
-                        textField: {
-                            question: "Tell us about your screen usage patterns:",
-                            placeholder: "e.g., work from home on computer all day, constantly checking phone, evening TV watching, gaming sessions..."
-                        }
+                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening..."
                     }
                 },
                 {
@@ -1007,13 +865,12 @@
                     options: ["Yes", "Sometimes", "No"],
                     textField: {
                         question: "Tell us more about when you avoid wearing glasses:",
-                        placeholder: "e.g., during exercise, while cooking, when going out socially, at work...",
-                        alwaysVisible: true
+                        placeholder: "e.g., during exercise, while cooking, when going out socially, at work..."
                     },
                     conditional: (answers) => {
                         const wearsGlasses = answers[0] && answers[0].includes('glasses');
                         const uses = answers[6] || [];
-                        const freeTime = answers[8] || [];
+                        const freeTime = answers[7] || [];
                         const doesSports = uses.includes("Sports or outdoors") || freeTime.includes("Exercise or play sports") || freeTime.includes("Spend time outdoors");
                         return wearsGlasses && doesSports;
                     },
@@ -1030,44 +887,64 @@
                     }
                 },
                 {
-                    type: 'multi-step',
+                    type: 'multiple',
                     section: "What You Need",
-                    question: "Tell us about your working environment",
-                    steps: [
-                        {
-                            question: "What best describes your primary work environment?",
-                            type: 'single',
-                            options: ["Office", "Indoors", "Outdoors", "Mixed environments"],
-                            fullWidth: true
+                    question: "What is your work environment?",
+                    options: ["Office", "Hospitality", "Production (indoors)", "Construction", "Driving", "Other outdoor", "Other indoor"],
+                    textField: {
+                        question: "Tell us more about your work environment:",
+                        placeholder: "e.g., open office with bright lights, restaurant kitchen, factory floor, outdoor construction sites, delivery driving..."
+                    }
+                },
+                {
+                    type: 'text',
+                    section: "What You Need",
+                    question: "Tell us about your specific activities and hobbies",
+                    placeholder: "e.g., tennis twice a week, coding 8+ hours daily, reading novels, cycling, gaming, cooking, woodworking, etc.",
+                    alwaysVisible: true
+                },
+                {
+                    type: 'single',
+                    section: "What You Need",
+                    question: "How many hours per day are you in front of a screen?",
+                    options: ["<2 hours", "2–4 hours", "5–8 hours", "More than 8 hours"],
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "What types of screens do you use most?",
+                            options: ["Desktop computer", "Laptop", "Smartphone", "Tablet", "TV", "Gaming monitor", "Multiple monitors"]
                         },
-                        {
-                            question: "Which specific environment best matches your work?",
-                            type: 'multiple',
-                            options: [], // Will be populated dynamically based on step 1
-                            fullWidth: true,
-                            conditionalOptions: {
-                                "Office": ["Open office", "Private office", "Home office", "Co-working space", "Conference rooms"],
-                                "Indoors": ["Retail/customer service", "Education/teaching", "Healthcare", "Manufacturing", "Restaurant/hospitality"],
-                                "Outdoors": ["Construction", "Landscaping", "Delivery/transport", "Sports/recreation", "Agriculture"],
-                                "Mixed environments": ["Field sales", "Consulting", "Hybrid remote/office", "Management", "Travel-based work"]
-                            },
-                            textField: {
-                                question: "Tell us more about your work environment:",
-                                placeholder: "e.g., open office with bright LED lights, home office by a window, outdoor construction work, laboratory with specialized lighting...",
-                                alwaysVisible: true
-                            }
+                        textField: {
+                            question: "Describe your screen usage and any discomfort:",
+                            placeholder: "e.g., mostly Excel work, gaming in evenings, video calls all day, eyes feel dry after work..."
                         }
-                    ]
+                    }
+                },
+                {
+                    type: 'multiple',
+                    section: "What You Need",
+                    question: "What describes your working environment?",
+                    options: ["Office with natural light", "Office with artificial lighting", "Home office", "Outdoor work", "Mixed environments", "Customer-facing role", "Workshop/lab environment", "Other"],
+                    textField: {
+                        question: "Tell us more about your work environment:",
+                        placeholder: "e.g., open office with bright LED lights, home office by a window, outdoor construction work, laboratory with specialized lighting..."
+                    }
                 },
                 {
                     type: 'multiple',
                     section: "What You Need",
                     question: "Do you ever experience any of the following?",
-                    options: ["Headaches related to eyesight", "Tired eyes", "Glare sensitivity", "Eye strain at screen", "Dry eyes", "None of these", "Other"],
-                    textField: {
-                        question: "Describe your eye comfort issues:",
-                        placeholder: "e.g., headaches after 2+ hours on computer, eyes water in bright light, tired eyes by evening, dry eyes with contacts...",
-                        alwaysVisible: true
+                    options: ["Headaches related to eyesight", "Tired eyes", "Glare sensitivity", "Eye strain at screen", "Dry eyes", "None of these"],
+                    details: {
+                        prompt: "If you give us more details, we will be able to provide better insights.",
+                        multipleChoice: {
+                            question: "When do these symptoms typically occur?",
+                            options: ["After long screen time", "In bright sunlight", "When reading", "Driving at night", "Throughout the day", "During specific activities"]
+                        },
+                        textField: {
+                            question: "Describe your eye comfort issues:",
+                            placeholder: "e.g., headaches after 2+ hours on computer, eyes water in bright light, tired eyes by evening, dry eyes with contacts..."
+                        }
                     }
                 },
                 {
@@ -1076,7 +953,7 @@
                     question: "Are you happy with your current glasses?",
                     sliderLabels: ["Not happy at all", "Very happy"],
                     sliderDefault: 50,
-                    conditional: () => false, // Skip this question
+                    conditional: () => false,
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -1095,7 +972,7 @@
                     question: "Do you think your current setup covers all your needs?",
                     sliderLabels: ["Not at all", "Perfectly"],
                     sliderDefault: 50,
-                    conditional: () => false, // Skip this question
+                    conditional: () => false,
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
                         multipleChoice: {
@@ -1128,59 +1005,34 @@
                     }
                 },
                 {
-                    type: 'multi-step',
+                    type: 'brand-selector',
                     section: "What You Need",
-                    question: "Tell us about your style preferences",
-                    steps: [
-                        {
-                            question: "What style makes you feel confident and comfortable?",
-                            type: 'multiple',
-                            options: ["Classic and timeless", "Modern and minimalist", "Bold and statement-making", "Sporty and functional", "Luxury and premium", "Trendy and fashion-forward", "Professional and conservative", "Creative and artistic", "No specific preference"],
-                            fullWidth: true
-                        },
-                        {
-                            question: "Which brands match your style preferences?",
-                            type: 'multiple',
-                            options: [], // Will be populated dynamically
-                            conditionalOptions: {
-                                "Classic and timeless": ["Ray-Ban", "Persol", "Oliver Peoples", "Silhouette", "Moscot", "Local independent opticians"],
-                                "Modern and minimalist": ["Lindberg", "Mykita", "ic! berlin", "Ace & Tate", "Cubitts", "No brand preference"],
-                                "Bold and statement-making": ["Tom Ford", "Dior", "Gucci", "Versace", "Etnia Barcelona", "Theo"],
-                                "Sporty and functional": ["Oakley", "Nike", "Maui Jim", "Revo", "Adidas", "Under Armour"],
-                                "Luxury and premium": ["Tom Ford", "Cartier", "Chanel", "Oliver Peoples", "Dita", "Lindberg"],
-                                "Trendy and fashion-forward": ["Gucci", "Saint Laurent", "Prada", "Garrett Leight", "Kirk & Kirk", "Ace & Tate"],
-                                "Professional and conservative": ["Ray-Ban", "Oliver Peoples", "Silhouette", "Lindberg", "General Óptica", "Multiópticas"],
-                                "Creative and artistic": ["Mykita", "Theo", "L.A. Eyeworks", "Etnia Barcelona", "Local artisan frames", "Boutique brands"],
-                                "No specific preference": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Focus on fit and comfort"]
-                            },
-                            textField: {
-                                question: "Tell us more about your personal style and what you're really looking for:",
-                                placeholder: "e.g., I want to feel confident in meetings, need something that matches my personality, want frames that make me look approachable, prefer something that works with my face shape and lifestyle...",
-                                alwaysVisible: true
-                            }
-                        }
-                    ]
+                    question: "Which brands do you like?",
+                    popularBrands: ["Ray-Ban", "Oakley", "Lindberg", "Tom Ford", "Oliver Peoples", "Silhouette"],
+                    allBrands: {
+                        "Luxury & Designer": ["Tom Ford", "Oliver Peoples", "Cartier", "Chanel", "Dior", "Prada", "Gucci", "Saint Laurent", "Bottega Veneta", "Fendi", "Versace", "Emporio Armani"],
+                        "Sport & Active": ["Oakley", "Nike", "Adidas", "Under Armour", "Revo", "Maui Jim", "Smith", "Julbo", "Bollé", "Uvex", "Carrera", "Police"],
+                        "European Heritage": ["Ray-Ban", "Persol", "Lindberg", "Silhouette", "Anglo American", "Cazal", "Moscot", "Rodenstock", "Menrad", "Eschenbach"],
+                        "Boutique": ["Ace & Tate", "Cubitts", "Mykita", "ic! berlin", "Etnia Barcelona", "Modo", "Garrett Leight", "Kirk & Kirk", "Theo", "L.A. Eyeworks", "Dita"],
+                        "Spanish Chains & Online": ["Alain Afflelou", "Multiópticas", "General Óptica", "Óptica 2000", "Cottet", "Óptica Universitaria", "Visionlab", "Mister Spex España"],
+                        "Lens Technology": ["Zeiss", "Essilor", "Transitions", "Crizal", "Varilux", "Blue Light Blocking", "Progressive Specialists", "Photochromic Lenses"]
+                    },
+                    genericOptions: ["I prefer local/independent opticians", "I go for comfort/style over brands", "I don't care about brands"],
+                    hasTextField: true,
+                    textFieldPlaceholder: "Any specific brands you'd like to mention?",
+                    conditional: (answers) => {
+                        // Since question 14 is skipped, we'll show this question by default
+                        return true;
+                    }
                 },
                 {
                     type: 'multiple',
                     section: "What You Need",
                     question: "What matters most to you in sunglasses?",
-                    options: ["UV protection", "Style and fashion", "Durability", "Comfort for all-day wear", "Clear vision while driving", "Sports performance", "Price/value", "Brand prestige", "Other"],
+                    options: ["UV protection", "Style and fashion", "Durability", "Comfort for all-day wear", "Clear vision while driving", "Sports performance", "Price/value", "Brand prestige"],
                     textField: {
                         question: "Any specific sunglasses preferences or experiences?",
-                        placeholder: "e.g., need polarized lenses for driving, prefer wraparound style for sports, had issues with cheap sunglasses breaking...",
-                        alwaysVisible: true
-                    },
-                    details: {
-                        prompt: "If you give us more details, we will be able to provide better insights.",
-                        multipleChoice: {
-                            question: "What specific features do you need in sunglasses?",
-                            options: ["Polarized lenses", "Prescription sunglasses", "Wraparound style", "Lightweight frames", "Interchangeable lenses", "Anti-reflective coating", "Photochromic lenses", "None specifically"]
-                        },
-                        textField: {
-                            question: "Tell us about your sunglasses usage and preferences:",
-                            placeholder: "e.g., need them for daily driving, wear during sports activities, prefer designer brands, have issues with current pair slipping..."
-                        }
+                        placeholder: "e.g., need polarized lenses for driving, prefer wraparound style for sports, had issues with cheap sunglasses breaking..."
                     }
                 }
             ];
@@ -1194,453 +1046,178 @@
                     // First question - intro content
                     0: {
                         icon: '🎯',
-                        title: 'Ready to see what you\'ve been missing?',
+                        title: 'Your VisionMatch Assessment',
                         content: `
-                            <div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                                <p style="margin: 0; font-size: 1.1em;">💡 <strong>Ever notice this?</strong></p>
-                                <p style="margin: 8px 0 0 0;">Your phone screen is crystal clear at 12 inches, but those same glasses make your computer screen at 24 inches feel blurry by afternoon!</p>
-                            </div>
-                            <p style="margin-bottom: 20px;">Let's find your missing pieces and finally get you seeing life in HD 🎬</p>
+                            <p style="margin-bottom: 16px;"><strong>Most people are missing 1-2 pairs of glasses without realizing it.</strong></p>
+                            <p style="margin-bottom: 20px;">Let's find what's missing from YOUR setup and build your complete vision solution.</p>
                             <div class="education-benefits">
-                                <div class="education-benefit">⚡ Lightning-fast analysis</div>
-                                <div class="education-benefit">🎯 Scary-accurate recommendations</div>
-                                <div class="education-benefit">✨ "Why didn't I do this sooner" moments</div>
+                                <div class="education-benefit">🤖 AI-powered analysis</div>
+                                <div class="education-benefit">⏱️ Takes 2 minutes</div>
+                                <div class="education-benefit">🎯 Get personalized recommendations</div>
+                                <div class="education-benefit">👁️ Discover what you're missing</div>
                             </div>
                         `
                     },
                     // Question about current prescription glasses
                     1: {
-                        icon: '👁️',
-                        title: 'Your eyes are shapeshifters!',
+                        icon: '💡',
+                        title: 'Did you know?',
                         content: `
-                            <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;"><strong>🌅 Morning:</strong> Fresh eyes, sharp focus</p>
-                                <p style="margin: 4px 0;"><strong>☀️ Afternoon:</strong> Getting tired, focus drifting</p>
-                                <p style="margin: 4px 0 0 0;"><strong>🌙 Evening:</strong> Exhausted, everything's fuzzy</p>
+                            <p>Most people who wear glasses actually need 2-3 different pairs for optimal vision throughout their day.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Reading glasses reduce eye strain for close work</div>
+                                <div class="education-benefit">Computer glasses filter blue light from screens</div>
+                                <div class="education-benefit">Prescription sunglasses protect eyes outdoors</div>
                             </div>
-                            <p style="margin: 0; font-style: italic;">One pair trying to do it all? No wonder you're squinting by 3pm!</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Many people build their glasses collection gradually, starting with their most essential pair and adding specialized options as needed.
+                            </div>
                         `
                     },
                     // Question about number of glasses
                     2: {
-                        icon: '🤯',
-                        title: 'The game-changing truth',
+                        icon: '👀',
+                        title: 'Vision insight',
                         content: `
-                            <div style="text-align: center; padding: 16px; background: #e0e7ff; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; font-size: 1.5em; font-weight: bold; color: #4f46e5;">😲 Wait, what?</p>
-                                <p style="margin: 4px 0 0 0;">You mean I don't have to choose between seeing my book OR my computer clearly?</p>
+                            <p>Using one pair of glasses for everything is like using one tool for every job - it can work, but specialized tools perform better.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Distance glasses aren't optimized for reading comfort</div>
+                                <div class="education-benefit">Indoor glasses lack UV protection outdoors</div>
+                                <div class="education-benefit">Regular glasses don't filter harmful blue light from screens</div>
                             </div>
-                            <p style="margin: 0;">🔨 You wouldn't use a hammer to paint a wall, right?<br/>
-                            So why use distance glasses for computer work? 🤔</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> You can keep your current glasses and add task-specific ones to complement what already works for you.
+                            </div>
                         `
                     },
-                    // Question about frame purchase details (new Q3)
+                    // Question about what glasses they own
                     3: {
-                        icon: '😤',
-                        title: 'The comfort conspiracy',
+                        icon: '🔍',
+                        title: 'Gap analysis',
                         content: `
-                            <div style="background: #fee2e2; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; font-size: 1.2em;"><strong>That familiar feeling:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Red marks on your nose bridge after 2 hours 😖</p>
-                                <p style="margin: 4px 0 0 0;">Glasses sliding down every 10 minutes 🙄</p>
-                                <p style="margin: 4px 0 0 0;">Ears aching by end of day 😫</p>
+                            <p>Your current setup might be missing key pieces for your lifestyle:</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Prescription sunglasses provide clearer outdoor vision than clip-ons</div>
+                                <div class="education-benefit">Progressive lenses could eliminate switching between reading and distance glasses</div>
+                                <div class="education-benefit">Anti-reflective coatings reduce glare by up to 99%</div>
+                                <div class="education-benefit">Blue light filters can improve sleep quality and reduce eye strain</div>
                             </div>
-                            <p style="margin: 0;">That's not "just how glasses feel" - that's <strong>wrong measurements!</strong><br/>
-                            <span style="font-size: 0.9em;">Professional fitting = all-day comfort 😌</span></p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Modern lens technologies like anti-reflective coatings and blue light filters can significantly improve your visual comfort.
+                            </div>
                         `
                     },
                     // Screen time question
                     10: {
                         icon: '💻',
-                        title: 'Screen time reality check',
+                        title: 'Screen health',
                         content: `
-                            <div style="background: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">😳 <strong>You literally forget to blink!</strong></p>
-                                <p style="margin: 8px 0 0 0;">📉 Blink rate drops from 22 to just 7 per minute = Sahara desert eyes</p>
+                            <p>Extended screen time can cause permanent changes to your eye muscles and disrupt sleep patterns through blue light exposure.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Blue light suppresses melatonin production, affecting sleep quality</div>
+                                <div class="education-benefit">Computer glasses can reduce headaches by 60%</div>
+                                <div class="education-benefit">Proper screen glasses improve focus and productivity</div>
                             </div>
-                            <p style="margin: 0;"><strong>The deadly combo:</strong><br/>
-                            🔵 Blue light bombing<br/>
-                            👓 Wrong prescription distance<br/>
-                            😴 = Why you're dead by 3pm</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Dedicated computer glasses can reduce digital eye strain and improve your focus during extended screen time.
+                            </div>
                         `
                     },
                     // Symptoms question
                     11: {
-                        icon: '🚨',
-                        title: 'Your eyes are SCREAMING at you',
+                        icon: '⚠️',
+                        title: 'Symptom insights',
                         content: `
-                            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; font-size: 1.1em;">🧠 <strong>That 3pm headache...</strong></p>
-                                <p style="margin: 8px 0 0 0;">The one that starts behind your eyes and spreads to your temples?</p>
-                                <p style="margin: 4px 0 0 0;">Happens every workday but mysteriously disappears on vacation? 🤔</p>
+                            <p>Even minor vision discomfort can significantly impact your daily quality of life and productivity.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Small vision issues compound over time if not addressed</div>
+                                <div class="education-benefit">Proper glasses can eliminate most eye strain quickly</div>
+                                <div class="education-benefit">Prevention is more effective and comfortable than treatment</div>
                             </div>
-                            <p style="margin: 0;">Your brain is literally <em>working overtime</em> to compensate for vision issues.<br/>
-                            <span style="font-size: 0.9em;">No wonder you're exhausted! 😫</span></p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Addressing small vision issues early can prevent them from becoming bigger problems later.
+                            </div>
                         `
                     },
-                    // Question about what glasses they own (now Q4)
+                    // Question about prescription updates
                     4: {
-                        icon: '🧩',
-                        title: 'So close, yet so far!',
+                        icon: '📅',
+                        title: 'Prescription health',
                         content: `
-                            <div style="text-align: center; padding: 16px; background: #f3f4f6; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">You've got <strong style="font-size: 1.5em; color: #ef4444;">distance glasses</strong></p>
-                                <p style="margin: 8px 0 0 0;">But you're using them to read your phone 😅</p>
-                                <p style="margin: 4px 0 0 0;">And wondering why Instagram gives you a headache!</p>
+                            <p>Outdated prescriptions don't just affect clarity - they can cause unnecessary eye strain and fatigue.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Most prescriptions change every 1-2 years, even subtly</div>
+                                <div class="education-benefit">Old prescriptions force your eyes to work harder than needed</div>
+                                <div class="education-benefit">Small prescription changes can eliminate headaches and eye strain</div>
                             </div>
-                            <p style="margin: 0;">It's like having a smartphone but no charger...<br/>
-                            <em>technically</em> works, but you're missing out! 📱😅</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Regular prescription updates ensure your glasses always provide optimal vision and comfort.
+                            </div>
                         `
                     },
-                    // Question about prescription updates (now Q5)
+                    // Question about sunglasses updates
                     5: {
-                        icon: '👀',
-                        title: 'Your eyes are evolving!',
-                        content: `
-                            <div style="background: #ecfdf5; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🔄 <strong>Remember when:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Your glasses used to feel perfect all day?</p>
-                                <p style="margin: 4px 0 0 0;">Now by evening, everything's a little... soft around the edges? 😑</p>
-                            </div>
-                            <p style="margin: 0;">Wearing 3-year-old prescription? 😬<br/>
-                            That's like using an iPhone 6 in 2024...<br/>
-                            <em>It works, but WHY suffer?</em></p>
-                        `
-                    },
-                    // Question about sunglasses updates (now Q6)
-                    6: {
-                        icon: '😎',
-                        title: 'The squint tax is REAL',
-                        content: `
-                            <div style="background: #fff7ed; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; font-size: 1.1em;">⚠️ <strong>Research shows:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Up to 20% of cataracts worldwide are caused by UV overexposure!</p>
-                            </div>
-                            <p style="margin: 0;"><strong>Prescription sunglasses aren't a luxury...</strong><br/>
-                            They're an investment in not looking like a raisin at 50! 🍇<br/>
-                            <span style="font-size: 0.9em;">(Plus, you know, preventing cataracts and stuff)</span></p>
-                        `
-                    },
-                    // Question about glasses usage (now Q7)
-                    7: {
-                        icon: '📐',
-                        title: 'The distance dilemma',
-                        content: `
-                            <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;"><strong>Your eyes' workload:</strong></p>
-                                <p style="margin: 8px 0 0 0;">📖 Reading: 16 inches<br/>
-                                💻 Computer: 24 inches<br/>
-                                📺 TV: 10+ feet</p>
-                            </div>
-                            <p style="margin: 0;">One pair doing triple duty? 🏋️<br/>
-                            <strong>No wonder your eyes want to quit by lunch!</strong></p>
-                        `
-                    },
-                    // New question about changing glasses needs (Q8)
-                    8: {
-                        icon: '🔄',
-                        title: 'The focus marathon',
-                        content: `
-                            <div style="text-align: center; padding: 16px; background: #fef3c7; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #f59e0b;">The daily eye workout:</p>
-                                <p style="margin: 4px 0 0 0;">Phone (12") → Computer (24") → TV (10 feet) → Phone again</p>
-                                <p style="margin: 4px 0 0 0;">All day. Every day. No wonder they're tired! 😩</p>
-                            </div>
-                            <p style="margin: 0;">Your poor eye muscles = Olympic athletes<br/>
-                            ...except they never signed up for this! 😅<br/>
-                            <em>(That burning sensation? They're filing a complaint)</em></p>
-                        `
-                    },
-                    // Free time activities (now Q10)
-                    10: {
-                        icon: '🏆',
-                        title: 'Level up your game!',
-                        content: `
-                            <div style="background: #e0e7ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">⚡ <strong>You know that moment...</strong></p>
-                                <p style="margin: 8px 0 0 0;">When you're playing tennis and lose the ball in the sun? 🎾</p>
-                                <p style="margin: 4px 0 0 0;">Or your glasses fog up during a run and you're basically blind? 🏃‍♂️</p>
-                            </div>
-                            <p style="margin: 0;">Still using regular glasses for sports? 😬<br/>
-                            That's like playing tennis with a ping pong paddle...<br/>
-                            <em>Sure, it's possible, but why handicap yourself?</em></p>
-                        `
-                    },
-                    // Screen time question (now Q11)
-                    11: {
-                        icon: '🖥️',
-                        title: 'Welcome to screen prison!',
-                        content: `
-                            <div style="background: #dbeafe; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">📱💻🖥️ <strong>Over 65% of adults experience digital eye strain!</strong></p>
-                                <p style="margin: 8px 0 0 0;">Your eyes are working overtime in this digital world! 😵</p>
-                            </div>
-                            <p style="margin: 0;"><strong>Computer glasses aren't "nice to have"...</strong><br/>
-                            They're as essential as your laptop! 💼<br/>
-                            <span style="font-size: 0.9em;">(Unless you enjoy feeling like a zombie by 2pm?)</span></p>
-                        `
-                    },
-                    // Avoiding glasses question (now Q12)
-                    12: {
-                        icon: '🚀',
-                        title: 'Stop missing out on life!',
-                        content: `
-                            <div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🎉 <strong>What if you could:</strong></p>
-                                <p style="margin: 8px 0 0 0;">🏊 Actually see underwater lane lines clearly<br/>
-                                🚴 Stop squinting into the wind on your bike<br/>
-                                🏀 Never worry about your glasses flying off mid-game</p>
-                            </div>
-                            <p style="margin: 0;">Still avoiding activities because of glasses? 😔<br/>
-                            <strong>That's 2010 thinking!</strong> Time for an upgrade! 🎯</p>
-                        `
-                    },
-                    // Symptoms question (now Q13)
-                    13: {
-                        icon: '🌪️',
-                        title: 'The domino effect',
-                        content: `
-                            <div style="background: #fee2e2; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">😵 <strong>Eye strain starts a chain reaction:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Tired eyes → stress hormones → bad sleep → worse eyes 🔄</p>
-                            </div>
-                            <p style="margin: 0;"><strong>It's not "just tired eyes"...</strong><br/>
-                            It's your whole body saying "HELP!" 🆘<br/>
-                            <span style="font-size: 0.9em;">(That 3am wake-up? Yep, blame your eyes)</span></p>
-                        `
-                    },
-                    // Working environment question (now Q14)
-                    14: {
-                        icon: '💡',
-                        title: 'Office eyes vs. home eyes',
-                        content: `
-                            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🏢 <strong>Office life:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Fluorescent lights blasting from above ⬇️</p>
-                                <p style="margin: 4px 0 0 0;">Dim laptop screen staring back at you ⬆️</p>
-                                <p style="margin: 4px 0 0 0;">Your poor eyes trying to handle both = 😵‍💫</p>
-                            </div>
-                            <p style="margin: 0;"><strong>Work glasses aren't just "computer glasses"...</strong><br/>
-                            They're your productivity superpower! 🦸<br/>
-                            <span style="font-size: 0.9em;">(Watch that 2pm slump disappear)</span></p>
-                        `
-                    },
-                    
-                    // Style preferences question (now Q16)
-                    16: {
-                        icon: '💖',
-                        title: 'Love your look = love your vision',
-                        content: `
-                            <div style="background: #fce7f3; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">😍 <strong>We've all been there:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Avoiding photos because you hate your frames 📷</p>
-                                <p style="margin: 4px 0 0 0;">Taking them off for selfies (and squinting blind) 🤨</p>
-                                <p style="margin: 4px 0 0 0;">Choosing contacts for dates even though they're uncomfortable 😘</p>
-                            </div>
-                            <p style="margin: 0;"><strong>"Just functional" frames? Boring!</strong><br/>
-                            Life's too short for ugly glasses 🎭<br/>
-                            <span style="font-size: 0.9em;">(Your face deserves better!)</span></p>
-                        `
-                    },
-                    
-                    // Sunglasses preferences question (now Q17)
-                    17: {
                         icon: '🕶️',
-                        title: 'The UV truth bomb',
+                        title: 'Sun protection',
                         content: `
-                            <div style="background: #fff7ed; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">⚠️ <strong>Research confirms:</strong></p>
-                                <p style="margin: 8px 0 0 0;">UV damage to eyes is cumulative and irreversible<br/>
-                                But you CAN'T see it happening! 👻</p>
+                            <p>Prescription sunglasses aren't a luxury - they're essential for eye health and visual clarity outdoors.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Clip-on sunglasses reduce vision quality and don't protect peripheral vision</div>
+                                <div class="education-benefit">UV protection prevents cataracts and macular degeneration</div>
+                                <div class="education-benefit">Clear outdoor vision improves safety while driving and sports</div>
                             </div>
-                            <p style="margin: 0;"><strong>Good sunglasses = insurance policy for your eyes</strong><br/>
-                            Future you will thank present you! 🙏<br/>
-                            <span style="font-size: 0.9em;">(Plus you'll look mysteriously cool)</span></p>
-                        `
-                    },
-                    
-                    // Final completion
-                    18: {
-                        icon: '🎉',
-                        title: 'Your vision upgrade awaits!',
-                        content: `
-                            <div style="background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 100%); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; text-align: center; font-size: 1.1em;">🎯 <strong>We've cracked your vision code!</strong></p>
-                                <p style="margin: 8px 0 0 0; text-align: center;">Ready to see what you've been missing? 👀✨</p>
-                            </div>
-                            <p style="margin: 0; text-align: center;"><strong>Your personalized vision system is ready...</strong><br/>
-                            <span style="font-size: 0.9em;">Let's make blurry, tired eyes a thing of the past! 🚀</span></p>
-                        `
-                    },
-                    
-                    // Question 9 - Celebration screen
-                    9: {
-                        icon: '🎊',
-                        title: 'You\'re halfway there!',
-                        content: `
-                            <div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; text-align: center; font-size: 1.1em;">🧩 <strong>Plot twist coming up!</strong></p>
-                                <p style="margin: 8px 0 0 0; text-align: center;">The next questions might surprise you...</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Prescription sunglasses provide both clear vision and essential UV protection for outdoor activities.
                             </div>
                         `
                     },
-                    
-                    // Question 15 - Happiness with current glasses
-                    15: {
-                        icon: '😊',
-                        title: 'Honesty time!',
-                        content: `
-                            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🤔 <strong>Here's the thing about "happy enough":</strong></p>
-                                <p style="margin: 8px 0 0 0;">Most people accept vision compromises because they think that's just "how glasses work"</p>
-                                <p style="margin: 8px 0 0 0;">But what if they could work better? 🤯</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 19 - Current needs coverage
-                    19: {
-                        icon: '🕳️',
-                        title: 'The honesty moment',
-                        content: `
-                            <div style="background: #e0e7ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🎯 <strong>Most people think their setup is "fine"...</strong></p>
-                                <p style="margin: 8px 0 0 0;">Until they realize what they've been missing!</p>
-                                <p style="margin: 4px 0 0 0;">Like using reading glasses for driving 😅</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 20 - Vision changes with age
-                    20: {
-                        icon: '📈',
-                        title: 'Your eyes are time travelers',
-                        content: `
-                            <div style="background: #ecfdf5; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">⏰ <strong>Remember when:</strong></p>
-                                <p style="margin: 8px 0 0 0;">You could read restaurant menus in dim lighting?</p>
-                                <p style="margin: 4px 0 0 0;">Thread a needle without squinting?</p>
-                                <p style="margin: 4px 0 0 0;">Your eyes weren't tired by 9pm? 🌅</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 21 - Free time activities
-                    21: {
+                    // Question about glasses usage
+                    6: {
                         icon: '🎯',
-                        title: 'Life beyond work!',
+                        title: 'Activity optimization',
                         content: `
-                            <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🏃‍♂️ <strong>Your hobbies deserve HD vision too!</strong></p>
-                                <p style="margin: 8px 0 0 0;">Why settle for "good enough" when you're doing what you love?</p>
-                                <p style="margin: 4px 0 0 0;">Perfect vision = perfect enjoyment ✨</p>
+                            <p>Different activities have unique visual demands - specialized glasses can significantly improve comfort and performance.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Computer glasses reduce digital eye strain and improve focus</div>
+                                <div class="education-benefit">Driving glasses reduce glare and improve night vision safety</div>
+                                <div class="education-benefit">Sports glasses provide impact protection and secure fit during movement</div>
+                                <div class="education-benefit">Reading glasses reduce neck strain and improve comprehension</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Different activities have unique visual demands that specialized glasses can address for better comfort and performance.
                             </div>
                         `
                     },
-                    
-                    // Question 22 - Screen time hours
-                    22: {
-                        icon: '📱',
-                        title: 'Welcome to the digital age',
+                    // Free time activities
+                    7: {
+                        icon: '🏃',
+                        title: 'Activity performance',
                         content: `
-                            <div style="background: #dbeafe; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">📊 <strong>Fun fact:</strong> Average adult spends 7+ hours daily on screens</p>
-                                <p style="margin: 8px 0 0 0;">That's like a full-time job for your eyes! 😵‍💫</p>
-                                <p style="margin: 4px 0 0 0;">No wonder they're begging for specialized help</p>
+                            <p>Your hobbies and activities might benefit from specialized eyewear for optimal performance and safety.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Sports glasses prevent 90% of eye injuries while improving performance</div>
+                                <div class="education-benefit">UV protection is critical during extended outdoor activities</div>
+                                <div class="education-benefit">Reading glasses reduce neck strain and improve comprehension</div>
+                                <div class="education-benefit">Detail work glasses provide enhanced near vision and reduce fatigue</div>
+                            </div>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Hobby-specific glasses can improve your enjoyment and safety during your favorite activities.
                             </div>
                         `
                     },
-                    
-                    // Question 23 - Activities avoided
-                    23: {
+                    // Avoiding glasses - only show if they actually avoid them
+                    8: {
                         icon: '🚫',
-                        title: 'Breaking free from limits',
+                        title: 'Activity barriers',
                         content: `
-                            <div style="background: #fee2e2; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">💔 <strong>The saddest part:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Missing out on life because of glasses limitations</p>
-                                <p style="margin: 4px 0 0 0;">But specialized eyewear can unlock everything! 🔓</p>
+                            <p>Avoiding glasses during activities means you're missing out on better performance, safety, and enjoyment.</p>
+                            <div class="education-benefits">
+                                <div class="education-benefit">Sports-specific frames stay secure during any movement</div>
+                                <div class="education-benefit">Impact-resistant lenses provide safety without compromising vision</div>
+                                <div class="education-benefit">Proper eyewear can actually enhance athletic performance through better vision</div>
                             </div>
-                        `
-                    },
-                    
-                    // Question 24 - Eye symptoms
-                    24: {
-                        icon: '😵‍💫',
-                        title: 'Your eyes are talking',
-                        content: `
-                            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🆘 <strong>Those "normal" symptoms?</strong></p>
-                                <p style="margin: 8px 0 0 0;">They're actually your eyes' SOS signals!</p>
-                                <p style="margin: 4px 0 0 0;">Dry, tired, burning = "Please help us!" 😢</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 25 - Working environment
-                    25: {
-                        icon: '💼',
-                        title: 'Your workplace vision reality',
-                        content: `
-                            <div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🏢 <strong>Work-from-home vs office eyes:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Different lighting, different distances, different challenges</p>
-                                <p style="margin: 4px 0 0 0;">One-size-fits-all glasses? Good luck! 😅</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 26 - Budget considerations
-                    26: {
-                        icon: '💰',
-                        title: 'Investment vs expense',
-                        content: `
-                            <div style="background: #ecfdf5; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">💡 <strong>Think about it:</strong></p>
-                                <p style="margin: 8px 0 0 0;">You use your eyes 16+ hours daily</p>
-                                <p style="margin: 4px 0 0 0;">That's more than your phone, car, or bed!</p>
-                                <p style="margin: 4px 0 0 0;">Shouldn't they get the best tools? 🤔</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 27 - Style preferences
-                    27: {
-                        icon: '✨',
-                        title: 'Your face, your canvas',
-                        content: `
-                            <div style="background: #fce7f3; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🎨 <strong>Style psychology is real:</strong></p>
-                                <p style="margin: 8px 0 0 0;">When you love how you look, confidence soars</p>
-                                <p style="margin: 4px 0 0 0;">When confidence soars, you wear glasses consistently</p>
-                                <p style="margin: 4px 0 0 0;">Consistency = better vision health! 📈</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 28 - Sunglasses style
-                    28: {
-                        icon: '😎',
-                        title: 'Sun protection with style',
-                        content: `
-                            <div style="background: #fff7ed; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0;">🕶️ <strong>The sunglasses dilemma:</strong></p>
-                                <p style="margin: 8px 0 0 0;">Regular sunglasses = can't see clearly</p>
-                                <p style="margin: 4px 0 0 0;">No sunglasses = UV damage + squinting</p>
-                                <p style="margin: 4px 0 0 0;">Prescription sunglasses = problem solved! ☀️</p>
-                            </div>
-                        `
-                    },
-                    
-                    // Question 29 - Final question
-                    29: {
-                        icon: '🏁',
-                        title: 'The final piece',
-                        content: `
-                            <div style="background: linear-gradient(135deg, #fef3c7 0%, #ecfdf5 100%); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; text-align: center;">🧩 <strong>Every detail matters</strong></p>
-                                <p style="margin: 8px 0 0 0; text-align: center;">This last piece completes your vision puzzle!</p>
-                                <p style="margin: 4px 0 0 0; text-align: center;">Almost ready for your personalized recommendations! 🎯</p>
+                            <div class="education-highlight">
+                                <strong>💡 Pro tip:</strong> Activity-specific glasses are designed to stay secure and comfortable during movement, so you can focus on your performance.
                             </div>
                         `
                     }
@@ -1669,7 +1246,7 @@
                             </div>
                             
                             <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280;">
-                                <p>Generated by VisionMatch Vision Finder • ${new Date().toLocaleDateString()}</p>
+                                <p>Generated by OptiQa Vision Finder • ${new Date().toLocaleDateString()}</p>
                             </div>
                         </div>
                     `;
@@ -2180,22 +1757,6 @@
                     return Array.isArray(answer) && answer.length > 0;
                 }
                 
-                if (question?.type === 'multi-step') {
-                    // For multi-step, check if all required steps are answered
-                    if (!answer || typeof answer !== 'object') return false;
-                    for (let i = 0; i < question.steps.length; i++) {
-                        // Check if the step answer exists
-                        if (answer[i] === undefined || answer[i] === null || answer[i] === '') {
-                            return false;
-                        }
-                        // For text type steps, we don't require them to be filled
-                        if (question.steps[i].type === 'text') {
-                            continue;
-                        }
-                    }
-                    return true;
-                }
-                
                 if (question?.type === 'slider') {
                     return true;
                 }
@@ -2566,18 +2127,6 @@
             const nextStep = async () => {
                 setShowAllBrands(false); // Reset brand expansion when moving to next question
                 let newStep = currentStep + 1;
-                
-                // Skip Q10 and Q11 (indices 10, 11) - but don't skip celebration at index 9
-                if (newStep === 10 || newStep === 11) {
-                    updateAnswer(newStep, 'skipped'); // Log skipped for AI if needed
-                    newStep++;
-                    // Check if we need to skip Q11 after Q10
-                    if (newStep === 11) {
-                        updateAnswer(newStep, 'skipped');
-                        newStep++;
-                    }
-                }
-                
                 while (newStep < questions.length && questions[newStep].conditional && !questions[newStep].conditional(answers)) {
                     updateAnswer(newStep, 'skipped'); // Log skipped for AI if needed
                     newStep++;
@@ -2628,16 +2177,6 @@
 
             const prevStep = () => {
                 let newStep = currentStep - 1;
-                
-                // Skip Q10 and Q11 (indices 9, 10) when going backwards
-                if (newStep === 10 || newStep === 9) {
-                    newStep--;
-                    // Check if we need to skip Q10 after Q11
-                    if (newStep === 9) {
-                        newStep--;
-                    }
-                }
-                
                 while (newStep > 0 && questions[newStep].conditional && !questions[newStep].conditional(answers)) {
                     newStep--;
                 }
@@ -2758,29 +2297,6 @@
                     );
                 }
 
-                // Check if question has sidebar
-                if (q.sidebar) {
-                    return React.createElement('div', { className: "flex gap-8 max-w-6xl mx-auto" },
-                        // Main question area
-                        React.createElement('div', { className: "flex-1 space-y-6" },
-                            React.createElement('h3', { className: "text-2xl font-semibold text-gray-800 text-center" }, q.question),
-                            renderQuestionContent(q)
-                        ),
-                        // Sidebar
-                        React.createElement('div', { className: "w-80 bg-blue-50 rounded-lg p-6 space-y-4" },
-                            React.createElement('h4', { className: "text-lg font-semibold text-blue-900" }, q.sidebar.title),
-                            React.createElement('p', { className: "text-blue-800 leading-relaxed" }, q.sidebar.content),
-                            React.createElement('div', { className: "text-sm text-blue-700 border-t border-blue-200 pt-4 mt-4" },
-                                q.sidebar.note.split(' • ').map((item, index) => 
-                                    React.createElement('div', { key: index, className: "flex items-center space-x-2 mb-2" },
-                                        React.createElement('div', { className: "w-2 h-2 bg-blue-600 rounded-full flex-shrink-0" }),
-                                        React.createElement('span', null, item)
-                                    )
-                                )
-                            )
-                        )
-                    );
-                }
 
                 return React.createElement('div', { className: "space-y-6" },
                     React.createElement('h3', { className: "text-2xl font-semibold text-gray-800 text-center" }, q.question),
@@ -2830,18 +2346,16 @@
                             ),
                             
                             // Detail sections with multiple choice and text field for sliders
-                            q.details && React.createElement('div', { className: "mt-8 text-center" },
-                                React.createElement('div', { className: "bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4" },
-                                    React.createElement('p', { className: "text-gray-700 text-sm mb-3 font-medium" }, "💡 Get better insights with more details"),
-                                    React.createElement('button', {
-                                        onClick: () => {
-                                            setExpandedDetails(prev => ({
-                                                ...prev,
-                                                [currentStep]: !prev[currentStep]
-                                            }));
-                                        },
-                                        className: "inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 rounded-lg transition-all font-medium shadow-sm"
+                            q.details && React.createElement('div', { className: "mt-6 text-center" },
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        setExpandedDetails(prev => ({
+                                            ...prev,
+                                            [currentStep]: !prev[currentStep]
+                                        }));
                                     },
+                                    className: "inline-flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all font-medium"
+                                },
                                     React.createElement('span', null, expandedDetails[currentStep] ? "Hide details" : q.details.prompt),
                                     React.createElement('svg', { 
                                         className: `w-4 h-4 transform transition-transform ${expandedDetails[currentStep] ? 'rotate-180' : ''}`,
@@ -2851,8 +2365,7 @@
                                     },
                                         React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M19 9l-7 7-7-7" })
                                     )
-                                )
-                            ),
+                                ),
                                 
                                 // Expandable detail content for sliders
                                 expandedDetails[currentStep] && React.createElement('div', { className: "mt-4 space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200 text-left" },
@@ -2880,18 +2393,16 @@
                                                     }`
                                                 },
                                                     React.createElement('div', { className: "flex items-center justify-between" },
-                                                        React.createElement('span', { className: "font-medium flex-1" }, option),
+                                                        React.createElement('span', { className: "font-medium" }, option),
                                                         React.createElement('div', {
-                                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
+                                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center ${
                                                                 (detailAnswers[`${currentStep}_mc`] || []).includes(option)
-                                                                    ? 'border-primary-blue bg-primary-blue'
+                                                                    ? 'border-blue-500 bg-blue-500'
                                                                     : 'border-gray-300'
                                                             }`
                                                         },
                                                             (detailAnswers[`${currentStep}_mc`] || []).includes(option) && 
-                                                                React.createElement('svg', { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20" },
-                                                                    React.createElement('path', { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" })
-                                                                )
+                                                                React.createElement('div', { className: "w-2 h-2 bg-white rounded-full" })
                                                         )
                                                     )
                                                 )
@@ -2959,137 +2470,6 @@
                                     )
                                 )
                             )
-                        ) :
-                    q.type === 'multi-step' ?
-                        React.createElement('div', { className: "space-y-6" },
-                            // Multi-step question renderer - progressive reveal
-                            q.steps.map((step, stepIndex) => {
-                                const stepAnswers = answers[currentStep] || {};
-                                
-                                // Show step 1 always, step 2 after step 1 is answered, step 3 after step 2 is answered
-                                const shouldShowStep = stepIndex === 0 || 
-                                    (stepIndex === 1 && stepAnswers[0]) ||
-                                    (stepIndex === 2 && stepAnswers[0] && stepAnswers[1]);
-                                
-                                if (!shouldShowStep) return null;
-                                
-                                return React.createElement('div', { 
-                                    key: stepIndex, 
-                                    id: `step-${stepIndex}`,
-                                    className: "bg-gray-50 rounded-xl p-6 border border-gray-200 transition-all duration-500" 
-                                },
-                                    React.createElement('h4', { className: "text-lg font-semibold text-gray-800 mb-4" }, 
-                                        `${stepIndex + 1}. ${step.question}`
-                                    ),
-                                    React.createElement('div', { 
-                                        className: step.fullWidth 
-                                            ? "grid grid-cols-1 gap-3"
-                                            : stepIndex === 0 
-                                                ? "grid grid-cols-2 md:grid-cols-3 gap-3" 
-                                                : stepIndex === 1 
-                                                    ? "grid grid-cols-3 gap-3"
-                                                    : "grid grid-cols-2 md:grid-cols-3 gap-3"
-                                    },
-                                        (() => {
-                                            // Handle conditional options based on previous step
-                                            let optionsToRender = step.options;
-                                            if (step.conditionalOptions && stepIndex > 0) {
-                                                const stepAnswers = answers[currentStep] || {};
-                                                const previousAnswer = stepAnswers[stepIndex - 1];
-                                                if (previousAnswer) {
-                                                    // Handle both single answers and multiple selections
-                                                    const selections = Array.isArray(previousAnswer) ? previousAnswer : [previousAnswer];
-                                                    let combinedOptions = new Set();
-                                                    
-                                                    selections.forEach(selection => {
-                                                        if (step.conditionalOptions[selection]) {
-                                                            step.conditionalOptions[selection].forEach(option => 
-                                                                combinedOptions.add(option)
-                                                            );
-                                                        }
-                                                    });
-                                                    
-                                                    if (combinedOptions.size > 0) {
-                                                        optionsToRender = Array.from(combinedOptions);
-                                                    }
-                                                }
-                                            }
-                                            return optionsToRender;
-                                        })().map((option, optionIndex) =>
-                                            React.createElement('button', {
-                                                key: optionIndex,
-                                                onClick: () => {
-                                                    const stepAnswers = answers[currentStep] || {};
-                                                    if (step.type === 'multiple') {
-                                                        const current = stepAnswers[stepIndex] || [];
-                                                        const updated = current.includes(option)
-                                                            ? current.filter(item => item !== option)
-                                                            : [...current, option];
-                                                        updateAnswer(currentStep, { ...stepAnswers, [stepIndex]: updated });
-                                                    } else {
-                                                        updateAnswer(currentStep, { ...stepAnswers, [stepIndex]: option });
-                                                        // Auto-scroll to next step after answering
-                                                        setTimeout(() => {
-                                                            const nextStep = document.getElementById(`step-${stepIndex + 1}`);
-                                                            if (nextStep) {
-                                                                nextStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                            }
-                                                        }, 300);
-                                                    }
-                                                },
-                                                className: `p-3 text-left rounded-lg border-2 transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 text-sm h-12 flex items-center ${
-                                                    step.type === 'multiple'
-                                                        ? ((answers[currentStep] || {})[stepIndex] || []).includes(option)
-                                                            ? 'border-blue-500 bg-blue-50 text-gray-800 font-medium'
-                                                            : 'border-gray-200 bg-white'
-                                                        : (answers[currentStep] || {})[stepIndex] === option
-                                                            ? 'border-blue-500 bg-blue-50 text-gray-800 font-medium'
-                                                            : 'border-gray-200 bg-white'
-                                                }`
-                                            },
-                                                React.createElement('div', { className: "flex items-center justify-between" },
-                                                    React.createElement('span', { className: "text-sm leading-tight flex-1" }, option),
-                                                    step.type === 'multiple' && React.createElement('div', {
-                                                        className: `w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
-                                                            ((answers[currentStep] || {})[stepIndex] || []).includes(option)
-                                                                ? 'border-primary-blue bg-primary-blue'
-                                                                : 'border-gray-300'
-                                                        }`
-                                                    },
-                                                        ((answers[currentStep] || {})[stepIndex] || []).includes(option) &&
-                                                        React.createElement('svg', { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20" },
-                                                            React.createElement('path', { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" })
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    // Text field for this step if needed
-                                    step.textField && (() => {
-                                        const stepAnswers = answers[currentStep] || {};
-                                        const currentAnswer = stepAnswers[stepIndex];
-                                        const shouldShow = step.textField.alwaysVisible || (step.textField.showWhen && (
-                                            step.type === 'multiple' 
-                                                ? (currentAnswer || []).includes(step.textField.showWhen)
-                                                : currentAnswer === step.textField.showWhen
-                                        ));
-                                        return shouldShow;
-                                    })() && React.createElement('div', { className: "mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4" },
-                                        React.createElement('h5', { className: "font-semibold text-gray-800 mb-3 text-sm" }, step.textField.question),
-                                        React.createElement('textarea', {
-                                            value: (answers[currentStep] || {})[`${stepIndex}_text`] || '',
-                                            onChange: (e) => {
-                                                const stepAnswers = answers[currentStep] || {};
-                                                updateAnswer(currentStep, { ...stepAnswers, [`${stepIndex}_text`]: e.target.value });
-                                            },
-                                            placeholder: step.textField.placeholder,
-                                            className: "w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none text-sm",
-                                            rows: 2
-                                        })
-                                    )
-                                );
-                            })
                         ) :
                     q.type === 'brand-selector' ?
                         (() => {
@@ -3231,27 +2611,21 @@
                                 React.createElement('button', {
                                     key: index,
                                     onClick: () => {
-                                        console.log(`🔍 OPTION CLICKED: Step ${currentStep}, Option: "${option}", Question type: ${q.type}`);
                                         if (q.type === 'multiple') {
                                             const current = answers[currentStep] || [];
-                                            console.log(`🔍 Current answers for step ${currentStep}:`, current);
                                             
-                                            // Special handling for Q8/index 7 (glasses usage) - "I always wear glasses"
-                                            if (currentStep === 7 && option === "I always wear glasses") {
-                                                console.log('🔍 Q8 (index 7): "I always wear glasses" clicked, current selections:', current);
-                                                console.log('🔍 All available options:', q.options);
+                                            // Special handling for question 7 (glasses usage)
+                                            if (currentStep === 6 && option === "I always wear glasses") {
                                                 if (current.includes(option)) {
-                                                    // If "I always wear glasses" is being unchecked, remove only it
+                                                    // If "I always wear glasses" is being unchecked, remove it
                                                     const updated = current.filter(item => item !== option);
-                                                    console.log('❌ Unchecking "I always wear glasses", new selection:', updated);
                                                     updateAnswer(currentStep, updated);
                                                 } else {
-                                                    // If "I always wear glasses" is being checked, select ALL options including "I always wear glasses"
-                                                    const allOptions = [...q.options];
-                                                    console.log('✅ AUTO-SELECTING ALL OPTIONS: Checking "I always wear glasses", selecting all options:', allOptions);
+                                                    // If "I always wear glasses" is being checked, select all options
+                                                    const allOptions = q.options.filter(opt => opt !== "I always wear glasses");
                                                     updateAnswer(currentStep, allOptions);
                                                 }
-                                            } else if (currentStep === 7 && current.includes("I always wear glasses")) {
+                                            } else if (currentStep === 6 && current.includes("I always wear glasses")) {
                                                 // If "I always wear glasses" is already selected and user clicks another option
                                                 const updated = current.includes(option)
                                                     ? current.filter(item => item !== option)
@@ -3281,78 +2655,32 @@
                                     }`
                                 },
                                     React.createElement('div', { className: "flex items-center justify-between" },
-                                        React.createElement('span', { className: "font-medium flex-1" }, option),
-                                        q.type === 'multiple' && React.createElement('div', {
-                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
+                                        React.createElement('span', { className: "font-medium" }, option),
+                                        q.type === 'multiple' &&                                         React.createElement('div', {
+                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center ${
                                                 (answers[currentStep] || []).includes(option)
                                                     ? 'border-primary-blue bg-primary-blue'
                                                     : 'border-gray-300'
                                             }`
                                         },
                                             (answers[currentStep] || []).includes(option) && 
-                                                React.createElement('svg', { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20" },
-                                                    React.createElement('path', { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" })
-                                                )
+                                                React.createElement('div', { className: "w-2 h-2 bg-white rounded-full" })
                                         )
                                     )
                                 )
                             ),
                             
-                            
-                            // General textField for multiple choice questions when "Other" is selected OR alwaysVisible is true
-                            (() => {
-                                const hasOther = (answers[currentStep] || []).includes("Other");
-                                const isAlwaysVisible = q.textField && q.textField.alwaysVisible;
-                                const shouldShow = q.type === 'multiple' && q.textField && (hasOther || isAlwaysVisible);
-                                console.log(`🔍 TextField check - Step ${currentStep}, Question: "${q.question}", Type: ${q.type}, Has textField: ${!!q.textField}, Current answers:`, answers[currentStep], `Has "Other": ${hasOther}, Always visible: ${isAlwaysVisible}, Should show: ${shouldShow}`);
-                                if (q.textField) {
-                                    console.log(`🔍 TextField config:`, q.textField);
-                                }
-                                return shouldShow;
-                            })() && React.createElement('div', { className: "mt-4" },
-                                React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-lg p-4" },
-                                    React.createElement('h4', { className: "font-semibold text-gray-800 mb-3" }, q.textField.question),
-                                    React.createElement('textarea', {
-                                        value: answers[`${currentStep}_textfield`] || '',
-                                        onChange: (e) => updateAnswer(`${currentStep}_textfield`, e.target.value),
-                                        placeholder: q.textField.placeholder,
-                                        className: "w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none",
-                                        rows: 3
-                                    })
-                                )
-                            ),
-
-                            // General textField for single choice questions when alwaysVisible is true
-                            (() => {
-                                const isAlwaysVisible = q.textField && q.textField.alwaysVisible;
-                                const shouldShow = q.type === 'single' && q.textField && isAlwaysVisible;
-                                return shouldShow;
-                            })() && React.createElement('div', { className: "mt-4" },
-                                React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-lg p-4" },
-                                    React.createElement('h4', { className: "font-semibold text-gray-800 mb-3" }, q.textField.question),
-                                    React.createElement('textarea', {
-                                        value: answers[`${currentStep}_textfield`] || '',
-                                        onChange: (e) => updateAnswer(`${currentStep}_textfield`, e.target.value),
-                                        placeholder: q.textField.placeholder,
-                                        className: "w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none",
-                                        rows: 3
-                                    })
-                                )
-                            ),
-                            
                             // Detail sections with multiple choice and text field
-                            q.details && React.createElement('div', { className: "mt-8" },
-                                React.createElement('div', { className: "bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4" },
-                                    React.createElement('p', { className: "text-gray-700 text-sm mb-3 font-medium" }, "💡 Get better insights with more details"),
-                                    React.createElement('button', {
-                                        onClick: () => {
-                                            setExpandedDetails(prev => ({
-                                                ...prev,
-                                                [currentStep]: !prev[currentStep]
-                                            }));
-                                        },
-                                        className: "inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 rounded-lg transition-all font-medium shadow-sm"
+                            q.details && React.createElement('div', { className: "mt-6 text-center" },
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        setExpandedDetails(prev => ({
+                                            ...prev,
+                                            [currentStep]: !prev[currentStep]
+                                        }));
                                     },
+                                    className: "inline-flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all font-medium"
+                                },
                                     React.createElement('span', null, expandedDetails[currentStep] ? "Hide details" : q.details.prompt),
                                     React.createElement('svg', { 
                                         className: `w-4 h-4 transform transition-transform ${expandedDetails[currentStep] ? 'rotate-180' : ''}`,
@@ -3391,18 +2719,16 @@
                                                     }`
                                                 },
                                                     React.createElement('div', { className: "flex items-center justify-between" },
-                                                        React.createElement('span', { className: "font-medium flex-1" }, option),
+                                                        React.createElement('span', { className: "font-medium" }, option),
                                                         React.createElement('div', {
-                                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
+                                                            className: `w-5 h-5 rounded border-2 flex items-center justify-center ${
                                                                 (detailAnswers[`${currentStep}_mc`] || []).includes(option)
-                                                                    ? 'border-primary-blue bg-primary-blue'
+                                                                    ? 'border-blue-500 bg-blue-500'
                                                                     : 'border-gray-300'
                                                             }`
                                                         },
                                                             (detailAnswers[`${currentStep}_mc`] || []).includes(option) && 
-                                                                React.createElement('svg', { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20" },
-                                                                    React.createElement('path', { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" })
-                                                                )
+                                                                React.createElement('div', { className: "w-2 h-2 bg-white rounded-full" })
                                                         )
                                                     )
                                                 )
@@ -3447,169 +2773,6 @@
                 );
             };
 
-            // Global cache for teaser results to avoid multiple API calls
-            window.teaserCache = window.teaserCache || null;
-            window.teaserPromise = window.teaserPromise || null;
-
-            const generateTeaserWithGemini = async () => {
-                // Return cached result if available
-                if (window.teaserCache) {
-                    console.log('🎯 Using cached teaser result');
-                    return window.teaserCache;
-                }
-
-                // Return existing promise if already generating
-                if (window.teaserPromise) {
-                    console.log('⏳ Teaser generation already in progress...');
-                    return window.teaserPromise;
-                }
-
-                // Create new promise
-                window.teaserPromise = (async () => {
-                    try {
-                        console.log('🤖 Generating teaser result with Gemini...');
-                        
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [{
-                                        text: "You're a vision expert creating a short, compelling teaser result. Based on their questionnaire answers, create a personalized teaser that triggers interest and makes them want to learn more.\n\n" +
-                                            "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
-                                            "REQUIREMENTS:\n" +
-                                            "- Keep the main result to 1-2 sentences maximum\n" +
-                                            "- Make it specific and personal, not generic\n" +
-                                            "- Focus on what they're missing or need to improve\n" +
-                                            "- Create urgency/interest to continue\n" +
-                                            "- Keep the insight short and actionable\n\n" +
-                                            "Return ONLY a JSON object with 'result' and 'insight' fields. No other text."
-                                    }]
-                                }],
-                                generationConfig: {
-                                    temperature: 0.7,
-                                    maxOutputTokens: 200
-                                }
-                            })
-                        });
-
-                        if (!response.ok) {
-                            const errorData = await response.json().catch(() => ({}));
-                            console.log(`❌ Gemini API error ${response.status}:`, errorData);
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        const text = data.candidates[0].content.parts[0].text.trim();
-                        
-                        // Try to parse as JSON
-                        let result;
-                        try {
-                            result = JSON.parse(text);
-                        } catch {
-                            // Fallback if not valid JSON
-                            result = {
-                                result: text.split('\n')[0] || "Your vision setup needs optimization.",
-                                insight: "A personalized analysis will reveal exactly what you need."
-                            };
-                        }
-
-                        // Cache the result
-                        window.teaserCache = result;
-                        console.log('✅ Teaser generated and cached!');
-                        return result;
-
-                    } catch (error) {
-                        console.error('❌ Error generating Gemini teaser:', error);
-                        const fallbackResult = generateTeaserFallback();
-                        window.teaserCache = fallbackResult; // Cache fallback too
-                        return fallbackResult;
-                    } finally {
-                        window.teaserPromise = null; // Reset promise
-                    }
-                })();
-
-                return window.teaserPromise;
-            };
-
-            const generateTeaserFallback = () => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
-                const glassesCount = answers[1] || 'One';
-                const glassesOwned = answers[2] || [];
-                const screenTime = answers[10] || 'Unknown';
-                const activities = answers[9] || [];
-                const eyeSymptoms = answers[12] || [];
-                const workEnvironment = answers[13] || {};
-                const stylePrefs = answers[17] || {};
-                
-                // Create highly personalized result based on multiple answer points
-                let result = "";
-                let insight = "";
-                
-                // Screen time + symptoms analysis
-                const hasEyeStrain = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Eye strain at screen');
-                const hasHeadaches = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Headaches related to eyesight');
-                const hasTiredEyes = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Tired eyes');
-                const highScreenTime = screenTime.includes('More than 8') || screenTime.includes('6-8');
-                
-                if (highScreenTime && (hasEyeStrain || hasHeadaches || hasTiredEyes)) {
-                    result = `With ${screenTime.toLowerCase()} of screen time daily and symptoms like ${eyeSymptoms.slice(0,2).join(' and ').toLowerCase()}, it seems like you might benefit from specialized computer glasses.`;
-                    insight = "Computer glasses with blue light filtering could help reduce these symptoms and improve your daily comfort.";
-                } else if (highScreenTime && !hasGlasses) {
-                    result = `Given your ${screenTime.toLowerCase()} of daily screen time, you might find computer glasses helpful for eye comfort.`;
-                    insight = "Even without prescription needs, computer glasses could make your work experience more comfortable.";
-                } 
-                // Active lifestyle analysis
-                else if (Array.isArray(activities) && (activities.includes('Exercise or play sports') || activities.includes('Spend time outdoors'))) {
-                    const activityList = activities.join(', ').toLowerCase();
-                    result = `With your active lifestyle including ${activityList}, it looks like you could benefit from specialized sports eyewear.`;
-                    insight = "Sports eyewear with impact resistance and UV protection might help keep you safe and performing at your best.";
-                }
-                // Multiple pairs analysis  
-                else if (glassesCount === 'One' && hasGlasses && Array.isArray(glassesOwned) && glassesOwned.length > 1) {
-                    result = `You have ${glassesOwned.join(', ').toLowerCase()} but seem to rely on one pair for everything. You might benefit from using different pairs for different activities.`;
-                    insight = "Having specialized pairs for different activities could improve your vision quality and comfort throughout the day.";
-                }
-                // Style-conscious users
-                else if (stylePrefs && Array.isArray(stylePrefs[0]) && stylePrefs[0].includes('Bold and statement-making')) {
-                    result = "Based on your style preferences, it seems like you value frames that make a statement and express your personality.";
-                    insight = "Finding frames that truly reflect your style could help you feel more confident and authentic.";
-                }
-                // No glasses but symptoms
-                else if (!hasGlasses && (hasEyeStrain || hasHeadaches || hasTiredEyes)) {
-                    const symptomList = eyeSymptoms.filter(s => s !== 'None of these').slice(0,2).join(' and ');
-                    result = `You mentioned experiencing ${symptomList.toLowerCase()}, which might indicate that glasses could be helpful for you.`;
-                    insight = "A professional eye exam could help determine what's causing these symptoms and whether glasses might help.";
-                }
-                // Default personalized
-                else {
-                    const personalDetails = [];
-                    if (hasGlasses) personalDetails.push('current glasses user');
-                    if (highScreenTime) personalDetails.push('heavy screen user');
-                    if (Array.isArray(activities) && activities.length > 0) personalDetails.push(activities[0].toLowerCase());
-                    
-                    result = `As a ${personalDetails.join(', ')}, it looks like your vision setup could potentially be optimized for your specific lifestyle.`;
-                    insight = "Small, targeted adjustments to your eyewear approach might make a noticeable difference in your daily comfort.";
-                }
-                
-                return { result, insight };
-            };
-
-            const generatePersonalizedResult = async () => {
-                try {
-                    // Add small delay to prevent rapid multiple calls
-                    if (!window.teaserCache && !window.teaserPromise) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    return await generateTeaserWithGemini();
-                } catch (error) {
-                    console.error('Error in generatePersonalizedResult:', error);
-                    return generateTeaserFallback();
-                }
-            };
-
             const renderResults = () => {
                 // Step 1: Transition screen  
                 if (resultStep === 'transition') {
@@ -3628,22 +2791,15 @@
 
                 // Step 2: Personal result + data capture
                 if (resultStep === 'result') {
-                    // Use cached result directly or fallback
-                    const personalizedResult = window.teaserCache || generateTeaserFallback();
-                    console.log('📊 Result screen - using teaser result:', personalizedResult);
-                    
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
                         React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Here's your Vision Match result 👇"),
                         
                         React.createElement('div', { className: "visionmatch-card p-6 shadow-lg bg-blue-50 border-l-4 border-primary-blue mb-8" },
-                            React.createElement('p', { className: "text-lg text-blue-900 mb-4 font-semibold" }, 
-                                personalizedResult.result
+                            React.createElement('p', { className: "text-lg text-blue-900 mb-4" }, 
+                                "You probably need 2 pairs of glasses: one for everyday use + one for screens."
                             ),
                             React.createElement('p', { className: "text-blue-800" },
-                                personalizedResult.insight
-                            ),
-                            React.createElement('p', { className: "text-blue-700 mt-4 text-sm font-medium" },
-                                "Good news: With VisionMatch you'll never pay for lens upgrades — they're free for life."
+                                "Good news: With OptiQa you'll never pay for lens upgrades — they're free for life."
                             )
                         ),
                         
@@ -3803,306 +2959,9 @@
                                 className: "visionmatch-button py-3 px-6 font-semibold"
                             }, "Add to Calendar"),
                             React.createElement('button', {
-                                onClick: () => setResultStep('emailConfirmation'),
-                                className: "visionmatch-button py-3 px-6 font-semibold"
-                            }, "View Email Confirmation"),
-                            React.createElement('button', {
                                 onClick: () => setResultStep('result'),
                                 className: "py-3 px-6 border border-primary-blue text-primary-blue rounded-lg font-semibold hover:bg-blue-50"
                             }, "See My Result Again")
-                        )
-                    );
-                }
-
-                // Step 6: Email Confirmation Screen
-                if (resultStep === 'emailConfirmation') {
-                    // Get the cached result directly since teaser generation is working
-                    const emailPersonalizedResult = window.teaserCache || generateTeaserFallback();
-                    
-                    console.log('📧 Email confirmation - using result:', emailPersonalizedResult);
-                    
-                    const today = new Date();
-                    const examDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week from now
-                    const formattedDate = examDate.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    });
-
-                    return React.createElement('div', { className: "space-y-8 max-w-4xl mx-auto" },
-                        React.createElement('div', { className: "text-center mb-8" },
-                            React.createElement('div', { className: "w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6" },
-                                React.createElement('div', { className: "text-4xl" }, "✉️")
-                            ),
-                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, "Email Confirmation Preview"),
-                            React.createElement('p', { className: "text-gray-600" }, "This is what you'll receive in your inbox:")
-                        ),
-                        
-                        // Email mockup container
-                        React.createElement('div', { className: "bg-gray-50 p-8 rounded-xl border-2 border-dashed border-gray-300" },
-                            React.createElement('div', { className: "bg-white rounded-lg shadow-lg max-w-2xl mx-auto overflow-hidden" },
-                                // Email header
-                                React.createElement('div', { className: "bg-primary-blue text-white p-6 text-center" },
-                                    React.createElement('h3', { className: "text-2xl font-bold mb-2" }, "🎉 Your Free Eye Exam Is Confirmed"),
-                                    React.createElement('p', { className: "text-blue-100" }, "VisionMatch Vision Match Results")
-                                ),
-                                
-                                // Email body
-                                React.createElement('div', { className: "p-8" },
-                                    React.createElement('p', { className: "text-lg text-gray-800 mb-6" }, 
-                                        `Hi ${userName || 'there'},`
-                                    ),
-                                    
-                                    React.createElement('p', { className: "text-gray-700 mb-6" }, 
-                                        "Thanks for completing your Vision Match! Based on your answers, we've prepared a free in-depth eye exam for you at:"
-                                    ),
-                                    
-                                    // Appointment details
-                                    React.createElement('div', { className: "bg-blue-50 p-6 rounded-xl mb-6" },
-                                        React.createElement('div', { className: "flex items-center space-x-3 mb-3" },
-                                            React.createElement('div', { className: "text-xl" }, "📍"),
-                                            React.createElement('span', { className: "font-semibold text-gray-800" }, selectedOptician?.name || "Your Selected Optician")
-                                        ),
-                                        React.createElement('div', { className: "flex items-center space-x-3 mb-3" },
-                                            React.createElement('div', { className: "text-xl" }, "📅"),
-                                            React.createElement('span', { className: "text-gray-700" }, formattedDate)
-                                        ),
-                                        React.createElement('div', { className: "flex items-center space-x-3" },
-                                            React.createElement('div', { className: "text-xl" }, "🕒"),
-                                            React.createElement('span', { className: "text-gray-700" }, selectedSlot || "Your selected time slot")
-                                        )
-                                    ),
-                                    
-                                    React.createElement('p', { className: "text-gray-700 mb-6" }, 
-                                        "Your optician will contact you if they need to adjust your time, but you're all set."
-                                    ),
-                                    
-                                    // Your Vision Match Results section - Expert Optician Analysis
-                                    React.createElement('div', { className: "border-t border-gray-200 pt-6 mb-6" },
-                                        React.createElement('h4', { className: "text-xl font-bold text-gray-800 mb-4" }, "👨‍⚕️ Your Expert Vision Analysis"),
-                                        React.createElement('div', { className: "bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl" },
-                                            React.createElement('div', { className: "space-y-6" },
-                                                // Expert introduction
-                                                React.createElement('div', { className: "bg-white p-4 rounded-lg border-l-4 border-blue-500" },
-                                                    React.createElement('p', { className: "text-gray-700 text-sm italic mb-2" },
-                                                        "Analysis by your VisionMatch expert optician with 30+ years of experience"
-                                                    ),
-                                                    React.createElement('p', { className: "text-gray-800 font-semibold" },
-                                                        emailPersonalizedResult.result
-                                                    )
-                                                ),
-                                                
-                                                // Detailed expert analysis function
-                                                (() => {
-                                                    const generateExpertAnalysis = () => {
-                                                        const currentGlasses = answers[0] || '';
-                                                        const currentSetup = answers[1] || '';
-                                                        const eyewearNeeds = answers[2] || '';
-                                                        const lifestyle = answers[6] || '';
-                                                        const screenTime = answers[7] || '';
-                                                        const workEnv = answers[12] || '';  // Updated index after Q13 deletion
-                                                        const age = answers[10] || '';
-                                                        const visionIssues = answers[9] || '';
-                                                        const style = answers[16] || '';  // Updated index
-                                                        const currentFrames = answers[3] || '';
-                                                        
-                                                        let analysis = [];
-                                                        
-                                                        // Current situation analysis
-                                                        analysis.push({
-                                                            title: "🔍 Your Current Eyewear Situation",
-                                                            content: (() => {
-                                                                let situation = "";
-                                                                if (currentGlasses.includes('glasses')) {
-                                                                    situation += "I can see you're currently wearing glasses, which is great - you're already taking care of your vision. ";
-                                                                    if (currentSetup) {
-                                                                        situation += `From what you've shared about your setup: "${currentSetup.substring(0, 100)}..." - this gives me good insight into how you use your eyewear daily. `;
-                                                                    }
-                                                                } else if (currentGlasses.includes('contact')) {
-                                                                    situation += "You're using contact lenses, which offers excellent peripheral vision and freedom for activities. ";
-                                                                } else {
-                                                                    situation += "You mentioned you don't currently wear corrective eyewear. This could mean your vision is naturally good, or perhaps you haven't had a recent comprehensive exam. ";
-                                                                }
-                                                                
-                                                                if (eyewearNeeds.includes('sunglasses')) {
-                                                                    situation += "I notice you use sunglasses, which shows you understand the importance of UV protection - that's excellent preventive care.";
-                                                                }
-                                                                
-                                                                return situation || "Let's work together to understand your vision needs better.";
-                                                            })()
-                                                        });
-                                                        
-                                                        // Lifestyle and vision demands analysis
-                                                        analysis.push({
-                                                            title: "💼 How Your Lifestyle Affects Your Vision",
-                                                            content: (() => {
-                                                                let lifestyle_analysis = "";
-                                                                
-                                                                if (screenTime.includes('8+ hours')) {
-                                                                    lifestyle_analysis += "With 8+ hours of screen time daily, your eyes are working incredibly hard. This extended digital exposure often leads to what we call Computer Vision Syndrome - eye strain, dry eyes, and focusing fatigue. ";
-                                                                } else if (screenTime.includes('4-8 hours')) {
-                                                                    lifestyle_analysis += "Your 4-8 hours of daily screen time puts you in the moderate-to-high digital eye strain risk category. ";
-                                                                }
-                                                                
-                                                                if (workEnv.includes('office')) {
-                                                                    lifestyle_analysis += "Working in an office environment typically means artificial lighting and potentially glare from windows or screens. ";
-                                                                } else if (workEnv.includes('outdoor')) {
-                                                                    lifestyle_analysis += "Outdoor work exposes your eyes to UV radiation and varying light conditions throughout the day. ";
-                                                                }
-                                                                
-                                                                if (lifestyle.includes('sports') || lifestyle.includes('exercise')) {
-                                                                    lifestyle_analysis += "Your active lifestyle is wonderful for overall health, and it means your eyewear needs to keep up with you - providing clear vision and protection during physical activities.";
-                                                                }
-                                                                
-                                                                return lifestyle_analysis || "Your daily activities will help us determine the best eyewear solutions for you.";
-                                                            })()
-                                                        });
-                                                        
-                                                        // Age-related vision changes
-                                                        if (age.includes('40') || age.includes('50') || age.includes('Over')) {
-                                                            analysis.push({
-                                                                title: "👀 Understanding Age-Related Vision Changes",
-                                                                content: "In your age group, it's completely normal to experience presbyopia - the gradual loss of near focusing ability. This isn't a flaw; it's a natural part of aging that affects virtually everyone. You might notice needing to hold reading material further away, or experiencing eye fatigue when switching between distance and near tasks. Progressive lenses or specialized computer glasses can make a tremendous difference in your daily comfort and visual efficiency."
-                                                            });
-                                                        }
-                                                        
-                                                        // Specific recommendations based on their answers
-                                                        analysis.push({
-                                                            title: "💡 My Professional Recommendations",
-                                                            content: (() => {
-                                                                let recommendations = "";
-                                                                
-                                                                // Blue light and computer work
-                                                                if (screenTime.includes('4+') || screenTime.includes('8+')) {
-                                                                    recommendations += "Given your significant screen time, I'd strongly recommend computer glasses with blue light filtering and anti-reflective coating. These reduce eye strain by filtering harmful blue light and eliminating reflections that cause your eyes to work harder. ";
-                                                                }
-                                                                
-                                                                // Progressive lenses for presbyopia
-                                                                const needsReading = visionIssues.includes('Reading') || visionIssues.includes('close-up');
-                                                                const isPresbyopic = age.includes('40') || age.includes('50') || age.includes('Over');
-                                                                if (needsReading && isPresbyopic) {
-                                                                    recommendations += "Progressive lenses would be ideal for you - they provide seamless vision at all distances without the telltale lines of bifocals. Modern progressives are incredibly advanced and most people adapt within a week. ";
-                                                                }
-                                                                
-                                                                // Prescription sunglasses
-                                                                if (currentGlasses.includes('glasses') && eyewearNeeds.includes('sunglasses') && !eyewearNeeds.includes('prescription sunglasses')) {
-                                                                    recommendations += "Since you wear glasses and regular sunglasses, prescription sunglasses would eliminate the hassle of switching between them. You'll have perfect vision outdoors with full UV protection. ";
-                                                                }
-                                                                
-                                                                // Sports eyewear
-                                                                if (lifestyle.includes('sports') && currentGlasses.includes('glasses')) {
-                                                                    recommendations += "For your active lifestyle, consider sport-specific eyewear with impact-resistant lenses and secure, comfortable frames designed for movement. ";
-                                                                }
-                                                                
-                                                                // Frame recommendations based on style
-                                                                if (style.includes('Classic')) {
-                                                                    recommendations += "Your classic style preference suggests you'd appreciate timeless frame designs that never go out of fashion - think clean lines and quality materials that age beautifully. ";
-                                                                } else if (style.includes('Modern')) {
-                                                                    recommendations += "With your modern style preference, we can explore contemporary frame designs with interesting details and current color trends. ";
-                                                                }
-                                                                
-                                                                return recommendations || "A comprehensive eye exam will help us identify the perfect solutions for your unique vision needs.";
-                                                            })()
-                                                        });
-                                                        
-                                                        // What might not be working
-                                                        if (currentSetup) {
-                                                            analysis.push({
-                                                                title: "⚠️ Potential Areas for Improvement",
-                                                                content: (() => {
-                                                                    let improvements = "Based on your current setup, here's what might be limiting your visual comfort: ";
-                                                                    
-                                                                    if (currentGlasses.includes('glasses') && !eyewearNeeds.includes('computer glasses') && screenTime.includes('4+')) {
-                                                                        improvements += "Your regular glasses might not have the specialized coatings needed for extended computer work, leading to unnecessary eye strain. ";
-                                                                    }
-                                                                    
-                                                                    if (currentGlasses.includes('glasses') && eyewearNeeds.includes('Plain sunglasses')) {
-                                                                        improvements += "Using separate glasses and sunglasses means you're compromising vision clarity when outdoors - prescription sunglasses would solve this completely. ";
-                                                                    }
-                                                                    
-                                                                    if (visionIssues.includes('headaches') || visionIssues.includes('eye strain')) {
-                                                                        improvements += "The vision symptoms you mentioned often indicate that your current prescription might need updating, or that specialized lens features could provide relief. ";
-                                                                    }
-                                                                    
-                                                                    return improvements;
-                                                                })()
-                                                            });
-                                                        }
-                                                        
-                                                        return analysis;
-                                                    };
-                                                    
-                                                    const expertAnalysis = generateExpertAnalysis();
-                                                    
-                                                    return React.createElement('div', { className: "space-y-4" },
-                                                        expertAnalysis.map((section, index) => 
-                                                            React.createElement('div', { 
-                                                                key: index, 
-                                                                className: "bg-white p-5 rounded-lg shadow-sm border border-gray-100" 
-                                                            },
-                                                                React.createElement('h6', { 
-                                                                    className: "font-semibold text-gray-800 text-base mb-3" 
-                                                                }, section.title),
-                                                                React.createElement('p', { 
-                                                                    className: "text-gray-700 text-sm leading-relaxed" 
-                                                                }, section.content)
-                                                            )
-                                                        )
-                                                    );
-                                                })(),
-                                                
-                                                // Next steps
-                                                React.createElement('div', { className: "bg-green-50 p-5 rounded-lg border border-green-200" },
-                                                    React.createElement('h6', { className: "font-semibold text-green-800 text-base mb-3" }, 
-                                                        "🎯 Your Next Steps"
-                                                    ),
-                                                    React.createElement('p', { className: "text-green-700 text-sm leading-relaxed" },
-                                                        "During our appointment, I'll conduct a thorough eye examination to confirm these insights and ensure we're addressing all your vision needs. We'll discuss frame options that match your style and lifestyle, and I'll show you lens technologies that will make a real difference in your daily comfort and visual performance. Remember, great vision care is about more than just seeing clearly - it's about feeling confident and comfortable in everything you do."
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    
-                                    React.createElement('div', { className: "bg-green-50 p-6 rounded-xl mb-6" },
-                                        React.createElement('h5', { className: "font-semibold text-gray-800 mb-3" }, "Why this exam matters:"),
-                                        React.createElement('ul', { className: "space-y-2 text-gray-700" },
-                                            React.createElement('li', { className: "flex items-start space-x-2" },
-                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
-                                                React.createElement('span', {}, "Confirms your Vision Match result with medical precision")
-                                            ),
-                                            React.createElement('li', { className: "flex items-start space-x-2" },
-                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
-                                                React.createElement('span', {}, "Free of charge, no strings attached")
-                                            ),
-                                            React.createElement('li', { className: "flex items-start space-x-2" },
-                                                React.createElement('span', { className: "text-green-600 font-bold" }, "✅"),
-                                                React.createElement('span', {}, "Unlocks the benefits of VisionMatch: free lens upgrades for life + no upfront payment for glasses")
-                                            )
-                                        )
-                                    ),
-                                    
-                                    React.createElement('div', { className: "text-center" },
-                                        React.createElement('p', { className: "text-gray-700 mb-4" }, "Next Step:"),
-                                        React.createElement('button', {
-                                            onClick: () => alert('Calendar integration would be implemented here'),
-                                            className: "visionmatch-button py-3 px-8 font-semibold mb-4"
-                                        }, "👉 Add to Calendar"),
-                                        React.createElement('p', { className: "text-sm text-gray-600" }, 
-                                            "We'll also send you a reminder by SMS before your appointment."
-                                        )
-                                    )
-                                )
-                            )
-                        ),
-                        
-                        // Back button
-                        React.createElement('div', { className: "text-center" },
-                            React.createElement('button', {
-                                onClick: () => setResultStep('confirmation'),
-                                className: "py-3 px-6 border border-primary-blue text-primary-blue rounded-lg font-semibold hover:bg-blue-50"
-                            }, "← Back to Confirmation")
                         )
                     );
                 }
@@ -4408,10 +3267,18 @@
         // Use React 18 createRoot API instead of deprecated render
         // Wait for DOM to be ready
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, looking for root element...');
             const rootElement = document.getElementById('root');
             if (rootElement) {
-                const root = ReactDOM.createRoot(rootElement);
-                root.render(React.createElement(GlassesFinderWizard));
+                console.log('Root element found, creating React root...');
+                try {
+                    const root = ReactDOM.createRoot(rootElement);
+                    console.log('React root created, rendering component...');
+                    root.render(React.createElement(GlassesFinderWizard));
+                    console.log('Component rendered successfully');
+                } catch (error) {
+                    console.error('Error rendering component:', error);
+                }
             } else {
                 console.error('Root element not found. Make sure there is an element with id="root"');
             }

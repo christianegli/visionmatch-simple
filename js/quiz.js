@@ -992,10 +992,14 @@ const { useState } = React;
                 }
                 setCurrentStep(newStep);
                 
-                // Scroll to top when continuing after section insights
+                // Scroll to top when continuing after section insights - immediate and smooth
                 setTimeout(() => {
+                    // Try multiple scroll methods to ensure it works
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 100);
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                    console.log('Scrolling to top after continueAfterInsights');
+                }, 50);
             };
 
             const nextStep = async () => {
@@ -1045,10 +1049,14 @@ const { useState } = React;
                 // Continue to next question
                 setCurrentStep(newStep);
                 
-                // Scroll to top when loading new question
+                // Scroll to top when loading new question - immediate and smooth
                 setTimeout(() => {
+                    // Try multiple scroll methods to ensure it works
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 100);
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                    console.log('Scrolling to top after nextStep');
+                }, 50);
             };
 
             const prevStep = () => {
@@ -1058,10 +1066,14 @@ const { useState } = React;
                 }
                 setCurrentStep(newStep);
                 
-                // Scroll to top when going back to previous question
+                // Scroll to top when going back to previous question - immediate and smooth
                 setTimeout(() => {
+                    // Try multiple scroll methods to ensure it works
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 100);
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                    console.log('Scrolling to top after prevStep');
+                }, 50);
             };
 
             const renderSectionComplete = () => {

@@ -991,6 +991,11 @@ const { useState } = React;
                     newStep++;
                 }
                 setCurrentStep(newStep);
+                
+                // Scroll to top when continuing after section insights
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
             };
 
             const nextStep = async () => {
@@ -1039,6 +1044,11 @@ const { useState } = React;
                 
                 // Continue to next question
                 setCurrentStep(newStep);
+                
+                // Scroll to top when loading new question
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
             };
 
             const prevStep = () => {
@@ -1047,6 +1057,11 @@ const { useState } = React;
                     newStep--;
                 }
                 setCurrentStep(newStep);
+                
+                // Scroll to top when going back to previous question
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
             };
 
             const renderSectionComplete = () => {

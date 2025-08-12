@@ -785,6 +785,7 @@
         const Phone = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' }));
 
         const GlassesFinderWizard = () => {
+            console.log('GlassesFinderWizard component initializing');
             const [currentStep, setCurrentStep] = useState(0);
             const [answers, setAnswers] = useState({});
             const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
@@ -848,7 +849,7 @@
                         {
                             question: "Where did you buy your main pair of glasses?",
                             type: 'single',
-                            options: ["Alain Afflelou", "Multiópticas", "General Óptica", "Óptica 2000", "Cottet", "Óptica Universitaria", "Visionlab", "Local optician", "Online store", "Department store", "Other"],
+                            options: ["Alain Afflelou", "Multiópticas", "General Óptica", "Óptica 2000", "Cottet", "Óptica Universitaria", "Visionlab", "Local optician", "Online store", "Department store", "I don't remember", "Other"],
                             textField: {
                                 question: "Please specify where:",
                                 placeholder: "e.g., specific store name, online retailer, etc.",
@@ -883,14 +884,14 @@
                     question: "Tell us about your glasses history",
                     steps: [
                         {
-                            question: "When were your primary glasses last updated?",
+                            question: "When did you buy your current glasses?",
                             type: 'single',
                             options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years"],
                             fullWidth: true
                         },
                         {
                             question: "What prompted your last glasses update?",
-                            type: 'single',
+                            type: 'multiple',
                             options: ["Prescription changed", "Glasses broke/lost", "Wanted new style", "Eye exam recommendation", "Visited optician", "Still using old glasses", "Other"],
                             fullWidth: true,
                             textField: {
@@ -928,33 +929,15 @@
                     }
                 },
                 {
-                    type: 'multi-step',
+                    type: 'multiple',
                     section: "What You Have",
-                    question: "Tell us about changes you might need",
-                    steps: [
-                        {
-                            question: "Do you feel like you need to change any of your current glasses?",
-                            type: 'multiple',
-                            options: ["My prescription needs updating", "Need new/additional pairs", "Current glasses are uncomfortable", "No changes needed"],
-                            fullWidth: true,
-                            textField: {
-                                question: "Tell us more about the changes you need:",
-                                placeholder: "e.g., my reading glasses aren't strong enough for computer work, frames are too heavy, want prescription sunglasses...",
-                                alwaysVisible: true
-                            }
-                        },
-                        {
-                            question: "Is there a specific need you haven't covered right now?",
-                            type: 'multiple',
-                            options: ["Better vision for specific activities", "Comfort/fit issues", "Style preferences", "All needs are covered"],
-                            fullWidth: true,
-                            textField: {
-                                question: "Describe your specific uncovered needs:",
-                                placeholder: "e.g., need something for driving at night, my progressives are hard to adjust to, can't see clearly outdoors, need computer glasses...",
-                                alwaysVisible: true
-                            }
-                        }
-                    ]
+                    question: "Do you have any of the following issues with any of your glasses?",
+                    options: ["Fit isn't perfect", "Lenses are scratched", "I don't like the style anymore", "My prescription needs updating", "They're uncomfortable", "Need backup/additional pairs", "Want better vision for specific activities", "Need computer/blue light glasses", "Want prescription sunglasses", "No issues with my glasses"],
+                    textField: {
+                        question: "Tell us more about your issues with your current glasses:",
+                        placeholder: "e.g., my reading glasses aren't strong enough for computer work, frames are too heavy, want prescription sunglasses...",
+                        alwaysVisible: true
+                    }
                 },
                 {
                     type: 'multiple',
@@ -969,20 +952,47 @@
                 },
                 {
                     type: 'celebration',
-                    title: "Great progress!",
+                    title: "We're getting to know you!",
                     subtitle: "Now let's get to know a bit more about you.",
                     progress: "You're halfway there"
                 },
                 {
-                    type: 'multiple',
+                    type: 'multi-step',
                     section: "What You Need",
                     question: "What do you usually do in your free time?",
-                    options: ["Exercise or play sports", "Read/watch shows", "Spend time outdoors", "Travel", "Create (music, art, crafts)", "None of these"],
-                    textField: {
-                        question: "Tell us about your special activities or spare time:",
-                        placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening...",
-                        alwaysVisible: true
-                    }
+                    steps: [
+                        {
+                            question: "What are your main activities?",
+                            type: 'multiple',
+                            options: ["Sports", "Outdoor", "Reading", "Watch shows", "Gaming", "Other"],
+                            fullWidth: true,
+                            textField: {
+                                question: "Please specify your other activities:",
+                                placeholder: "e.g., creative arts, music, crafts, volunteer work, social activities...",
+                                showWhen: "Other"
+                            }
+                        },
+                        {
+                            question: "Any specific activities you'd like to mention?",
+                            type: 'multiple',
+                            options: [], // Will be populated dynamically based on step 1
+                            fullWidth: true,
+                            gridLayout: true,
+                            conditionalOptions: {
+                                "Sports": ["Running/jogging", "Gym/fitness", "Team sports (football, basketball, etc.)", "Tennis/racquet sports", "Swimming", "Cycling", "Golf", "Martial arts", "Yoga/pilates", "Climbing/mountaineering", "Winter sports", "Water sports", "Other sports"],
+                                "Outdoor": ["Hiking/walking", "Camping", "Fishing/hunting", "Gardening", "Photography", "Bird watching", "Beach activities", "Picnics/BBQs", "Adventure sports", "Nature exploration", "Outdoor festivals", "Other outdoor activities"],
+                                "Reading": ["Fiction books", "Non-fiction/educational", "Magazines/newspapers", "E-books/digital reading", "Audiobooks", "Comics/graphic novels", "Professional/work reading", "Research/studying", "Book clubs", "Other reading"],
+                                "Watch shows": ["Movies/cinema", "TV series/streaming", "Documentaries", "Sports broadcasts", "News programs", "YouTube/online videos", "Live performances/theater", "Gaming streams", "Educational content", "Other viewing"],
+                                "Gaming": ["Video games (console)", "PC gaming", "Mobile gaming", "Board games", "Card games", "Online multiplayer", "Retro gaming", "Gaming tournaments", "Game development", "Other gaming"],
+                                "Other": ["Creative arts (painting, drawing, crafts)", "Music (playing instruments, composing)", "Photography/videography", "Cooking/baking", "Gardening/landscaping", "Home improvement/DIY", "Volunteer work", "Social activities/events", "Learning/education", "Travel/exploration", "Collecting hobbies", "Technology/programming", "Other activities"]
+                            },
+                            textField: {
+                                question: "Tell us about your special activities or spare time:",
+                                placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening...",
+                                alwaysVisible: true
+                            }
+                        }
+                    ]
                 },
                 {
                     type: 'single',
@@ -1131,28 +1141,30 @@
                 {
                     type: 'multi-step',
                     section: "What You Need",
-                    question: "Tell us about your style preferences",
+                    question: "What style do you like the most?",
                     steps: [
                         {
-                            question: "What style makes you feel confident and comfortable?",
+                            question: "What style do you like the most?",
                             type: 'multiple',
-                            options: ["Classic and timeless", "Modern and minimalist", "Bold and statement-making", "Sporty and functional", "Luxury and premium", "Trendy and fashion-forward", "Professional and conservative", "Creative and artistic", "No specific preference"],
+                            options: ["Classic and timeless (clean lines, traditional shapes)", "Modern and minimalist (sleek, simple, contemporary)", "Bold and statement-making (eye-catching, unique designs)", "Sporty and functional (durable, active lifestyle)", "Luxury and premium (high-end materials, designer brands)", "Trendy and fashion-forward (latest styles, cutting-edge)", "Professional and conservative (business-appropriate, understated)", "Creative and artistic (unique, expressive, unconventional)", "I care about the fit, not the style", "No specific preference"],
                             fullWidth: true
                         },
                         {
                             question: "Which brands match your style preferences?",
                             type: 'multiple',
-                            options: [], // Will be populated dynamically
+                            options: ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "No brand preference"], // Default fallback options
+                            gridLayout: true,
                             conditionalOptions: {
-                                "Classic and timeless": ["Ray-Ban", "Persol", "Oliver Peoples", "Silhouette", "Moscot", "Local independent opticians"],
-                                "Modern and minimalist": ["Lindberg", "Mykita", "ic! berlin", "Ace & Tate", "Cubitts", "No brand preference"],
-                                "Bold and statement-making": ["Tom Ford", "Dior", "Gucci", "Versace", "Etnia Barcelona", "Theo"],
-                                "Sporty and functional": ["Oakley", "Nike", "Maui Jim", "Revo", "Adidas", "Under Armour"],
-                                "Luxury and premium": ["Tom Ford", "Cartier", "Chanel", "Oliver Peoples", "Dita", "Lindberg"],
-                                "Trendy and fashion-forward": ["Gucci", "Saint Laurent", "Prada", "Garrett Leight", "Kirk & Kirk", "Ace & Tate"],
-                                "Professional and conservative": ["Ray-Ban", "Oliver Peoples", "Silhouette", "Lindberg", "General Óptica", "Multiópticas"],
-                                "Creative and artistic": ["Mykita", "Theo", "L.A. Eyeworks", "Etnia Barcelona", "Local artisan frames", "Boutique brands"],
-                                "No specific preference": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Focus on fit and comfort"]
+                                "Classic and timeless": ["Ray-Ban", "Persol", "Oliver Peoples", "Silhouette", "Moscot", "Local independent opticians", "General Óptica", "Multiópticas", "No brand preference"],
+                                "Modern and minimalist": ["Lindberg", "Mykita", "ic! berlin", "Ace & Tate", "Cubitts", "General Óptica", "Multiópticas", "No brand preference"],
+                                "Bold and statement-making": ["Tom Ford", "Dior", "Gucci", "Versace", "Etnia Barcelona", "Theo", "Local independent opticians", "No brand preference"],
+                                "Sporty and functional": ["Oakley", "Nike", "Maui Jim", "Revo", "Adidas", "Under Armour", "General Óptica", "Multiópticas"],
+                                "Luxury and premium": ["Tom Ford", "Cartier", "Chanel", "Oliver Peoples", "Dita", "Lindberg", "Local independent opticians", "No brand preference"],
+                                "Trendy and fashion-forward": ["Gucci", "Saint Laurent", "Prada", "Garrett Leight", "Kirk & Kirk", "Ace & Tate", "Local independent opticians", "No brand preference"],
+                                "Professional and conservative": ["Ray-Ban", "Oliver Peoples", "Silhouette", "Lindberg", "General Óptica", "Multiópticas", "Local independent opticians", "No brand preference"],
+                                "Creative and artistic": ["Mykita", "Theo", "L.A. Eyeworks", "Etnia Barcelona", "Local artisan frames", "Boutique brands", "Local independent opticians", "No brand preference"],
+                                "I care about the fit, not the style": ["Focus on comfort and fit", "Local independent opticians", "General Óptica", "Multiópticas", "Quality over brand", "No brand preference"],
+                                "No specific preference": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Focus on fit and comfort", "No brand preference"]
                             },
                             textField: {
                                 question: "Tell us more about your personal style and what you're really looking for:",
@@ -1352,8 +1364,8 @@
                             <em>(That burning sensation? They're filing a complaint)</em></p>
                         `
                     },
-                    // Free time activities (now Q10)
-                    10: {
+                    // Free time activities (Q10)
+                    9: {
                         icon: '🏆',
                         title: 'Level up your game!',
                         content: `
@@ -1474,17 +1486,6 @@
                         `
                     },
                     
-                    // Question 9 - Celebration screen
-                    9: {
-                        icon: '🎊',
-                        title: 'You\'re halfway there!',
-                        content: `
-                            <div style="background: #f0f9ff; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                <p style="margin: 0; text-align: center; font-size: 1.1em;">🧩 <strong>Plot twist coming up!</strong></p>
-                                <p style="margin: 8px 0 0 0; text-align: center;">The next questions might surprise you...</p>
-                            </div>
-                        `
-                    },
                     
                     // Question 15 - Happiness with current glasses
                     15: {
@@ -1688,6 +1689,91 @@
                     }
                 } catch (error) {
                     alert('Download failed. Please try again or take a screenshot of your results.');
+                }
+            };
+
+            const [personalitySummary, setPersonalitySummary] = useState("");
+            const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+
+            const generatePersonalitySummary = async () => {
+                if (personalitySummary) return personalitySummary; // Return cached summary if already generated
+                
+                setIsGeneratingSummary(true);
+                
+                try {
+                    // Collect relevant answers for personality analysis, especially text fields
+                    const relevantAnswers = {
+                        currentGlasses: answers[0],
+                        glassesDetailsText: answers['0_text'], // Text field from Q1
+                        glassesSetupText: answers['1_text'], // Text field from Q2
+                        glassesTypesText: answers['2_text'], // Text field from Q3
+                        glassesHistory: answers[4],
+                        glassesHistoryText: answers[4]?.['1_text'], // Text from glasses history
+                        issues: answers[6],
+                        issuesText: answers['6_text'], // Text field from issues question
+                        glassesUsage: answers[7],
+                        glassesUsageText: answers['7_text'], // Text field from usage question
+                        freeTimeActivities: answers[9]?.[0], // Step 1 of multi-step
+                        freeTimeDetails: answers[9]?.['1_text'] // Text field from step 2
+                    };
+
+                    const prompt = `Based on their quiz answers, create a SHORT (1 sentence), funny, personal observation that shows you're paying attention to what they actually wrote. Focus especially on their free text responses. Be playful, witty, and insightful - NOT sales-y. Make them laugh or think "wow, they get me":
+
+Current glasses: ${relevantAnswers.currentGlasses}
+What they wrote about vision needs: "${relevantAnswers.glassesDetailsText}"
+What they wrote about their setup: "${relevantAnswers.glassesSetupText}" 
+What they wrote about their glasses types: "${relevantAnswers.glassesTypesText}"
+Glasses history: ${JSON.stringify(relevantAnswers.glassesHistory)}
+What they wrote about glasses history: "${relevantAnswers.glassesHistoryText}"
+Issues with current glasses: ${relevantAnswers.issues}
+What they wrote about their issues: "${relevantAnswers.issuesText}"
+How they use glasses: ${relevantAnswers.glassesUsage}
+What they wrote about usage: "${relevantAnswers.glassesUsageText}"
+Free time activities: ${relevantAnswers.freeTimeActivities}
+What they wrote about activities: "${relevantAnswers.freeTimeDetails}"
+
+PAY SPECIAL ATTENTION to what they wrote in text fields - their specific details, complaints, activities. Pick up on quirky details or contradictions.
+
+Examples of the playful, observational tone I want:
+- If they wrote about gaming tournaments but have old glasses: "Gaming tournaments with 3-year-old glasses? That's like racing Formula 1 with bicycle brakes."
+- If they mentioned photography but can't see clearly: "A photographer who can't see clearly - the irony is not lost on us."
+- If they wrote about cooking but have scratched lenses: "Cooking with scratched lenses explains why the salt and sugar containers look identical."
+
+Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. Don't sell anything.`;
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: prompt }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.8,
+                                maxOutputTokens: 60
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Gemini API call failed');
+                    }
+
+                    const data = await response.json();
+                    const summary = data.candidates[0].content.parts[0].text.trim();
+                    setPersonalitySummary(summary);
+                    setIsGeneratingSummary(false);
+                    return summary;
+                } catch (error) {
+                    console.error('Error generating personality summary:', error);
+                    setIsGeneratingSummary(false);
+                    
+                    // Fallback to simple summary if API fails
+                    const fallback = "You're the type who actually reads the fine print on everything - including vision questionnaires apparently.";
+                    setPersonalitySummary(fallback);
+                    return fallback;
                 }
             };
 
@@ -2625,6 +2711,11 @@
                 
                 // Continue to next question
                 setCurrentStep(newStep);
+                
+                // Scroll to top for new questions
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
             };
 
             const prevStep = () => {
@@ -2743,19 +2834,34 @@
 
                 // Handle celebration slides
                 if (q.type === 'celebration') {
-                    return React.createElement('div', { className: "celebration-screen text-center space-y-8 flex flex-col items-center justify-center min-h-[400px] px-4" },
-                        React.createElement('div', { className: "space-y-6 max-w-lg mx-auto" },
-                            React.createElement('div', { className: "w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" },
+                    // Trigger AI generation when celebration slide is shown
+                    if (!personalitySummary && !isGeneratingSummary) {
+                        generatePersonalitySummary().catch(console.error);
+                    }
+
+                    return React.createElement('div', { className: "w-full flex items-center justify-center min-h-[80vh] px-4" },
+                        React.createElement('div', { className: "celebration-screen text-center space-y-8 max-w-3xl w-full mx-auto" },
+                            React.createElement('div', { className: "w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6" },
                                 React.createElement('div', { className: "w-8 h-8 bg-green-500 rounded-full" })
                             ),
                             React.createElement('p', { className: "text-sm text-green-600 font-medium uppercase tracking-wide" }, q.progress),
-                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800" }, q.title),
-                            React.createElement('p', { className: "text-lg text-gray-600" }, q.subtitle)
-                        ),
-                        React.createElement('button', {
-                            onClick: nextStep,
-                            className: "visionmatch-button px-8 py-3 text-base font-semibold"
-                        }, "Continue")
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-8" }, q.title),
+                            React.createElement('div', { className: "bg-blue-50 rounded-2xl p-8 mb-8 mx-auto border-2 border-blue-100 shadow-sm" },
+                                isGeneratingSummary ? 
+                                    React.createElement('div', { className: "flex items-center justify-center space-x-3" },
+                                        React.createElement('div', { className: "animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" }),
+                                        React.createElement('p', { className: "text-lg text-gray-600" }, "Reading between the lines...")
+                                    ) :
+                                    React.createElement('p', { className: "text-xl text-gray-800 leading-relaxed font-medium" }, 
+                                        personalitySummary || "You are the kind of person that probably cleans their glasses more often than they clean their car."
+                                    )
+                            ),
+                            React.createElement('p', { className: "text-xl font-semibold text-gray-800 mb-8" }, "Let's now find out how we can optimise your setup"),
+                            React.createElement('button', {
+                                onClick: nextStep,
+                                className: "visionmatch-button px-8 py-3 text-base font-semibold"
+                            }, "Continue")
+                        )
                     );
                 }
 
@@ -2968,9 +3074,20 @@
                                 const stepAnswers = answers[currentStep] || {};
                                 
                                 // Show step 1 always, step 2 after step 1 is answered, step 3 after step 2 is answered
-                                const shouldShowStep = stepIndex === 0 || 
+                                let shouldShowStep = stepIndex === 0 || 
                                     (stepIndex === 1 && stepAnswers[0]) ||
                                     (stepIndex === 2 && stepAnswers[0] && stepAnswers[1]);
+                                
+                                // Special logic for style question - skip step 2 if "No specific preference" or "I care about the fit" is selected
+                                if (q.question === "What style do you like the most?" && stepIndex === 1 && stepAnswers[0]) {
+                                    const firstStepAnswer = stepAnswers[0];
+                                    const skipSecondStep = Array.isArray(firstStepAnswer) && 
+                                        (firstStepAnswer.includes("No specific preference") || 
+                                         firstStepAnswer.includes("I care about the fit, not the style"));
+                                    if (skipSecondStep) {
+                                        shouldShowStep = false;
+                                    }
+                                }
                                 
                                 if (!shouldShowStep) return null;
                                 
@@ -2985,11 +3102,13 @@
                                     React.createElement('div', { 
                                         className: step.fullWidth 
                                             ? "grid grid-cols-1 gap-3"
-                                            : stepIndex === 0 
-                                                ? "grid grid-cols-2 md:grid-cols-3 gap-3" 
-                                                : stepIndex === 1 
-                                                    ? "grid grid-cols-3 gap-3"
-                                                    : "grid grid-cols-2 md:grid-cols-3 gap-3"
+                                            : step.gridLayout
+                                                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+                                                : stepIndex === 0 
+                                                    ? "grid grid-cols-2 md:grid-cols-3 gap-3" 
+                                                    : stepIndex === 1 
+                                                        ? "grid grid-cols-3 gap-3"
+                                                        : "grid grid-cols-2 md:grid-cols-3 gap-3"
                                     },
                                         (() => {
                                             // Handle conditional options based on previous step
@@ -4239,7 +4358,7 @@
                     React.createElement('div', { className: "max-w-2xl mx-auto px-4" }
                     )
                 ),
-                React.createElement('div', { className: currentStep >= questions.length ? "max-w-4xl mx-auto px-4" : "quiz-layout" },
+                React.createElement('div', { className: currentStep >= questions.length ? "max-w-4xl mx-auto px-4" : (questions[currentStep]?.type === 'celebration' ? "w-full" : "quiz-layout") },
                     currentStep >= questions.length ? React.createElement('div', { className: "w-full" },
                         renderResults()
                     ) : React.createElement('div', { className: "quiz-main" },
@@ -4278,8 +4397,8 @@
                         )
                     ), // Close quiz-main div
                     
-                    // Sidebar with progress and education
-                    currentStep < questions.length && React.createElement('div', { className: "quiz-sidebar" },
+                    // Sidebar with progress and education (hidden for celebration slides)
+                    currentStep < questions.length && questions[currentStep]?.type !== 'celebration' && React.createElement('div', { className: "quiz-sidebar" },
                         // Progress section
                         React.createElement('div', { className: "progress-section" },
                             React.createElement('div', { className: "progress-header" },

@@ -3619,155 +3619,256 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 );
             };
 
-            // Global cache for teaser results to avoid multiple API calls
-            window.teaserCache = window.teaserCache || null;
-            window.teaserPromise = window.teaserPromise || null;
+            // Global cache for three-stage AI reports
+            window.initialTeaserCache = window.initialTeaserCache || null;
+            window.secondTeaserCache = window.secondTeaserCache || null;
+            window.fullReportCache = window.fullReportCache || null;
 
-            const generateTeaserWithGemini = async () => {
+            // AI Report Generation System - Stage 1: Initial Teaser (before name)
+            const generateInitialTeaserWithGemini = async () => {
                 // Return cached result if available
-                if (window.teaserCache) {
-                    console.log('🎯 Using cached teaser result');
-                    return window.teaserCache;
+                if (window.initialTeaserCache) {
+                    console.log('🎯 Using cached initial teaser result');
+                    return window.initialTeaserCache;
                 }
 
-                // Return existing promise if already generating
-                if (window.teaserPromise) {
-                    console.log('⏳ Teaser generation already in progress...');
-                    return window.teaserPromise;
-                }
-
-                // Create new promise
-                window.teaserPromise = (async () => {
-                    try {
-                        console.log('🤖 Generating teaser result with Gemini...');
-                        
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [{
-                                        text: "You're a vision expert creating a short, compelling teaser result. Based on their questionnaire answers, create a personalized teaser that triggers interest and makes them want to learn more.\n\n" +
-                                            "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
-                                            "REQUIREMENTS:\n" +
-                                            "- Keep the main result to 1-2 sentences maximum\n" +
-                                            "- Make it specific and personal, not generic\n" +
-                                            "- Focus on what they're missing or need to improve\n" +
-                                            "- Create urgency/interest to continue\n" +
-                                            "- Keep the insight short and actionable\n\n" +
-                                            "Return ONLY a JSON object with 'result' and 'insight' fields. No other text."
-                                    }]
-                                }],
-                                generationConfig: {
-                                    temperature: 0.7,
-                                    maxOutputTokens: 200
-                                }
-                            })
-                        });
-
-                        if (!response.ok) {
-                            const errorData = await response.json().catch(() => ({}));
-                            console.log(`❌ Gemini API error ${response.status}:`, errorData);
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        const text = data.candidates[0].content.parts[0].text.trim();
-                        
-                        // Try to parse as JSON
-                        let result;
-                        try {
-                            result = JSON.parse(text);
-                        } catch {
-                            // Fallback if not valid JSON
-                            result = {
-                                result: text.split('\n')[0] || "Your vision setup needs optimization.",
-                                insight: "A personalized analysis will reveal exactly what you need."
-                            };
-                        }
-
-                        // Cache the result
-                        window.teaserCache = result;
-                        console.log('✅ Teaser generated and cached!');
-                        return result;
-
-                    } catch (error) {
-                        console.error('❌ Error generating Gemini teaser:', error);
-                        const fallbackResult = generateTeaserFallback();
-                        window.teaserCache = fallbackResult; // Cache fallback too
-                        return fallbackResult;
-                    } finally {
-                        window.teaserPromise = null; // Reset promise
-                    }
-                })();
-
-                return window.teaserPromise;
-            };
-
-            const generateTeaserFallback = () => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
-                const glassesCount = answers[1] || 'One';
-                const glassesOwned = answers[2] || [];
-                const screenTime = answers[10] || 'Unknown';
-                const activities = answers[9] || [];
-                const eyeSymptoms = answers[12] || [];
-                const workEnvironment = answers[13] || {};
-                const stylePrefs = answers[17] || {};
-                
-                // Create highly personalized result based on multiple answer points
-                let result = "";
-                let insight = "";
-                
-                // Screen time + symptoms analysis
-                const hasEyeStrain = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Eye strain at screen');
-                const hasHeadaches = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Headaches related to eyesight');
-                const hasTiredEyes = Array.isArray(eyeSymptoms) && eyeSymptoms.includes('Tired eyes');
-                const highScreenTime = screenTime.includes('More than 8') || screenTime.includes('6-8');
-                
-                if (highScreenTime && (hasEyeStrain || hasHeadaches || hasTiredEyes)) {
-                    result = `With ${screenTime.toLowerCase()} of screen time daily and symptoms like ${eyeSymptoms.slice(0,2).join(' and ').toLowerCase()}, it seems like you might benefit from specialized computer glasses.`;
-                    insight = "Computer glasses with blue light filtering could help reduce these symptoms and improve your daily comfort.";
-                } else if (highScreenTime && !hasGlasses) {
-                    result = `Given your ${screenTime.toLowerCase()} of daily screen time, you might find computer glasses helpful for eye comfort.`;
-                    insight = "Even without prescription needs, computer glasses could make your work experience more comfortable.";
-                } 
-                // Active lifestyle analysis
-                else if (Array.isArray(activities) && (activities.includes('Exercise or play sports') || activities.includes('Spend time outdoors'))) {
-                    const activityList = activities.join(', ').toLowerCase();
-                    result = `With your active lifestyle including ${activityList}, it looks like you could benefit from specialized sports eyewear.`;
-                    insight = "Sports eyewear with impact resistance and UV protection might help keep you safe and performing at your best.";
-                }
-                // Multiple pairs analysis  
-                else if (glassesCount === 'One' && hasGlasses && Array.isArray(glassesOwned) && glassesOwned.length > 1) {
-                    result = `You have ${glassesOwned.join(', ').toLowerCase()} but seem to rely on one pair for everything. You might benefit from using different pairs for different activities.`;
-                    insight = "Having specialized pairs for different activities could improve your vision quality and comfort throughout the day.";
-                }
-                // Style-conscious users
-                else if (stylePrefs && Array.isArray(stylePrefs[0]) && stylePrefs[0].includes('Bold and statement-making')) {
-                    result = "Based on your style preferences, it seems like you value frames that make a statement and express your personality.";
-                    insight = "Finding frames that truly reflect your style could help you feel more confident and authentic.";
-                }
-                // No glasses but symptoms
-                else if (!hasGlasses && (hasEyeStrain || hasHeadaches || hasTiredEyes)) {
-                    const symptomList = eyeSymptoms.filter(s => s !== 'None of these').slice(0,2).join(' and ');
-                    result = `You mentioned experiencing ${symptomList.toLowerCase()}, which might indicate that glasses could be helpful for you.`;
-                    insight = "A professional eye exam could help determine what's causing these symptoms and whether glasses might help.";
-                }
-                // Default personalized
-                else {
-                    const personalDetails = [];
-                    if (hasGlasses) personalDetails.push('current glasses user');
-                    if (highScreenTime) personalDetails.push('heavy screen user');
-                    if (Array.isArray(activities) && activities.length > 0) personalDetails.push(activities[0].toLowerCase());
+                try {
+                    console.log('🤖 Generating initial teaser result with Gemini...');
                     
-                    result = `As a ${personalDetails.join(', ')}, it looks like your vision setup could potentially be optimized for your specific lifestyle.`;
-                    insight = "Small, targeted adjustments to your eyewear approach might make a noticeable difference in your daily comfort.";
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: "You're a vision expert creating an initial teaser report. Analyze their questionnaire answers and create a compelling teaser that makes them want to provide their name for more insights.\n\n" +
+                                        "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
+                                        "REQUIREMENTS:\n" +
+                                        "- Create urgency and curiosity\n" +
+                                        "- Identify their biggest vision challenge from answers\n" +
+                                        "- Be specific to their lifestyle (screen time, activities, symptoms)\n" +
+                                        "- Create FOMO - make them want the full analysis\n" +
+                                        "- Keep headline punchy, insight intriguing\n\n" +
+                                        "Return ONLY this JSON format:\n" +
+                                        '{\n' +
+                                        '  "headline": "Your Vision Profile: [Specific insight-based headline]",\n' +
+                                        '  "insight": "Based on your answers, [specific finding that surprises them - 2 sentences max]",\n' +
+                                        '  "hook": "[One compelling sentence that makes them want personalized recommendations]"\n' +
+                                        '}'
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.9,
+                                topK: 40,
+                                topP: 0.95,
+                                maxOutputTokens: 250,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                    const data = await response.json();
+                    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const cleanText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+                    
+                    let result = JSON.parse(cleanText);
+                    window.initialTeaserCache = result;
+                    console.log('✅ Initial teaser generated and cached!');
+                    return result;
+
+                } catch (error) {
+                    console.error('❌ Error generating initial teaser:', error);
+                    const fallbackResult = generateInitialTeaserFallback();
+                    window.initialTeaserCache = fallbackResult;
+                    return fallbackResult;
                 }
-                
-                return { result, insight };
             };
+
+            // AI Report Generation System - Stage 2: Second Teaser (after name)
+            const generateSecondTeaserWithGemini = async (userName) => {
+                // Return cached result if available
+                if (window.secondTeaserCache) {
+                    console.log('🎯 Using cached second teaser result');
+                    return window.secondTeaserCache;
+                }
+
+                try {
+                    console.log('🤖 Generating personalized second teaser with name...');
+                    
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You're a vision expert creating a personalized second teaser for ${userName}. Now that you have their name, make it more personal and reveal a deeper insight.\n\n` +
+                                        "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
+                                        "REQUIREMENTS:\n" +
+                                        `- Address them by name (${userName})\n` +
+                                        "- Reveal a more specific insight than the first teaser\n" +
+                                        "- Connect their lifestyle patterns (work, hobbies, symptoms)\n" +
+                                        "- Build anticipation for the full email report\n" +
+                                        "- Be conversational and personal\n\n" +
+                                        "Return ONLY this JSON format:\n" +
+                                        '{\n' +
+                                        '  "headline": "Hi [Name], here\'s what caught our attention...",\n' +
+                                        '  "personalInsight": "[Specific insight about their vision habits - 2-3 sentences using their name]",\n' +
+                                        '  "nextStep": "[What they can expect in the full email report]"\n' +
+                                        '}'
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.8,
+                                maxOutputTokens: 300,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                    const data = await response.json();
+                    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const cleanText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+                    
+                    let result = JSON.parse(cleanText);
+                    window.secondTeaserCache = result;
+                    console.log('✅ Second teaser generated and cached!');
+                    return result;
+
+                } catch (error) {
+                    console.error('❌ Error generating second teaser:', error);
+                    const fallbackResult = generateSecondTeaserFallback(userName);
+                    window.secondTeaserCache = fallbackResult;
+                    return fallbackResult;
+                }
+            };
+
+            // AI Report Generation System - Stage 3: Full Report Card (email)
+            const generateFullReportWithGemini = async (userName) => {
+                try {
+                    console.log('🤖 Generating comprehensive email report...');
+                    
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `Create a comprehensive vision report card for ${userName}. This is their complete analysis for the confirmation email.\n\n` +
+                                        "Their detailed answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
+                                        "REQUIREMENTS:\n" +
+                                        "- Personal greeting using their name\n" +
+                                        "- Executive summary of their vision profile\n" +
+                                        "- 3-4 key findings with explanations\n" +
+                                        "- Specific recommendations based on their lifestyle\n" +
+                                        "- Action items they can take\n" +
+                                        "- Professional tone but friendly\n" +
+                                        "- Include relevant statistics/facts\n\n" +
+                                        "Return ONLY this JSON format:\n" +
+                                        '{\n' +
+                                        '  "greeting": "Dear [Name], here\'s your comprehensive vision analysis",\n' +
+                                        '  "executiveSummary": "[2-3 sentence overview of their vision profile]",\n' +
+                                        '  "keyFindings": [\n' +
+                                        '    {\n' +
+                                        '      "title": "[Finding title]",\n' +
+                                        '      "description": "[Detailed explanation]",\n' +
+                                        '      "impact": "[Why this matters for them]"\n' +
+                                        '    }\n' +
+                                        '  ],\n' +
+                                        '  "recommendations": "[Specific actionable advice]",\n' +
+                                        '  "nextSteps": "[What they should do next]"\n' +
+                                        '}'
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 800,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                    const data = await response.json();
+                    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const cleanText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+                    
+                    return JSON.parse(cleanText);
+
+                } catch (error) {
+                    console.error('❌ Error generating full report:', error);
+                    return generateFullReportFallback(userName);
+                }
+            };
+
+            // Legacy compatibility
+            const generateTeaserWithGemini = generateInitialTeaserWithGemini;
+
+            // Fallback functions for each stage
+            const generateInitialTeaserFallback = () => {
+                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const screenTime = answers[10] || 'Unknown';
+                const symptoms = answers[11] || [];
+                
+                return {
+                    headline: hasGlasses ? "Your Vision Profile: Multi-Tasking Eyes Under Stress" : "Your Vision Profile: Hidden Strain Detected",
+                    insight: hasGlasses ? 
+                        "Your current glasses are working overtime to handle multiple visual distances, potentially causing unnecessary eye fatigue." :
+                        "Even with good natural vision, your screen habits suggest developing eye strain patterns that could worsen over time.",
+                    hook: "Discover your personalized vision optimization plan - enter your name to see what we found."
+                };
+            };
+
+            const generateSecondTeaserFallback = (userName) => {
+                const screenTime = answers[10] || 'Unknown';
+                const symptoms = answers[11] || [];
+                const hasSymptoms = symptoms.length > 0 && !symptoms.includes('None of these');
+                
+                return {
+                    headline: `Hi ${userName}, here's what caught our attention...`,
+                    personalInsight: hasSymptoms ?
+                        `${userName}, your combination of ${screenTime} screen time and reported symptoms suggests your eyes are sending clear signals for help. The patterns in your responses indicate this isn't just temporary fatigue.` :
+                        `${userName}, while you're not experiencing major symptoms yet, your visual demands are setting you up for future eye strain. Prevention is always easier than treatment.`,
+                    nextStep: "Your complete vision analysis with specific recommendations will arrive in your inbox shortly."
+                };
+            };
+
+            const generateFullReportFallback = (userName) => {
+                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const screenTime = answers[10] || 'Unknown';
+                const symptoms = answers[11] || [];
+                
+                return {
+                    greeting: `Dear ${userName}, here's your comprehensive vision analysis`,
+                    executiveSummary: hasGlasses ?
+                        "Your vision profile reveals a common pattern: hardworking eyes managing multiple visual demands with suboptimal tools. You're likely experiencing more strain than necessary." :
+                        "Your profile shows good natural vision facing increasing digital demands. Early optimization can prevent the eye strain issues that affect 80% of computer users.",
+                    keyFindings: [
+                        {
+                            title: "Visual Workload Assessment",
+                            description: `Your ${screenTime} of daily screen time requires specialized focusing support that standard vision correction doesn't address.`,
+                            impact: "This mismatch between visual demands and optical support contributes to end-of-day eye fatigue."
+                        },
+                        {
+                            title: "Strain Prevention Opportunity",
+                            description: "Your current setup can be optimized to reduce accommodation demand by 60-70% through task-specific prescriptions.",
+                            impact: "This could eliminate the 3pm energy dip that many screen users experience."
+                        }
+                    ],
+                    recommendations: "Consider computer-specific glasses with blue light filtering and anti-reflective coating. A reading prescription optimized for your screen distance would significantly reduce eye muscle fatigue.",
+                    nextSteps: "Schedule an eye exam mentioning your screen time habits. Bring this report to ensure your eye care professional addresses your specific visual environment."
+                };
+            };
+
+            // Legacy fallback
+            const generateTeaserFallback = generateInitialTeaserFallback;
 
             const generatePersonalizedResult = async () => {
                 try {
@@ -3798,26 +3899,183 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     );
                 }
 
-                // Step 2: Personal result + data capture
+                // Step 2: Initial teaser result + name capture
                 if (resultStep === 'result') {
-                    // Use cached result directly or fallback
-                    const personalizedResult = window.teaserCache || generateTeaserFallback();
-                    console.log('📊 Result screen - using teaser result:', personalizedResult);
+                    // Generate initial teaser
+                    const [initialTeaserResult, setInitialTeaserResult] = useState(null);
+                    const [isGeneratingInitial, setIsGeneratingInitial] = useState(false);
+                    
+                    // Generate teaser on mount if not already generated
+                    React.useEffect(() => {
+                        if (!initialTeaserResult && !isGeneratingInitial) {
+                            setIsGeneratingInitial(true);
+                            generateInitialTeaserWithGemini()
+                                .then(result => {
+                                    setInitialTeaserResult(result);
+                                    setIsGeneratingInitial(false);
+                                })
+                                .catch(error => {
+                                    console.error('Error generating initial teaser:', error);
+                                    setInitialTeaserResult(generateInitialTeaserFallback());
+                                    setIsGeneratingInitial(false);
+                                });
+                        }
+                    }, []);
+                    
+                    const displayResult = initialTeaserResult || generateInitialTeaserFallback();
                     
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
                         React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Here's your Vision Match result 👇"),
                         
+                        // Display initial teaser
                         React.createElement('div', { className: "visionmatch-card p-6 shadow-lg bg-blue-50 border-l-4 border-primary-blue mb-8" },
-                            React.createElement('p', { className: "text-lg text-blue-900 mb-4 font-semibold" }, 
-                                personalizedResult.result
-                            ),
-                            React.createElement('p', { className: "text-blue-800" },
-                                personalizedResult.insight
-                            ),
-                            React.createElement('p', { className: "text-blue-700 mt-4 text-sm font-medium" },
-                                "Good news: With VisionMatch you'll never pay for lens upgrades — they're free for life."
+                            isGeneratingInitial ? 
+                                React.createElement('div', { className: "text-center py-4" },
+                                    React.createElement('div', { className: "animate-pulse text-blue-600" }, "🤖 Analyzing your vision profile..."),
+                                    React.createElement('p', { className: "text-sm text-blue-500 mt-2" }, "This will only take a moment")
+                                ) : 
+                                React.createElement(React.Fragment, null,
+                                    React.createElement('h3', { className: "text-xl font-bold text-blue-900 mb-4" }, displayResult.headline),
+                                    React.createElement('p', { className: "text-lg text-blue-800 mb-4" }, displayResult.insight),
+                                    React.createElement('p', { className: "text-blue-700 font-medium" }, displayResult.hook)
+                                )
+                        ),
+                        
+                        // Name input section
+                        React.createElement('div', { className: "visionmatch-card p-6" },
+                            React.createElement('h3', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Get Your Personalized Recommendations"),
+                            React.createElement('p', { className: "text-gray-600 mb-4" }, "Enter your name to unlock your detailed vision analysis and next steps."),
+                            React.createElement('div', { className: "space-y-4" },
+                                React.createElement('input', {
+                                    type: "text",
+                                    placeholder: "Your first name",
+                                    value: userName,
+                                    onChange: (e) => setUserName(e.target.value),
+                                    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
+                                }),
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        if (userName.trim()) {
+                                            setResultStep('nameTeaser');
+                                        }
+                                    },
+                                    disabled: !userName.trim(),
+                                    className: "w-full visionmatch-button px-6 py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                }, userName.trim() ? `Show ${userName}'s Analysis` : "Enter Your Name First")
+                            )
+                        )
+                    );
+                }
+                
+                // Step 3: Second teaser with name
+                if (resultStep === 'nameTeaser') {
+                    const [secondTeaserResult, setSecondTeaserResult] = useState(null);
+                    const [isGeneratingSecond, setIsGeneratingSecond] = useState(false);
+                    
+                    // Generate second teaser on mount
+                    React.useEffect(() => {
+                        if (!secondTeaserResult && !isGeneratingSecond && userName.trim()) {
+                            setIsGeneratingSecond(true);
+                            generateSecondTeaserWithGemini(userName)
+                                .then(result => {
+                                    setSecondTeaserResult(result);
+                                    setIsGeneratingSecond(false);
+                                })
+                                .catch(error => {
+                                    console.error('Error generating second teaser:', error);
+                                    setSecondTeaserResult(generateSecondTeaserFallback(userName));
+                                    setIsGeneratingSecond(false);
+                                });
+                        }
+                    }, [userName]);
+                    
+                    const displaySecondResult = secondTeaserResult || generateSecondTeaserFallback(userName);
+                    
+                    return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
+                        // Second teaser display
+                        React.createElement('div', { className: "visionmatch-card p-6 shadow-lg bg-green-50 border-l-4 border-green-400 mb-8" },
+                            isGeneratingSecond ? 
+                                React.createElement('div', { className: "text-center py-4" },
+                                    React.createElement('div', { className: "animate-pulse text-green-600" }, `🔍 Personalizing analysis for ${userName}...`),
+                                    React.createElement('p', { className: "text-sm text-green-500 mt-2" }, "Connecting the dots from your answers")
+                                ) : 
+                                React.createElement(React.Fragment, null,
+                                    React.createElement('h3', { className: "text-xl font-bold text-green-900 mb-4" }, displaySecondResult.headline),
+                                    React.createElement('p', { className: "text-lg text-green-800 mb-4" }, displaySecondResult.personalInsight),
+                                    React.createElement('p', { className: "text-green-700 font-medium" }, displaySecondResult.nextStep)
+                                )
+                        ),
+                        
+                        // Email input for full report
+                        React.createElement('div', { className: "visionmatch-card p-6" },
+                            React.createElement('h3', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Get Your Complete Vision Report"),
+                            React.createElement('p', { className: "text-gray-600 mb-4" }, "We'll send your comprehensive analysis and recommendations to your email, plus help you find local eye care professionals."),
+                            React.createElement('div', { className: "space-y-4" },
+                                React.createElement('input', {
+                                    type: "email",
+                                    placeholder: "Your email address",
+                                    value: userEmail,
+                                    onChange: (e) => setUserEmail(e.target.value),
+                                    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
+                                }),
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        if (userEmail.trim() && userName.trim()) {
+                                            setResultStep('optician');
+                                        }
+                                    },
+                                    disabled: !userEmail.trim() || !userName.trim(),
+                                    className: "w-full visionmatch-button px-6 py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                }, "Continue to Eye Care Professionals")
+                            )
+                        )
+                    );
+                }
+                
+                // Step 4: Optician selection (existing)
+                if (resultStep === 'optician') {
+                    const mockOpticians = [
+                        { id: 1, name: "VisionCare Optometry", address: "123 Main St", hours: "Mon-Fri 9-6, Sat 9-4", distance: "0.5 mi" },
+                        { id: 2, name: "EyeHealth Partners", address: "456 Oak Ave", hours: "Mon-Sat 8-7", distance: "1.2 mi" },
+                        { id: 3, name: "ClearSight Vision Center", address: "789 Pine Rd", hours: "Tue-Fri 10-8, Sat 9-5", distance: "2.1 mi" }
+                    ];
+                    
+                    return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
+                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Choose Your Eye Care Professional"),
+                        React.createElement('p', { className: "text-gray-600 mb-6" }, "We've found highly-rated optometrists near you who can help with your vision needs."),
+                        
+                        React.createElement('div', { className: "space-y-4" },
+                            mockOpticians.map(optician =>
+                                React.createElement('div', { 
+                                    key: optician.id,
+                                    className: `visionmatch-card p-4 cursor-pointer border-2 transition-colors ${
+                                        selectedOptician?.id === optician.id 
+                                            ? 'border-primary-blue bg-blue-50' 
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    }`,
+                                    onClick: () => setSelectedOptician(optician)
+                                },
+                                    React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                        React.createElement('h3', { className: "font-semibold text-lg" }, optician.name),
+                                        React.createElement('span', { className: "text-sm text-gray-500" }, optician.distance)
+                                    ),
+                                    React.createElement('p', { className: "text-gray-600 text-sm mb-1" }, optician.address),
+                                    React.createElement('p', { className: "text-gray-500 text-sm" }, optician.hours)
+                                )
                             )
                         ),
+                        
+                        React.createElement('button', {
+                            onClick: () => selectedOptician && setResultStep('timeSlot'),
+                            disabled: !selectedOptician,
+                            className: "w-full visionmatch-button px-6 py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        }, selectedOptician ? `Book with ${selectedOptician.name}` : "Select an Eye Care Professional"),
+                        
+                        React.createElement('div', { className: "text-center text-gray-500 text-sm" },
+                            React.createElement('p', null, "💡 All appointments include a comprehensive eye exam and VisionMatch consultation")
+                        )
+                    );
+                }
                         
                         React.createElement('div', { className: "visionmatch-card p-6 shadow-sm" },
                             React.createElement('div', { className: "space-y-4" },
@@ -3986,12 +4244,34 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     );
                 }
 
-                // Step 6: Email Confirmation Screen
+                // Step 6: Email Confirmation Screen with Full Report
                 if (resultStep === 'emailConfirmation') {
-                    // Get the cached result directly since teaser generation is working
-                    const emailPersonalizedResult = window.teaserCache || generateTeaserFallback();
+                    const [fullReport, setFullReport] = useState(null);
+                    const [isGeneratingReport, setIsGeneratingReport] = useState(false);
                     
-                    console.log('📧 Email confirmation - using result:', emailPersonalizedResult);
+                    // Generate comprehensive report for email
+                    React.useEffect(() => {
+                        if (!fullReport && !isGeneratingReport && userName.trim()) {
+                            setIsGeneratingReport(true);
+                            generateFullReportWithGemini(userName)
+                                .then(result => {
+                                    setFullReport(result);
+                                    setIsGeneratingReport(false);
+                                    // Cache for potential re-use
+                                    window.fullReportCache = result;
+                                })
+                                .catch(error => {
+                                    console.error('Error generating full report:', error);
+                                    const fallback = generateFullReportFallback(userName);
+                                    setFullReport(fallback);
+                                    setIsGeneratingReport(false);
+                                    window.fullReportCache = fallback;
+                                });
+                        }
+                    }, [userName]);
+                    
+                    const displayReport = fullReport || generateFullReportFallback(userName);
+                    console.log('📧 Email confirmation - using full report:', displayReport);
                     
                     const today = new Date();
                     const examDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week from now
@@ -4050,20 +4330,54 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                         "Your optician will contact you if they need to adjust your time, but you're all set."
                                     ),
                                     
-                                    // Your Vision Match Results section - Expert Optician Analysis
+                                    // Comprehensive AI Report Section
                                     React.createElement('div', { className: "border-t border-gray-200 pt-6 mb-6" },
-                                        React.createElement('h4', { className: "text-xl font-bold text-gray-800 mb-4" }, "👨‍⚕️ Your Expert Vision Analysis"),
-                                        React.createElement('div', { className: "bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl" },
-                                            React.createElement('div', { className: "space-y-6" },
-                                                // Expert introduction
-                                                React.createElement('div', { className: "bg-white p-4 rounded-lg border-l-4 border-blue-500" },
-                                                    React.createElement('p', { className: "text-gray-700 text-sm italic mb-2" },
-                                                        "Analysis by your VisionMatch expert optician with 30+ years of experience"
+                                        React.createElement('h4', { className: "text-xl font-bold text-gray-800 mb-4" }, "📊 Your Comprehensive Vision Report"),
+                                        
+                                        isGeneratingReport ? 
+                                            React.createElement('div', { className: "text-center py-8" },
+                                                React.createElement('div', { className: "animate-pulse text-primary-blue text-lg mb-2" }, "🤖 Generating your personalized report..."),
+                                                React.createElement('p', { className: "text-gray-500 text-sm" }, "Our AI is analyzing your responses to create detailed recommendations")
+                                            ) :
+                                            React.createElement('div', { className: "bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl" },
+                                                React.createElement('div', { className: "space-y-6" },
+                                                    // Greeting
+                                                    React.createElement('div', { className: "bg-white p-4 rounded-lg border-l-4 border-green-500" },
+                                                        React.createElement('p', { className: "text-gray-800 font-semibold text-lg" }, displayReport.greeting),
+                                                        React.createElement('p', { className: "text-gray-700 mt-2" }, displayReport.executiveSummary)
                                                     ),
-                                                    React.createElement('p', { className: "text-gray-800 font-semibold" },
-                                                        emailPersonalizedResult.result
+                                                    
+                                                    // Key Findings
+                                                    React.createElement('div', { className: "bg-white p-6 rounded-lg" },
+                                                        React.createElement('h5', { className: "font-bold text-gray-800 mb-4" }, "🔍 Key Findings"),
+                                                        React.createElement('div', { className: "space-y-4" },
+                                                            displayReport.keyFindings && displayReport.keyFindings.map((finding, index) =>
+                                                                React.createElement('div', { 
+                                                                    key: index,
+                                                                    className: "bg-blue-50 p-4 rounded-lg border-l-3 border-blue-400"
+                                                                },
+                                                                    React.createElement('h6', { className: "font-semibold text-blue-900 mb-2" }, finding.title),
+                                                                    React.createElement('p', { className: "text-blue-800 mb-2" }, finding.description),
+                                                                    React.createElement('p', { className: "text-blue-700 text-sm font-medium" }, `Impact: ${finding.impact}`)
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
+                                                    
+                                                    // Recommendations
+                                                    React.createElement('div', { className: "bg-white p-6 rounded-lg" },
+                                                        React.createElement('h5', { className: "font-bold text-gray-800 mb-3" }, "💡 Personalized Recommendations"),
+                                                        React.createElement('p', { className: "text-gray-700" }, displayReport.recommendations)
+                                                    ),
+                                                    
+                                                    // Next Steps
+                                                    React.createElement('div', { className: "bg-white p-6 rounded-lg" },
+                                                        React.createElement('h5', { className: "font-bold text-gray-800 mb-3" }, "🎯 Your Next Steps"),
+                                                        React.createElement('p', { className: "text-gray-700" }, displayReport.nextSteps)
                                                     )
-                                                ),
+                                                )
+                                            )
+                                    ),
                                                 
                                                 // Detailed expert analysis function
                                                 (() => {

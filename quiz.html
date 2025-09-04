@@ -4229,52 +4229,6 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         )
                     );
                 }
-                        
-                        React.createElement('div', { className: "visionmatch-card p-6 shadow-sm" },
-                            React.createElement('div', { className: "space-y-4" },
-                                React.createElement('div', null,
-                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Name"),
-                                    React.createElement('input', {
-                                        type: "text",
-                                        value: userName,
-                                        onChange: (e) => setUserName(e.target.value),
-                                        className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent",
-                                        placeholder: "Your full name"
-                                    })
-                                ),
-                                React.createElement('div', null,
-                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Email"),
-                                    React.createElement('input', {
-                                        type: "email",
-                                        value: userEmail,
-                                        onChange: (e) => setUserEmail(e.target.value),
-                                        className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent",
-                                        placeholder: "your.email@example.com"
-                                    })
-                                ),
-                                React.createElement('div', null,
-                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "ZIP Code"),
-                                    React.createElement('input', {
-                                        type: "text",
-                                        value: userZipCode,
-                                        onChange: (e) => setUserZipCode(e.target.value),
-                                        className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent",
-                                        placeholder: "Enter zip code to find nearest opticians"
-                                    })
-                                ),
-                                React.createElement('button', {
-                                    onClick: () => setResultStep('optician'),
-                                    disabled: !userName || !userEmail || userZipCode.length < 5,
-                                    className: `w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                                        userName && userEmail && userZipCode.length >= 5
-                                            ? 'bg-primary-blue text-white hover:bg-primary-blue-dark'
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`
-                                }, "Send My Result & Find My Free Exam")
-                            )
-                        )
-                    );
-                }
 
                 // Step 3: Optician selection
                 if (resultStep === 'optician') {

@@ -4230,50 +4230,6 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     );
                 }
 
-                // Step 3: Optician selection
-                if (resultStep === 'optician') {
-                    const mockOpticians = [
-                        { id: 1, name: "VisionCare Optometry", address: "123 Main St", hours: "Mon-Fri 9-6, Sat 9-4", distance: "0.5 mi" },
-                        { id: 2, name: "Clear Sight Center", address: "456 Oak Ave", hours: "Mon-Sat 8-7", distance: "1.2 mi" },  
-                        { id: 3, name: "Precision Eye Care", address: "789 Pine Rd", hours: "Tue-Sat 10-6", distance: "1.8 mi" }
-                    ];
-
-                    return React.createElement('div', { className: "space-y-6 max-w-2xl mx-auto" },
-                        React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4" }, "Choose your free eye exam location"),
-                        React.createElement('p', { className: "text-gray-600 mb-6" }, "Remember that you can add your existing glasses into the vision plan so that you can get a free lens upgrade when it's time to change them"),
-                        
-                        React.createElement('div', { className: "space-y-4" },
-                            mockOpticians.map(optician =>
-                                React.createElement('div', {
-                                    key: optician.id,
-                                    onClick: () => setSelectedOptician(optician),
-                                    className: `visionmatch-card p-4 cursor-pointer transition-all ${
-                                        selectedOptician?.id === optician.id 
-                                            ? 'border-2 border-primary-blue bg-blue-50' 
-                                            : 'border border-gray-200 hover:border-primary-blue'
-                                    }`
-                                },
-                                    React.createElement('div', { className: "flex justify-between items-start" },
-                                        React.createElement('div', { className: "flex-1" },
-                                            React.createElement('h3', { className: "font-semibold text-gray-800 mb-1" }, optician.name),
-                                            React.createElement('p', { className: "text-gray-600 text-sm mb-1" }, optician.address),
-                                            React.createElement('p', { className: "text-gray-500 text-sm" }, optician.hours)
-                                        ),
-                                        React.createElement('div', { className: "text-right" },
-                                            React.createElement('p', { className: "text-sm text-primary-blue font-medium" }, optician.distance),
-                                            React.createElement('p', { className: "text-xs text-gray-500" }, "walking time")
-                                        )
-                                    )
-                                )
-                            )
-                        ),
-                        
-                        selectedOptician && React.createElement('button', {
-                            onClick: () => setResultStep('timeSlot'),
-                            className: "w-full visionmatch-button py-3 px-6 font-semibold"
-                        }, "Choose & Book")
-                    );
-                }
 
                 // Step 4: Time slot selection
                 if (resultStep === 'timeSlot') {
@@ -4700,6 +4656,7 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     );
                 }
 
+                // Default insights view
                 return React.createElement('div', { className: "space-y-8" },
                     React.createElement('div', { className: "text-center" },
                         React.createElement('div', { className: "w-20 h-20 visionmatch-gradient rounded-full flex items-center justify-center mx-auto mb-6" },
@@ -4828,8 +4785,7 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
             return React.createElement('div', { className: "min-h-screen pt-32 pb-12" },
                 // VisionMatch Header
                 React.createElement('div', { className: "text-center mb-8" },
-                    React.createElement('div', { className: "max-w-2xl mx-auto px-4" }
-                    )
+                    React.createElement('div', { className: "max-w-2xl mx-auto px-4" })
                 ),
                 React.createElement('div', { className: currentStep >= questions.length ? "max-w-4xl mx-auto px-4" : (questions[currentStep]?.type === 'celebration' ? "w-full" : "quiz-layout") },
                     currentStep >= questions.length ? React.createElement('div', { className: "w-full" },

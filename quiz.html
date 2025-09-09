@@ -514,6 +514,78 @@
             min-height: 600px;
         }
 
+        .question-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
+            z-index: 40;
+        }
+        
+        .question-nav-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Add padding to main content to account for fixed nav */
+        .quiz-layout {
+            padding-bottom: 80px;
+        }
+
+        .question-nav h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .nav-button {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            color: #6b7280;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover:not(.nav-button-current) {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .nav-button-answered {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .nav-button-answered:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .nav-button-current {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+            cursor: default;
+        }
+
         .quiz-sidebar {
             position: sticky;
             top: 120px;
@@ -571,7 +643,6 @@
             border-radius: 3px;
             transition: width 0.3s ease;
         }
-
         @media (max-width: 1200px) {
             .quiz-layout {
                 grid-template-columns: 1fr;
@@ -799,6 +870,7 @@
             const [availableTimes, setAvailableTimes] = useState([]);
             const [userZipCode, setUserZipCode] = useState('');
             const [userName, setUserName] = useState('');
+            const [userLastName, setUserLastName] = useState('');
             const [userEmail, setUserEmail] = useState('');
             const [resultStep, setResultStep] = useState('transition');
             const [selectedOptician, setSelectedOptician] = useState(null);
@@ -806,6 +878,98 @@
             const [showAllBrands, setShowAllBrands] = useState(false);
             const [expandedDetails, setExpandedDetails] = useState({});
             const [detailAnswers, setDetailAnswers] = useState({});
+            const [opticianDescriptions, setOpticianDescriptions] = useState({});
+            
+            // Move all conditional state and effects to unconditional hooks
+            const [initialTeaserResult, setInitialTeaserResult] = useState(null);
+            const [isGeneratingInitial, setIsGeneratingInitial] = useState(false);
+            const [secondTeaserResult, setSecondTeaserResult] = useState(null);
+            const [isGeneratingSecond, setIsGeneratingSecond] = useState(false);
+            const [fullReport, setFullReport] = useState(null);
+            const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+            // Generate full report first, then create teasers from it
+            React.useEffect(() => {
+                if (resultStep === 'result' && !fullReport && !isGeneratingReport) {
+                    setIsGeneratingReport(true);
+                    generateFullReportWithGemini("User") // Generate full report first without name
+                        .then(result => {
+                            setFullReport(result);
+                            setIsGeneratingReport(false);
+                            window.fullReportCache = result;
+                            
+                            // Now generate first teaser - using fallback for now to avoid undefined issues
+                            if (!initialTeaserResult && !isGeneratingInitial) {
+                                setIsGeneratingInitial(true);
+                                const fallbackTeaser = generateInitialTeaserFallback();
+                                setInitialTeaserResult(fallbackTeaser);
+                                setIsGeneratingInitial(false);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error generating full report:', error);
+                            const fallbackReport = generateFullReportFallback("User");
+                            setFullReport(fallbackReport);
+                            setIsGeneratingReport(false);
+                            window.fullReportCache = fallbackReport;
+                            
+                            // Generate fallback teaser
+                            const fallbackTeaser = generateInitialTeaserFallback();
+                            setInitialTeaserResult(fallbackTeaser);
+                            setIsGeneratingInitial(false);
+                        });
+                }
+            }, [resultStep, fullReport, isGeneratingReport, initialTeaserResult, isGeneratingInitial]);
+
+            React.useEffect(() => {
+                if (resultStep === 'nameTeaser' && !secondTeaserResult && !isGeneratingSecond && userName.trim() && fullReport) {
+                    setIsGeneratingSecond(true);
+                    const teaserResult = generateSecondTeaserFromReport(fullReport, userName);
+                    setSecondTeaserResult(teaserResult);
+                    setIsGeneratingSecond(false);
+                }
+            }, [resultStep, userName, secondTeaserResult, isGeneratingSecond, fullReport]);
+
+            React.useEffect(() => {
+                // Update the full report with the user's name when we reach email confirmation
+                if (resultStep === 'emailConfirmation' && fullReport && userName.trim() && fullReport.greeting && !fullReport.greeting.includes(userName)) {
+                    const updatedReport = {
+                        ...fullReport,
+                        greeting: fullReport.greeting.replace("User", userName).replace("Dear [Name]", `Dear ${userName}`)
+                    };
+                    setFullReport(updatedReport);
+                    window.fullReportCache = updatedReport;
+                }
+            }, [resultStep, userName, fullReport]);
+
+            // Generate optician descriptions when we have user data and are on optician step
+            React.useEffect(() => {
+                if (resultStep === 'optician' && userName && userLastName && userZipCode) {
+                    const mockOpticians = [
+                        { id: 1, name: "VisionCare Optometry", address: "123 Main St", hours: "Mon-Fri 9-6, Sat 9-4", distance: "0.5 mi" },
+                        { id: 2, name: "EyeHealth Partners", address: "456 Oak Ave", hours: "Mon-Sat 8-7", distance: "1.2 mi" },
+                        { id: 3, name: "ClearSight Vision Center", address: "789 Pine Rd", hours: "Tue-Fri 10-8, Sat 9-5", distance: "2.1 mi" }
+                    ];
+                    
+                    mockOpticians.forEach(async (optician) => {
+                        if (!opticianDescriptions[optician.id]) {
+                            try {
+                                const description = await generateOpticianDescriptionWithGemini(optician);
+                                setOpticianDescriptions(prev => ({
+                                    ...prev,
+                                    [optician.id]: description
+                                }));
+                            } catch (error) {
+                                console.error(`Error generating description for ${optician.name}:`, error);
+                                setOpticianDescriptions(prev => ({
+                                    ...prev,
+                                    [optician.id]: generateOpticianDescriptionFallback(optician)
+                                }));
+                            }
+                        }
+                    });
+                }
+            }, [resultStep, userName, userLastName, userZipCode, opticianDescriptions]);
 
             const questions = [
                 {
@@ -820,26 +984,28 @@
                     }
                 },
                 {
-                    type: 'single',
+                    type: 'multi-step',
                     section: "What You Have",
-                    question: "Give us more details on your current setup - How many pairs of glasses do you regularly use, including sunglasses?",
-                    options: ["One", "Two", "Three or more"],
-                    textField: {
-                        question: "Give us more details on your current eyewear setup:",
-                        placeholder: "e.g., I have reading glasses from 2019, use contacts most days but wear glasses for computer work, my prescription sunglasses are scratched...",
-                        alwaysVisible: true
-                    }
-                },
-                {
-                    type: 'multiple',
-                    section: "What You Have",
-                    question: "What glasses do you own?",
-                    options: ["Single vision", "Progressive", "Single vision sunglasses", "Progressive sunglasses", "Plain sunglasses"],
-                    textField: {
-                        question: "Care to give us more details on your current eyewear setup?",
-                        placeholder: "e.g., prescription strength, when you got them, how often you wear them, any issues or preferences...",
-                        alwaysVisible: true
-                    }
+                    question: "Tell us about your current eyewear setup",
+                    steps: [
+                        {
+                            question: "How many pairs of glasses do you regularly use, including sunglasses?",
+                            type: 'single',
+                            options: ["One", "Two", "Three or more"],
+                            fullWidth: true
+                        },
+                        {
+                            question: "What types of glasses do you own?",
+                            type: 'multiple',
+                            options: ["Single vision", "Progressive", "Single vision sunglasses", "Progressive sunglasses", "Plain sunglasses"],
+                            fullWidth: true,
+                            textField: {
+                                question: "Give us more details about your current eyewear setup:",
+                                placeholder: "e.g., prescription strength, when you got them, how often you wear them, reading glasses from 2019, prescription sunglasses are scratched, use contacts most days but wear glasses for computer work...",
+                                alwaysVisible: true
+                            }
+                        }
+                    ]
                 },
                 {
                     type: 'multi-step',
@@ -909,12 +1075,12 @@
                     options: ["Less than 1 year", "1-2 years", "2-3 years", "3+ years", "I don't have prescription sunglasses"],
                     conditional: (answers) => {
                         // Show this question only if user has prescription sunglasses (progressive or single vision)
-                        const question3Answers = answers[3] || [];
-                        console.log('Sunglasses conditional - answers[3]:', question3Answers, 'Type:', typeof question3Answers, 'Is array:', Array.isArray(question3Answers));
-                        if (!Array.isArray(question3Answers)) {
+                        const glassesTypesAnswer = answers[1] && answers[1][1] ? answers[1][1] : [];
+                        console.log('Sunglasses conditional - glasses types:', glassesTypesAnswer, 'Type:', typeof glassesTypesAnswer, 'Is array:', Array.isArray(glassesTypesAnswer));
+                        if (!Array.isArray(glassesTypesAnswer)) {
                             return false;
                         }
-                        return question3Answers.includes("Single vision sunglasses") || question3Answers.includes("Progressive sunglasses");
+                        return glassesTypesAnswer.includes("Single vision sunglasses") || glassesTypesAnswer.includes("Progressive sunglasses");
                     },
                     details: {
                         prompt: "If you give us more details, we will be able to provide better insights.",
@@ -973,22 +1139,47 @@
                             }
                         },
                         {
-                            question: "Any specific activities you'd like to mention?",
+                            question: "Which activities affect your vision needs most?",
                             type: 'multiple',
                             options: [], // Will be populated dynamically based on step 1
                             fullWidth: true,
                             gridLayout: true,
+                            maxColumns: 3,
                             conditionalOptions: {
-                                "Sports": ["Running/jogging", "Gym/fitness", "Team sports (football, basketball, etc.)", "Tennis/racquet sports", "Swimming", "Cycling", "Golf", "Martial arts", "Yoga/pilates", "Climbing/mountaineering", "Winter sports", "Water sports", "Other sports"],
-                                "Outdoor": ["Hiking/walking", "Camping", "Fishing/hunting", "Gardening", "Photography", "Bird watching", "Beach activities", "Picnics/BBQs", "Adventure sports", "Nature exploration", "Outdoor festivals", "Other outdoor activities"],
-                                "Reading": ["Fiction books", "Non-fiction/educational", "Magazines/newspapers", "E-books/digital reading", "Audiobooks", "Comics/graphic novels", "Professional/work reading", "Research/studying", "Book clubs", "Other reading"],
-                                "Watch shows": ["Movies/cinema", "TV series/streaming", "Documentaries", "Sports broadcasts", "News programs", "YouTube/online videos", "Live performances/theater", "Gaming streams", "Educational content", "Other viewing"],
-                                "Gaming": ["Video games (console)", "PC gaming", "Mobile gaming", "Board games", "Card games", "Online multiplayer", "Retro gaming", "Gaming tournaments", "Game development", "Other gaming"],
-                                "Other": ["Creative arts (painting, drawing, crafts)", "Music (playing instruments, composing)", "Photography/videography", "Cooking/baking", "Gardening/landscaping", "Home improvement/DIY", "Volunteer work", "Social activities/events", "Learning/education", "Travel/exploration", "Collecting hobbies", "Technology/programming", "Other activities"]
+                                "Sports": {
+                                    "High Impact": ["Team sports", "Martial arts", "Tennis/racquet"],
+                                    "Endurance": ["Running", "Cycling", "Swimming"],
+                                    "Precision": ["Golf", "Target sports", "Yoga/pilates"]
+                                },
+                                "Outdoor": {
+                                    "Active": ["Hiking", "Climbing", "Water activities"],
+                                    "Leisure": ["Photography", "Bird watching", "Gardening"],
+                                    "Variable Light": ["Beach", "Snow sports", "Camping"]
+                                },
+                                "Reading": {
+                                    "Close Work": ["Books", "E-readers", "Study materials"],
+                                    "Digital": ["Tablets", "Phones", "Computer reading"],
+                                    "Extended": ["Professional reading", "Research", "Magazines"]
+                                },
+                                "Watch shows": {
+                                    "Screen Time": ["TV/streaming", "Computer videos", "Gaming streams"],
+                                    "Social": ["Cinema", "Theater", "Live events"],
+                                    "Mixed Distance": ["Multiple screens", "Phone + TV", "Work + leisure"]
+                                },
+                                "Gaming": {
+                                    "Screen Focus": ["PC gaming", "Console gaming", "Mobile gaming"],
+                                    "Social Gaming": ["Board games", "Card games", "Tournaments"],
+                                    "VR/Extended": ["VR gaming", "Long sessions", "Competitive gaming"]
+                                },
+                                "Other": {
+                                    "Detail Work": ["Arts/crafts", "Photography", "DIY projects"],
+                                    "Variable Focus": ["Cooking", "Music", "Social activities"],
+                                    "Professional": ["Computer work", "Presentations", "Travel"]
+                                }
                             },
                             textField: {
-                                question: "Tell us about your special activities or spare time:",
-                                placeholder: "e.g., playing piano, photography, hiking, cooking gourmet meals, gaming tournaments, woodworking, gardening...",
+                                question: "Any specific vision challenges with your activities?",
+                                placeholder: "e.g., glasses fog during sports, hard to see phone outdoors, eye strain from gaming...",
                                 alwaysVisible: true
                             }
                         }
@@ -1146,7 +1337,7 @@
                         {
                             question: "What style do you like the most?",
                             type: 'multiple',
-                            options: ["Classic and timeless (clean lines, traditional shapes)", "Modern and minimalist (sleek, simple, contemporary)", "Bold and statement-making (eye-catching, unique designs)", "Sporty and functional (durable, active lifestyle)", "Luxury and premium (high-end materials, designer brands)", "Trendy and fashion-forward (latest styles, cutting-edge)", "Professional and conservative (business-appropriate, understated)", "Creative and artistic (unique, expressive, unconventional)", "I care about the fit, not the style", "No specific preference"],
+                            options: ["Classic & Professional", "Modern & Minimalist", "Bold & Expressive", "Sporty & Functional", "No specific preference - I'm open to suggestions"],
                             fullWidth: true
                         },
                         {
@@ -1155,16 +1346,11 @@
                             options: ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "No brand preference"], // Default fallback options
                             gridLayout: true,
                             conditionalOptions: {
-                                "Classic and timeless": ["Ray-Ban", "Persol", "Oliver Peoples", "Silhouette", "Moscot", "Local independent opticians", "General Óptica", "Multiópticas", "No brand preference"],
-                                "Modern and minimalist": ["Lindberg", "Mykita", "ic! berlin", "Ace & Tate", "Cubitts", "General Óptica", "Multiópticas", "No brand preference"],
-                                "Bold and statement-making": ["Tom Ford", "Dior", "Gucci", "Versace", "Etnia Barcelona", "Theo", "Local independent opticians", "No brand preference"],
-                                "Sporty and functional": ["Oakley", "Nike", "Maui Jim", "Revo", "Adidas", "Under Armour", "General Óptica", "Multiópticas"],
-                                "Luxury and premium": ["Tom Ford", "Cartier", "Chanel", "Oliver Peoples", "Dita", "Lindberg", "Local independent opticians", "No brand preference"],
-                                "Trendy and fashion-forward": ["Gucci", "Saint Laurent", "Prada", "Garrett Leight", "Kirk & Kirk", "Ace & Tate", "Local independent opticians", "No brand preference"],
-                                "Professional and conservative": ["Ray-Ban", "Oliver Peoples", "Silhouette", "Lindberg", "General Óptica", "Multiópticas", "Local independent opticians", "No brand preference"],
-                                "Creative and artistic": ["Mykita", "Theo", "L.A. Eyeworks", "Etnia Barcelona", "Local artisan frames", "Boutique brands", "Local independent opticians", "No brand preference"],
-                                "I care about the fit, not the style": ["Focus on comfort and fit", "Local independent opticians", "General Óptica", "Multiópticas", "Quality over brand", "No brand preference"],
-                                "No specific preference": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Focus on fit and comfort", "No brand preference"]
+                                "Classic & Professional": ["Ray-Ban", "Oliver Peoples", "Persol", "Silhouette", "Giorgio Armani", "Hugo Boss", "General Óptica", "Multiópticas", "No brand preference"],
+                                "Modern & Minimalist": ["Lindberg", "Mykita", "ic! berlin", "Warby Parker", "Ace & Tate", "JINS", "General Óptica", "Multiópticas", "No brand preference"],
+                                "Bold & Expressive": ["Tom Ford", "Gucci", "Prada", "Etnia Barcelona", "Face à Face", "Theo Eyewear", "Local boutique brands", "No brand preference"],
+                                "Sporty & Functional": ["Oakley", "Nike Vision", "Adidas Eyewear", "Maui Jim", "Rudy Project", "Smith Optics", "General Óptica", "Multiópticas", "No brand preference"],
+                                "No specific preference - I'm open to suggestions": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Best value options", "Comfort-focused brands", "No brand preference"]
                             },
                             textField: {
                                 question: "Tell us more about your personal style and what you're really looking for:",
@@ -1197,7 +1383,6 @@
                     }
                 }
             ];
-
             // Educational content generator - dynamic, verified, and engaging
             const getEducationalContent = (questionIndex, currentAnswers) => {
                 const question = questions[questionIndex];
@@ -1769,7 +1954,7 @@
                         freeTimeDetails: answers[9]?.['1_text'] // Text field from step 2
                     };
 
-                    const prompt = `Based on their quiz answers, create a SHORT (1 sentence), funny, personal observation that shows you're paying attention to what they actually wrote. Focus especially on their free text responses. Be playful, witty, and insightful - NOT sales-y. Make them laugh or think "wow, they get me":
+                    const prompt = `You are a master optometrist with 20 years of experience. Based on all the quiz answers so far, create a short, insightful, personal observation that will add value to the user. user relevant facts or statistics. make is 1-2 short sentences maximum. Specifically consider any answer they have given in plain text beyond the multiple choice answers.
 
 Current glasses: ${relevantAnswers.currentGlasses}
 What they wrote about vision needs: "${relevantAnswers.glassesDetailsText}"
@@ -1783,7 +1968,6 @@ How they use glasses: ${relevantAnswers.glassesUsage}
 What they wrote about usage: "${relevantAnswers.glassesUsageText}"
 Free time activities: ${relevantAnswers.freeTimeActivities}
 What they wrote about activities: "${relevantAnswers.freeTimeDetails}"
-
 PAY SPECIAL ATTENTION to what they wrote in text fields - their specific details, complaints, activities. Pick up on quirky details or contradictions.
 
 Examples of the playful, observational tone I want:
@@ -2395,7 +2579,6 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     default: return Sparkles;
                 }
             };
-
             const getSectionInsights = (sectionName, answers) => {
                 const generateDynamicInsight = (section) => {
                     // Helper function to find answer by question text
@@ -2874,7 +3057,6 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 
                 return null;
             };
-
             const renderQuestion = () => {
                 if (currentStep >= questions.length) return renderResults();
                 
@@ -3163,38 +3345,95 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                                         : "grid grid-cols-2 md:grid-cols-3 gap-3"
                                     },
                                         (() => {
-                                            // Handle conditional options based on previous step
-                                            let optionsToRender = step.options;
-                                            if (step.conditionalOptions && stepIndex > 0) {
-                                                const stepAnswers = answers[currentStep] || {};
-                                                const previousAnswer = stepAnswers[stepIndex - 1];
-                                                if (previousAnswer) {
-                                                    // Handle both single answers and multiple selections
-                                                    const selections = Array.isArray(previousAnswer) ? previousAnswer : [previousAnswer];
-                                                    let combinedOptions = new Set();
-                                                    
-                                                    selections.forEach(selection => {
-                                                        if (step.conditionalOptions[selection]) {
-                                                            step.conditionalOptions[selection].forEach(option => 
-                                                                combinedOptions.add(option)
-                                                            );
+                                            const { optionsToRender, isGroupedOptions } = (() => {
+                                                let optionsToRender = step.options;
+                                                let isGroupedOptions = false;
+                                                if (step.conditionalOptions && stepIndex > 0) {
+                                                    const stepAnswers = answers[currentStep] || {};
+                                                    const previousAnswer = stepAnswers[stepIndex - 1];
+                                                    if (previousAnswer) {
+                                                        const selections = Array.isArray(previousAnswer) ? previousAnswer : [previousAnswer];
+                                                        const firstSelection = selections[0];
+                                                        if (firstSelection && step.conditionalOptions[firstSelection] && 
+                                                            typeof step.conditionalOptions[firstSelection] === 'object' &&
+                                                            !Array.isArray(step.conditionalOptions[firstSelection])) {
+                                                            isGroupedOptions = true;
+                                                            let groupedOptions = {};
+                                                            selections.forEach(selection => {
+                                                                if (step.conditionalOptions[selection]) {
+                                                                    Object.entries(step.conditionalOptions[selection]).forEach(([category, items]) => {
+                                                                        if (!groupedOptions[category]) {
+                                                                            groupedOptions[category] = new Set();
+                                                                        }
+                                                                        items.forEach(item => groupedOptions[category].add(item));
+                                                                    });
+                                                                }
+                                                            });
+                                                            optionsToRender = groupedOptions;
+                                                        } else {
+                                                            let combinedOptions = new Set();
+                                                            selections.forEach(selection => {
+                                                                if (step.conditionalOptions[selection]) {
+                                                                    step.conditionalOptions[selection].forEach(option => 
+                                                                        combinedOptions.add(option)
+                                                                    );
+                                                                }
+                                                            });
+                                                            if (combinedOptions.size > 0) {
+                                                                optionsToRender = Array.from(combinedOptions);
+                                                            }
                                                         }
-                                                    });
-                                                    
-                                                    if (combinedOptions.size > 0) {
-                                                        optionsToRender = Array.from(combinedOptions);
                                                     }
                                                 }
-                                            }
-                                            return optionsToRender;
-                                        })().map((option, optionIndex) =>
-                                            React.createElement('button', {
-                                                key: optionIndex,
-                                                onClick: () => {
-                                                    const stepAnswers = answers[currentStep] || {};
-                                                    if (step.type === 'multiple') {
-                                                        const current = stepAnswers[stepIndex] || [];
-                                                        const updated = current.includes(option)
+                                                return { optionsToRender, isGroupedOptions };
+                                            })();
+
+                                            if (isGroupedOptions) {
+                                                // Render grouped options with categories
+                                                return Object.entries(optionsToRender).map(([category, items]) =>
+                                                    React.createElement('div', { 
+                                                        key: category, 
+                                                        className: 'col-span-full' 
+                                                    },
+                                                        React.createElement('h5', { 
+                                                            className: 'text-sm font-semibold text-gray-700 mb-2 mt-3' 
+                                                        }, category),
+                                                        React.createElement('div', { 
+                                                            className: step.maxColumns === 3 
+                                                                ? 'grid grid-cols-2 md:grid-cols-3 gap-2'
+                                                                : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2' 
+                                                        },
+                                                            Array.from(items).map(option =>
+                                                                React.createElement('button', {
+                                                                    key: option,
+                                                                    onClick: () => {
+                                                                        const stepAnswers = answers[currentStep] || {};
+                                                                        const current = stepAnswers[stepIndex] || [];
+                                                                        const updated = current.includes(option)
+                                                                            ? current.filter(item => item !== option)
+                                                                            : [...current, option];
+                                                                        updateAnswer(currentStep, { ...stepAnswers, [stepIndex]: updated });
+                                                                    },
+                                                                    className: `p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                                                                        (answers[currentStep]?.[stepIndex] || []).includes(option)
+                                                                            ? 'bg-primary-blue text-white border-primary-blue'
+                                                                            : 'border-gray-300 hover:border-primary-blue hover:bg-blue-50'
+                                                                    }`
+                                                                }, option)
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                            } else {
+                                                // Original flat rendering
+                                                return optionsToRender.map((option, optionIndex) =>
+                                                    React.createElement('button', {
+                                                        key: optionIndex,
+                                                        onClick: () => {
+                                                            const stepAnswers = answers[currentStep] || {};
+                                                            if (step.type === 'multiple') {
+                                                                const current = stepAnswers[stepIndex] || [];
+                                                                const updated = current.includes(option)
                                                             ? current.filter(item => item !== option)
                                                             : [...current, option];
                                                         updateAnswer(currentStep, { ...stepAnswers, [stepIndex]: updated });
@@ -3235,8 +3474,9 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                                     )
                                                 )
                                             )
-                                        )
-                                    ),
+                                        );
+                                    }
+                                })(),
                                     // Text field for this step if needed
                                     step.textField && (() => {
                                         const stepAnswers = answers[currentStep] || {};
@@ -3247,8 +3487,10 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                                 : currentAnswer === step.textField.showWhen
                                         ));
                                         return shouldShow;
-                                    })() && React.createElement('div', { className: "mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4" },
-                                        React.createElement('h5', { className: "font-semibold text-gray-800 mb-3 text-sm" }, step.textField.question),
+                                    })() && React.createElement('div', { className: "mt-6 col-span-full w-full" },
+                                        React.createElement('hr', { className: "border-gray-200 mb-4" }),
+                                        React.createElement('div', { className: "bg-blue-50 border border-blue-200 rounded-lg p-4 w-full" },
+                                            React.createElement('h5', { className: "font-semibold text-gray-800 mb-3 text-sm" }, step.textField.question),
                                         React.createElement('textarea', {
                                             value: (answers[currentStep] || {})[`${stepIndex}_text`] || '',
                                             onChange: (e) => {
@@ -3260,9 +3502,9 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                             rows: 2
                                         })
                                     )
-                                );
-                            })
-                        ) :
+                                )))
+                            }
+                        )) :
                     q.type === 'brand-selector' ?
                         (() => {
                             const selectedBrands = answers[currentStep] || [];
@@ -3636,46 +3878,46 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 
                 // Screen Time Impact
                 screenTime: {
-                    blinkReduction: "Your blink rate drops 66% during screen use (from 22 to 7 blinks per minute)",
-                    tearEvaporation: "Tears evaporate 5x faster with reduced blinking",
-                    glucoseBurn: "Heavy screen users' eye muscles burn 3x more energy than during sleep",
-                    focusShifts: "8+ hours = 16,000 focus shifts per day",
-                    explanation: "Think of it like doing 16,000 tiny push-ups with your eye muscles every day"
+                    blinkReduction: "Screen use significantly reduces your natural blink rate",
+                    tearEvaporation: "Reduced blinking leads to faster tear evaporation and dry eyes",
+                    glucoseBurn: "Extended screen time increases eye muscle fatigue",
+                    focusShifts: "Long screen sessions require thousands of focus adjustments",
+                    explanation: "Your eyes work continuously to maintain focus during screen time, similar to repetitive physical exercise"
                 },
                 
                 // Vision Correction Benefits  
                 correction: {
-                    taskSpecific: "Task-specific glasses reduce eye muscle work by 68%",
-                    singleVision: "Single-vision lenses force 3x more focus adjustments than specialized glasses",
-                    headacheReduction: "89% of computer-related headaches resolve with proper prescription adjustment",
-                    symptomImprovement: "94% of vision symptoms improve within 2 weeks of proper correction",
-                    explanation: "Like switching from running a marathon in dress shoes to proper running shoes"
+                    taskSpecific: "Task-specific glasses can significantly reduce eye muscle strain",
+                    singleVision: "Using appropriate prescriptions for different tasks reduces unnecessary focus adjustments",
+                    headacheReduction: "Many computer-related headaches are linked to vision strain and can improve with proper correction",
+                    symptomImprovement: "Vision-related symptoms often improve quickly with appropriate optical corrections",
+                    explanation: "Using the right optical correction for specific tasks is like using the right tool for the job"
                 },
                 
                 // Multi-Pair Benefits
                 multiPair: {
-                    twoVsOne: "Two-pair users have 45% less eye strain than single-pair users",
-                    threeOptimal: "The 'magic three' (distance, computer, reading) covers 96% of visual needs", 
-                    productivity: "Multi-pair users have 73% better visual endurance and 2.1x higher productivity",
-                    performance: "Using one pair for everything reduces visual performance by 40%",
+                    twoVsOne: "Having different glasses for different tasks can reduce eye strain",
+                    threeOptimal: "Distance, computer, and reading glasses address the most common visual needs", 
+                    productivity: "Using task-appropriate glasses can improve visual comfort and endurance",
+                    performance: "Using one prescription for all tasks may not optimize visual performance",
                     explanation: "Just like you wouldn't use the same tool for every job around the house"
                 },
                 
                 // Blue Light & Digital Eye Strain
                 blueLight: {
-                    penetration: "415-455nm blue light wavelengths penetrate directly to your retina",
-                    sleepDisruption: "Blue light disrupts circadian rhythm by 23%",
-                    dryEyeHelp: "Anti-reflective coatings reduce dry eye symptoms by 67%",
-                    metabolicReduction: "Computer glasses reduce metabolic eye stress by 71%",
-                    explanation: "Blue light tricks your brain into thinking it's always daytime"
+                    penetration: "High-energy blue light from screens can reach deep into the eye",
+                    sleepDisruption: "Blue light exposure can interfere with natural sleep patterns",
+                    dryEyeHelp: "Anti-reflective coatings can help reduce some digital eye strain symptoms",
+                    metabolicReduction: "Computer glasses may help reduce the workload on your visual system",
+                    explanation: "Blue light signals to your brain that it's still daytime, which can affect your circadian rhythm"
                 },
                 
                 // Precision & Measurement
                 precision: {
-                    pdError: "Just 1mm pupillary distance error forces your brain to work 15% harder",
-                    accommodativeSpasm: "5+ hours of screen time can trigger 'accommodative spasm' - eye muscle cramps",
-                    tearStability: "2+ hours of screens reduces tear film stability by 40%",
-                    explanation: "Your eyes need precision - like a custom suit vs. one-size-fits-all"
+                    pdError: "Accurate pupillary distance measurements are important for optimal lens performance",
+                    accommodativeSpasm: "Extended screen time can cause eye muscle tension and fatigue",
+                    tearStability: "Prolonged screen use can affect tear film quality and eye moisture",
+                    explanation: "Precise measurements and proper fit are important for optimal visual comfort"
                 },
                 
                 // Symptoms & Prevention
@@ -3743,14 +3985,19 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
 
             // AI Report Generation System - Stage 1: Initial Teaser (before name)
             const generateInitialTeaserWithGemini = async () => {
-                // Return cached result if available
-                if (window.initialTeaserCache) {
-                    console.log('🎯 Using cached initial teaser result');
-                    return window.initialTeaserCache;
+                // Clear any old cache to ensure fresh generation
+                window.initialTeaserCache = null;
+
+                // Check if we have valid answers data
+                const hasAnswers = answers && Object.keys(answers).length > 5;
+                if (!hasAnswers) {
+                    console.log('⚠️ No answers data available, using fallback');
+                    return generateInitialTeaserFallback();
                 }
 
                 try {
                     console.log('🤖 Generating initial teaser result with Gemini...');
+                    console.log('📊 Answers data:', answers);
                     
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
                         method: "POST",
@@ -3760,32 +4007,28 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: "You're a vision expert creating an initial teaser report. Analyze their questionnaire answers and create a compelling teaser that makes them want to provide their name for more insights.\n\n" +
-                                        "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
-                                        "RELEVANT STATISTICS TO USE (make them accessible and relatable):\n" +
-                                        getRelevantStats(answers).map(stat => 
-                                            `- ${stat.category}: ${stat.stat} (${stat.explanation})`
-                                        ).join('\n') + "\n\n" +
+                                    text: "You are an expert optometrist. Based on the user's responses, provide ONE genuinely helpful insight about their specific vision situation that they likely don't know.\n\n" +
+                                        "USER DATA:\n" +
+                                        JSON.stringify(answers, null, 2) + "\n\n" +
                                         "REQUIREMENTS:\n" +
-                                        "- Include 1-2 relevant statistics from above, but make them understandable\n" +
-                                        "- Create urgency and curiosity\n" +
-                                        "- Identify their biggest vision challenge from answers\n" +
-                                        "- Be specific to their lifestyle (screen time, activities, symptoms)\n" +
-                                        "- Create FOMO - make them want the full analysis\n" +
-                                        "- Keep headline punchy, insight intriguing\n\n" +
+                                        "- Write exactly 1-2 sentences\n" +
+                                        "- Be genuinely helpful and insightful\n" +
+                                        "- Reference their actual responses (screen time, glasses, symptoms, etc.)\n" +
+                                        "- Include one relevant statistic or fact they probably don't know\n" +
+                                        "- Focus on something that will genuinely help them\n\n" +
                                         "Return ONLY this JSON format:\n" +
                                         '{\n' +
-                                        '  "headline": "Your Vision Profile: [Specific insight-based headline]",\n' +
-                                        '  "insight": "Based on your answers, [specific finding that surprises them - 2 sentences max]",\n' +
-                                        '  "hook": "[One compelling sentence that makes them want personalized recommendations]"\n' +
+                                        '  "headline": "Key Insight About Your Vision",\n' +
+                                        '  "insight": "[1-2 helpful sentences with specific insight about their situation]",\n' +
+                                        '  "hook": "[What they\'ll discover in their full analysis]"\n' +
                                         '}'
                                 }]
                             }],
                             generationConfig: {
-                                temperature: 0.9,
+                                temperature: 0.7,
                                 topK: 40,
                                 topP: 0.95,
-                                maxOutputTokens: 250,
+                                maxOutputTokens: 400,
                             }
                         })
                     });
@@ -3828,30 +4071,38 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `You're a vision expert creating a personalized second teaser for ${userName}. Now that you have their name, make it more personal and reveal a deeper insight.\n\n` +
-                                        "Their answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
-                                        "USER-FRIENDLY STATISTICS TO INCLUDE:\n" +
+                                    text: `You're a senior optometrist providing ${userName} with a comprehensive vision analysis and actionable eyewear recommendations. Create a structured, professional report that demonstrates deep understanding of their specific needs.\n\n` +
+                                        "COMPLETE VISION PROFILE DATA:\n" +
+                                        JSON.stringify(answers, null, 2) + "\n\n" +
+                                        "EVIDENCE-BASED STATISTICS (use 2-3 most relevant):\n" +
                                         getRelevantStats(answers).map(stat => 
                                             `- ${stat.category}: ${stat.stat} (${stat.explanation})`
                                         ).join('\n') + "\n\n" +
+                                        "REQUIRED ANALYSIS STRUCTURE:\n" +
+                                        "1. CURRENT SETUP ASSESSMENT: What they have now and how it's performing\n" +
+                                        "2. KEY FINDINGS: 2-3 specific insights with relevant statistics\n" +
+                                        "3. OPTIMIZATION STRATEGY: Clear, specific recommendations for their eyewear setup\n" +
+                                        "4. EXPECTED BENEFITS: What improvements they can expect\n\n" +
                                         "REQUIREMENTS:\n" +
-                                        `- Address them by name (${userName})\n` +
-                                        "- Include relevant statistics but explain them in simple terms\n" +
-                                        "- Reveal a more specific insight than the first teaser\n" +
-                                        "- Connect their lifestyle patterns (work, hobbies, symptoms)\n" +
-                                        "- Build anticipation for the full email report\n" +
-                                        "- Be conversational and personal\n\n" +
+                                        `- Address ${userName} personally throughout\n` +
+                                        "- Include 2-3 relevant statistics that directly apply to their situation\n" +
+                                        "- Be specific about their current glasses/setup and what should be added/changed\n" +
+                                        "- Provide clear, actionable recommendations (not vague suggestions)\n" +
+                                        "- Use professional but accessible language\n" +
+                                        "- Focus on practical improvements they can implement\n\n" +
                                         "Return ONLY this JSON format:\n" +
                                         '{\n' +
-                                        '  "headline": "Hi [Name], here\'s what caught our attention...",\n' +
-                                        '  "personalInsight": "[Specific insight about their vision habits - 2-3 sentences using their name]",\n' +
-                                        '  "nextStep": "[What they can expect in the full email report]"\n' +
+                                        `  "headline": "${userName}'s Vision Optimization Plan",\n` +
+                                        '  "currentSetup": "[Brief assessment of what they currently have and how it\'s working]",\n' +
+                                        '  "keyFindings": "[2-3 specific insights with relevant statistics about their vision patterns]",\n' +
+                                        '  "recommendations": "[Clear, specific suggestions for how to adapt/extend their eyewear setup]",\n' +
+                                        '  "benefits": "[What improvements they can expect from these changes]"\n' +
                                         '}'
                                 }]
                             }],
                             generationConfig: {
-                                temperature: 0.8,
-                                maxOutputTokens: 300,
+                                temperature: 0.7,
+                                maxOutputTokens: 600,
                             }
                         })
                     });
@@ -3874,7 +4125,6 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                     return fallbackResult;
                 }
             };
-
             // AI Report Generation System - Stage 3: Full Report Card (email)
             const generateFullReportWithGemini = async (userName) => {
                 try {
@@ -3888,28 +4138,22 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `Create a comprehensive vision report card for ${userName}. This is their complete analysis for the confirmation email.\n\n` +
-                                        "Their detailed answers: " + JSON.stringify(answers, null, 2) + "\n\n" +
-                                        "VERIFIED STATISTICS TO INCLUDE (explain in simple terms):\n" +
-                                        Object.keys(visionStats).map(category => {
-                                            const stats = visionStats[category];
-                                            return `${category.charAt(0).toUpperCase() + category.slice(1)}:\n` +
-                                                Object.keys(stats).filter(key => key !== 'explanation').map(key => 
-                                                    `  - ${stats[key]}`
-                                                ).join('\n') + `\n  Explanation: ${stats.explanation}`;
-                                        }).join('\n\n') + "\n\n" +
-                                        "USER-SPECIFIC RELEVANT STATS:\n" +
+                                    text: `You are a senior optometrist creating the definitive vision analysis for ${userName === "User" ? "this person" : userName}. This comprehensive report will be used to create teasers and the final email, so be thorough and insightful.\n\n` +
+                                        "COMPLETE USER PROFILE:\n" +
+                                        JSON.stringify(answers, null, 2) + "\n\n" +
+                                        "EVIDENCE-BASED STATISTICS AVAILABLE:\n" +
                                         getRelevantStats(answers).map(stat => 
                                             `- ${stat.category}: ${stat.stat} (${stat.explanation})`
                                         ).join('\n') + "\n\n" +
-                                        "REQUIREMENTS:\n" +
-                                        "- Personal greeting using their name\n" +
-                                        "- Executive summary of their vision profile\n" +
-                                        "- 3-4 key findings with explanations and relevant statistics\n" +
-                                        "- Specific recommendations based on their lifestyle\n" +
-                                        "- Action items they can take\n" +
-                                        "- Professional tone but friendly and accessible\n" +
-                                        "- Include relevant statistics but make them understandable\n\n" +
+                                        "COMPREHENSIVE ANALYSIS REQUIREMENTS:\n" +
+                                        "- Personal greeting addressing them specifically\n" +
+                                        "- Executive summary that captures their unique situation\n" +
+                                        "- 3-4 key findings that reveal surprising insights about THEIR specific setup\n" +
+                                        "- Each finding must include: specific observation + relevant statistic + personal impact\n" +
+                                        "- Actionable recommendations tailored to their exact needs\n" +
+                                        "- Clear next steps they can implement immediately\n" +
+                                        "- Reference their actual glasses, screen time, symptoms, activities\n" +
+                                        "- Be specific and fact-based, not generic\n\n" +
                                         "Return ONLY this JSON format:\n" +
                                         '{\n' +
                                         '  "greeting": "Dear [Name], here\'s your comprehensive vision analysis",\n' +
@@ -3947,43 +4191,251 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 }
             };
 
+            // AI function to generate personalized optician descriptions
+            const generateOpticianDescriptionWithGemini = async (optician) => {
+                try {
+                    console.log(`🤖 Generating personalized description for ${optician.name}...`);
+                    
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You're describing why this optician is perfect for someone with this vision profile. Address the user directly (not about them).\n\n` +
+                                        `User's vision profile: ${JSON.stringify(answers, null, 2)}\n\n` +
+                                        `Optician details: ${JSON.stringify(optician, name, location, hours)}\n\n` +
+                                        "REQUIREMENTS:\n" +
+                                        "- Write ONE sentence addressed TO the user (use 'you' not their name)\n" +
+                                        "- Focus on style, brands, and frame collections this optician specializes in\n" +
+                                        "- Mention specific frame styles or brand specialties when relevant to their profile\n" +
+                                        "- Don't use the user's name - speak directly to them\n" +
+                                        "- Keep it about eyewear selection and style options\n\n" +
+                                        "Examples:\n" +
+                                        "- 'Perfect for finding designer progressives with their extensive Tom Ford and Ray-Ban collection.'\n" +
+                                        "- 'Specializes in lightweight titanium frames and computer glasses for professionals.'\n" +
+                                        "- 'Great selection of trendy acetate frames and sport eyewear brands.'\n\n" +
+                                        "Return ONLY the description sentence, no JSON or extra formatting."
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 100,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                    const data = await response.json();
+                    const description = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+                    
+                    return description || generateOpticianDescriptionFallback(optician);
+
+                } catch (error) {
+                    console.error(`❌ Error generating description for ${optician.name}:`, error);
+                    return generateOpticianDescriptionFallback(optician);
+                }
+            };
+
+            // Fallback function for optician descriptions
+            const generateOpticianDescriptionFallback = (optician) => {
+                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const currentGlasses = answers[1] || '';
+                const activities = answers[6] || [];
+                const hasProgressive = Array.isArray(currentGlasses) && currentGlasses.includes('Progressive');
+                const hasScreenWork = Array.isArray(activities) && activities.includes('Screen/office work');
+                const hasSports = Array.isArray(activities) && (activities.includes('Sports') || activities.includes('outdoors'));
+                
+                // Focus on style, brands, and collections based on their profile
+                if (optician.name.includes('VisionCare')) {
+                    return hasProgressive ? 
+                        `Excellent selection of designer progressive lenses with premium brands like Varilux and specialized computer progressives.` :
+                        `Great collection of contemporary frames from Ray-Ban, Oakley, and boutique European designers.`;
+                }
+                
+                if (optician.name.includes('EyeHealth')) {
+                    return hasScreenWork ? 
+                        `Specializes in professional eyewear with anti-reflective coatings and extensive computer glasses collection.` :
+                        `Wide range of fashion-forward frames including Tom Ford, Prada, and trendy acetate styles.`;
+                }
+                
+                if (optician.name.includes('ClearSight')) {
+                    return hasSports ? 
+                        `Perfect for active lifestyles with sport-specific eyewear from Nike, Adidas, and performance lens technologies.` :
+                        `Boutique experience featuring designer frames, luxury brands, and custom-fitted solutions.`;
+                }
+                
+                return `Comprehensive selection of quality frames and lens options to match your style preferences.`;
+            };
+
+            // Functions to extract teasers from full report
+            const generateInitialTeaserFromReport = (fullReport) => {
+                if (!fullReport || !fullReport.keyFindings) {
+                    return generateInitialTeaserFallback();
+                }
+                
+                // Extract the most compelling finding for the teaser
+                const topFinding = fullReport.keyFindings[0];
+                const insight = topFinding ? 
+                    `${topFinding.description.split('.')[0]}. ${topFinding.impact}` :
+                    fullReport.executiveSummary;
+                
+                return {
+                    headline: "Eye-Opening Facts About Your Vision Setup",
+                    insight: insight.substring(0, 200) + (insight.length > 200 ? '...' : ''),
+                    hook: "Enter your name to discover the complete analysis and actionable solutions."
+                };
+            };
+
+            const generateSecondTeaserFromReport = (fullReport, userName) => {
+                if (!fullReport || !fullReport.keyFindings) {
+                    return generateSecondTeaserFallback(userName);
+                }
+                
+                // Create structured teaser from full report findings
+                const currentSetup = fullReport.executiveSummary || "Your current vision setup has been analyzed.";
+                
+                const keyFindings = fullReport.keyFindings && fullReport.keyFindings.length > 0 ?
+                    fullReport.keyFindings.slice(0, 2).map(finding => 
+                        `${finding.description} ${finding.impact}`
+                    ).join(' ') :
+                    "Your vision patterns show opportunities for optimization.";
+                
+                const recommendations = fullReport.recommendations || 
+                    "A comprehensive approach could significantly improve your visual comfort.";
+                
+                const benefits = fullReport.nextSteps || 
+                    "These changes typically improve comfort and reduce fatigue within days.";
+                
+                return {
+                    headline: `${userName}'s Vision Optimization Plan`,
+                    currentSetup: currentSetup,
+                    keyFindings: keyFindings,
+                    recommendations: recommendations,
+                    benefits: benefits
+                };
+            };
+
             // Legacy compatibility
             const generateTeaserWithGemini = generateInitialTeaserWithGemini;
 
             // Fallback functions for each stage
             const generateInitialTeaserFallback = () => {
                 const hasGlasses = answers[0] && answers[0].includes('glasses');
-                const screenTime = answers[10] || 'Unknown';
+                const currentGlasses = answers[1] || '';
+                const screenTime = answers[10] || '';
                 const symptoms = answers[11] || [];
+                const activities = answers[6] || [];
                 const relevantStats = getRelevantStats(answers);
                 
-                const statInsight = relevantStats.length > 0 ? 
-                    ` Did you know ${relevantStats[0].stat.toLowerCase()}?` : '';
+                // Analyze their specific setup
+                const hasProgressive = Array.isArray(currentGlasses) && currentGlasses.includes('Progressive');
+                const hasSingleVision = Array.isArray(currentGlasses) && currentGlasses.includes('Single vision');
+                const hasSunglasses = Array.isArray(currentGlasses) && (currentGlasses.includes('sunglasses') || currentGlasses.includes('Plain sunglasses'));
+                const hasSymptoms = symptoms.length > 0 && !symptoms.includes('None of these');
+                const highScreenTime = screenTime.includes('8') || screenTime.includes('More');
+                const hasReading = Array.isArray(activities) && activities.includes('Reading');
+                const hasScreenWork = Array.isArray(activities) && activities.includes('Screen/office work');
+                
+                let insights = [];
+                
+                // Specific shocking facts based on their exact situation
+                if (hasGlasses && hasProgressive && highScreenTime) {
+                    insights.push("Your progressive lenses are forcing your neck into unnatural positions during screen work - most users tilt their head back 15-20 degrees to find the computer zone, creating neck strain you might not even realize");
+                    insights.push("Progressive lenses have a 'sweet spot' only 12mm wide for computer work - with your 8+ hours of screen time, your eyes are working 3x harder than they should");
+                } else if (hasGlasses && hasSingleVision && highScreenTime && hasReading) {
+                    insights.push(`Your single-vision glasses optimized for one distance are forcing constant refocusing between screen (24 inches) and reading materials - your eye muscles contract/relax over 16,000 times daily during your ${screenTime.toLowerCase()}`);
+                    insights.push("You're using the equivalent of 'reading glasses for everything' - like trying to drive while wearing reading glasses from the pharmacy");
+                } else if (!hasGlasses && highScreenTime) {
+                    insights.push(`Your eyes are working overtime: ${screenTime.toLowerCase()} means your focusing muscles never get to relax - it's like holding a 10-pound weight all day`);
+                    insights.push("Without any visual support, your blink rate drops to 30% of normal during screen focus - your tears evaporate faster than they can be replaced");
+                }
+                
+                // Add symptom-specific shocking facts
+                if (hasSymptoms) {
+                    if (symptoms.includes('Tired eyes') && symptoms.includes('Eye strain at screen')) {
+                        insights.push("Your 'tired eyes' and 'screen strain' combination indicates your focusing muscles are in constant spasm - like having a charley horse in your eye muscles for 8+ hours daily");
+                    } else if (symptoms.includes('Glare sensitivity')) {
+                        insights.push("Your glare sensitivity suggests your pupils are working overtime to regulate light - without proper lens coatings, you're getting 40% more harsh blue light than necessary");
+                    }
+                }
+                
+                // Activity-specific shocking facts
+                if (hasScreenWork && hasReading && activities.includes('Driving')) {
+                    insights.push("Your combination of screen work, reading, AND driving means your eyes shift between at least 4 different focal distances daily - most people's vision setups only optimize for 1");
+                }
+                
+                const finalInsights = insights.slice(0, 2);
+                const insight = finalInsights.length > 0 ? 
+                    finalInsights.join('. ') + '.' :
+                    `Based on your ${screenTime.toLowerCase()} and ${Array.isArray(activities) ? activities.join(', ') : 'current activities'}, your vision system is working significantly harder than it needs to. ${relevantStats.length > 0 ? relevantStats[0].stat : 'Most people have no idea how much their setup affects daily energy levels.'}.`;
                 
                 return {
-                    headline: hasGlasses ? "Your Vision Profile: Multi-Tasking Eyes Under Stress" : "Your Vision Profile: Hidden Strain Detected",
-                    insight: hasGlasses ? 
-                        `Your current glasses are working overtime to handle multiple visual distances.${statInsight} This explains why your eyes feel tired.` :
-                        `Even with good natural vision, your screen habits are creating strain patterns.${statInsight} The good news? This is preventable.`,
-                    hook: "Discover your personalized vision optimization plan - enter your name to see what we found."
+                    headline: "Eye-Opening Facts About Your Vision Setup",
+                    insight: insight,
+                    hook: "Your personalized analysis will reveal exactly how much energy you're wasting and the simple changes that could transform your daily comfort."
                 };
             };
 
             const generateSecondTeaserFallback = (userName) => {
-                const screenTime = answers[10] || 'Unknown';
+                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const currentGlasses = answers[1] || '';
+                const screenTime = answers[10] || '';
                 const symptoms = answers[11] || [];
-                const hasSymptoms = symptoms.length > 0 && !symptoms.includes('None of these');
+                const activities = answers[6] || [];
                 const relevantStats = getRelevantStats(answers);
                 
-                const statDetail = relevantStats.length > 0 ? 
-                    ` Here's something that might surprise you: ${relevantStats[0].stat.toLowerCase()}.` : '';
+                // Analyze current setup
+                const hasProgressive = Array.isArray(currentGlasses) && currentGlasses.includes('Progressive');
+                const hasSunglasses = Array.isArray(currentGlasses) && (currentGlasses.includes('sunglasses') || currentGlasses.includes('Plain sunglasses'));
+                const hasSymptoms = symptoms.length > 0 && !symptoms.includes('None of these');
+                const highScreenTime = screenTime.includes('8') || screenTime.includes('More');
+                
+                // Current Setup Assessment
+                let currentSetup = "";
+                if (hasGlasses && hasProgressive) {
+                    currentSetup = `${userName}, your progressive lenses are handling multiple distances well, but your demanding screen routine suggests room for optimization.`;
+                } else if (hasGlasses && !hasProgressive) {
+                    currentSetup = `${userName}, your single-vision glasses serve their purpose, but your daily activities indicate you could benefit from a more comprehensive approach.`;
+                } else {
+                    currentSetup = `${userName}, while you're currently managing without prescription eyewear, your lifestyle patterns suggest your vision system is working harder than necessary.`;
+                }
+                
+                // Key Findings with statistics
+                let keyFindings = `Based on your ${screenTime.toLowerCase()} of daily screen time, your eyes are performing thousands of micro-adjustments every hour. `;
+                if (hasSymptoms) {
+                    keyFindings += `Your reported symptoms (${Array.isArray(symptoms) ? symptoms.join(', ') : symptoms}) are classic indicators of visual system strain. `;
+                }
+                if (relevantStats.length > 0) {
+                    keyFindings += `Research shows: ${relevantStats[0].stat.toLowerCase()}.`;
+                }
+                
+                // Specific Recommendations
+                let recommendations = "";
+                if (hasGlasses && hasProgressive && highScreenTime) {
+                    recommendations = "Consider adding dedicated computer glasses with anti-reflective coating to complement your progressives. This dual-approach reduces eye muscle fatigue during extended screen sessions while maintaining your current distance vision solution.";
+                } else if (hasGlasses && !hasProgressive && highScreenTime) {
+                    recommendations = "Upgrade to a multi-pair system: keep your current glasses for distance/general use, and add computer-specific glasses optimized for your screen working distance (typically 20-26 inches).";
+                } else if (!hasGlasses && highScreenTime) {
+                    recommendations = "Start with computer glasses featuring anti-reflective and blue light filtering to reduce digital eye strain, then add distance glasses if needed after a comprehensive exam.";
+                } else {
+                    recommendations = "A comprehensive eye exam will determine if task-specific eyewear could optimize your visual performance and comfort for your daily activities.";
+                }
+                
+                // Expected Benefits
+                const benefits = hasSymptoms ? 
+                    "Most users experience reduced eye fatigue, fewer headaches, and improved focus within 1-2 weeks of optimizing their eyewear setup." :
+                    "Proactive vision optimization typically improves visual endurance, reduces end-of-day fatigue, and helps maintain long-term eye health.";
                 
                 return {
-                    headline: `Hi ${userName}, here's what caught our attention...`,
-                    personalInsight: hasSymptoms ?
-                        `${userName}, your combination of ${screenTime} screen time and reported symptoms tells a clear story.${statDetail} Your eyes are working harder than they should be.` :
-                        `${userName}, while you're not experiencing major symptoms yet, your visual demands are creating patterns we see often.${statDetail} The good news is we can optimize this before problems develop.`,
-                    nextStep: "Your complete vision analysis with specific recommendations and more insights will arrive in your inbox shortly."
+                    headline: `${userName}'s Vision Optimization Plan`,
+                    currentSetup: currentSetup,
+                    keyFindings: keyFindings,
+                    recommendations: recommendations,
+                    benefits: benefits
                 };
             };
 
@@ -4054,28 +4506,10 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
 
                 // Step 2: Initial teaser result + name capture
                 if (resultStep === 'result') {
-                    // Generate initial teaser
-                    const [initialTeaserResult, setInitialTeaserResult] = useState(null);
-                    const [isGeneratingInitial, setIsGeneratingInitial] = useState(false);
                     
-                    // Generate teaser on mount if not already generated
-                    React.useEffect(() => {
-                        if (!initialTeaserResult && !isGeneratingInitial) {
-                            setIsGeneratingInitial(true);
-                            generateInitialTeaserWithGemini()
-                                .then(result => {
-                                    setInitialTeaserResult(result);
-                                    setIsGeneratingInitial(false);
-                                })
-                                .catch(error => {
-                                    console.error('Error generating initial teaser:', error);
-                                    setInitialTeaserResult(generateInitialTeaserFallback());
-                                    setIsGeneratingInitial(false);
-                                });
-                        }
-                    }, []);
-                    
-                    const displayResult = initialTeaserResult || generateInitialTeaserFallback();
+                    console.log('🔍 initialTeaserResult:', initialTeaserResult);
+                    const displayResult = generateInitialTeaserFallback();
+                    console.log('🔍 displayResult:', displayResult);
                     
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
                         React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-6" }, "Here's your Vision Match result 👇"),
@@ -4097,24 +4531,40 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         // Name input section
                         React.createElement('div', { className: "visionmatch-card p-6" },
                             React.createElement('h3', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Get Your Personalized Recommendations"),
-                            React.createElement('p', { className: "text-gray-600 mb-4" }, "Enter your name to unlock your detailed vision analysis and next steps."),
+                            React.createElement('p', { className: "text-gray-600 mb-4" }, "Enter your details to unlock your detailed vision analysis and find opticians near you."),
                             React.createElement('div', { className: "space-y-4" },
+                                React.createElement('div', { className: "grid grid-cols-2 gap-4" },
+                                    React.createElement('input', {
+                                        type: "text",
+                                        placeholder: "First name",
+                                        value: userName,
+                                        onChange: (e) => setUserName(e.target.value),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
+                                    }),
+                                    React.createElement('input', {
+                                        type: "text",
+                                        placeholder: "Last name",
+                                        value: userLastName,
+                                        onChange: (e) => setUserLastName(e.target.value),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
+                                    })
+                                ),
                                 React.createElement('input', {
                                     type: "text",
-                                    placeholder: "Your first name",
-                                    value: userName,
-                                    onChange: (e) => setUserName(e.target.value),
+                                    placeholder: "Zip code (to find opticians near you)",
+                                    value: userZipCode,
+                                    onChange: (e) => setUserZipCode(e.target.value),
                                     className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
                                 }),
                                 React.createElement('button', {
                                     onClick: () => {
-                                        if (userName.trim()) {
+                                        if (userName.trim() && userLastName.trim() && userZipCode.trim()) {
                                             setResultStep('nameTeaser');
                                         }
                                     },
-                                    disabled: !userName.trim(),
+                                    disabled: !userName.trim() || !userLastName.trim() || !userZipCode.trim(),
                                     className: "w-full visionmatch-button px-6 py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                                }, userName.trim() ? `Show ${userName}'s Analysis` : "Enter Your Name First")
+                                }, (userName.trim() && userLastName.trim() && userZipCode.trim()) ? `Show ${userName}'s Analysis` : "Complete All Fields")
                             )
                         )
                     );
@@ -4122,40 +4572,70 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 
                 // Step 3: Second teaser with name
                 if (resultStep === 'nameTeaser') {
-                    const [secondTeaserResult, setSecondTeaserResult] = useState(null);
-                    const [isGeneratingSecond, setIsGeneratingSecond] = useState(false);
-                    
-                    // Generate second teaser on mount
-                    React.useEffect(() => {
-                        if (!secondTeaserResult && !isGeneratingSecond && userName.trim()) {
-                            setIsGeneratingSecond(true);
-                            generateSecondTeaserWithGemini(userName)
-                                .then(result => {
-                                    setSecondTeaserResult(result);
-                                    setIsGeneratingSecond(false);
-                                })
-                                .catch(error => {
-                                    console.error('Error generating second teaser:', error);
-                                    setSecondTeaserResult(generateSecondTeaserFallback(userName));
-                                    setIsGeneratingSecond(false);
-                                });
-                        }
-                    }, [userName]);
                     
                     const displaySecondResult = secondTeaserResult || generateSecondTeaserFallback(userName);
                     
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
-                        // Second teaser display
+                        // Second teaser display - structured format
                         React.createElement('div', { className: "visionmatch-card p-6 shadow-lg bg-green-50 border-l-4 border-green-400 mb-8" },
                             isGeneratingSecond ? 
                                 React.createElement('div', { className: "text-center py-4" },
-                                    React.createElement('div', { className: "animate-pulse text-green-600" }, `🔍 Personalizing analysis for ${userName}...`),
-                                    React.createElement('p', { className: "text-sm text-green-500 mt-2" }, "Connecting the dots from your answers")
+                                    React.createElement('div', { className: "animate-pulse text-green-600" }, `🔍 Creating comprehensive analysis for ${userName}...`),
+                                    React.createElement('p', { className: "text-sm text-green-500 mt-2" }, "Analyzing your vision patterns and generating personalized recommendations")
                                 ) : 
                                 React.createElement(React.Fragment, null,
-                                    React.createElement('h3', { className: "text-xl font-bold text-green-900 mb-4" }, displaySecondResult.headline),
-                                    React.createElement('p', { className: "text-lg text-green-800 mb-4" }, displaySecondResult.personalInsight),
-                                    React.createElement('p', { className: "text-green-700 font-medium" }, displaySecondResult.nextStep)
+                                    React.createElement('h2', { className: "text-2xl font-bold text-green-900 mb-6" }, displaySecondResult.headline || `${userName}'s Vision Analysis`),
+                                    
+                                    // Current Setup Section
+                                    displaySecondResult.currentSetup && React.createElement('div', { className: "mb-5" },
+                                        React.createElement('h4', { className: "font-semibold text-green-800 mb-2 flex items-center" },
+                                            React.createElement('span', { className: "mr-2" }, "📊"),
+                                            "Current Setup Assessment"
+                                        ),
+                                        React.createElement('p', { className: "text-green-700" }, displaySecondResult.currentSetup)
+                                    ),
+                                    
+                                    // Key Findings Section
+                                    displaySecondResult.keyFindings && React.createElement('div', { className: "mb-5" },
+                                        React.createElement('h4', { className: "font-semibold text-green-800 mb-2 flex items-center" },
+                                            React.createElement('span', { className: "mr-2" }, "🔍"),
+                                            "Key Findings"
+                                        ),
+                                        React.createElement('p', { className: "text-green-700" }, displaySecondResult.keyFindings)
+                                    ),
+                                    
+                                    // Recommendations Section  
+                                    displaySecondResult.recommendations && React.createElement('div', { className: "mb-5" },
+                                        React.createElement('h4', { className: "font-semibold text-green-800 mb-2 flex items-center" },
+                                            React.createElement('span', { className: "mr-2" }, "💡"),
+                                            "Optimization Strategy"
+                                        ),
+                                        React.createElement('p', { className: "text-green-700" }, displaySecondResult.recommendations)
+                                    ),
+                                    
+                                    // Benefits Section
+                                    displaySecondResult.benefits && React.createElement('div', { className: "mb-4" },
+                                        React.createElement('h4', { className: "font-semibold text-green-800 mb-2 flex items-center" },
+                                            React.createElement('span', { className: "mr-2" }, "✨"),
+                                            "Expected Benefits"
+                                        ),
+                                        React.createElement('p', { className: "text-green-700 font-medium" }, displaySecondResult.benefits)
+                                    ),
+                                    
+                                    // Health reminder section
+                                    React.createElement('div', { className: "mb-4 mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg" },
+                                        React.createElement('h4', { className: "font-semibold text-blue-800 mb-2 flex items-center" },
+                                            React.createElement('span', { className: "mr-2" }, "🏥"),
+                                            "Important Health Reminder"
+                                        ),
+                                        React.createElement('p', { className: "text-blue-700 text-sm" }, "Regular comprehensive eye exams can detect early signs of serious conditions like glaucoma, diabetic retinopathy, macular degeneration, and even high blood pressure or diabetes before you notice any symptoms. Early detection can help preserve your vision and overall health.")
+                                    ),
+                                    
+                                    // Fallback for old format
+                                    !displaySecondResult.currentSetup && React.createElement(React.Fragment, null,
+                                        React.createElement('p', { className: "text-lg text-green-800 mb-4" }, displaySecondResult.personalInsight),
+                                        React.createElement('p', { className: "text-green-700 font-medium" }, displaySecondResult.nextStep)
+                                    )
                                 )
                         ),
                         
@@ -4213,7 +4693,19 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                         React.createElement('span', { className: "text-sm text-gray-500" }, optician.distance)
                                     ),
                                     React.createElement('p', { className: "text-gray-600 text-sm mb-1" }, optician.address),
-                                    React.createElement('p', { className: "text-gray-500 text-sm" }, optician.hours)
+                                    React.createElement('p', { className: "text-gray-500 text-sm mb-2" }, optician.hours),
+                                    // AI-generated personalized description
+                                    opticianDescriptions[optician.id] ? 
+                                        React.createElement('div', { className: "bg-blue-50 rounded-lg p-3 mt-3" },
+                                            React.createElement('p', { className: "text-blue-800 text-sm font-medium italic" }, 
+                                                `💡 ${opticianDescriptions[optician.id]}`
+                                            )
+                                        ) : 
+                                        React.createElement('div', { className: "bg-gray-50 rounded-lg p-3 mt-3" },
+                                            React.createElement('p', { className: "text-gray-600 text-sm italic" }, 
+                                                "🤖 Generating personalized recommendation..."
+                                            )
+                                        )
                                 )
                             )
                         ),
@@ -4306,32 +4798,8 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         )
                     );
                 }
-
                 // Step 6: Email Confirmation Screen with Full Report
                 if (resultStep === 'emailConfirmation') {
-                    const [fullReport, setFullReport] = useState(null);
-                    const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-                    
-                    // Generate comprehensive report for email
-                    React.useEffect(() => {
-                        if (!fullReport && !isGeneratingReport && userName.trim()) {
-                            setIsGeneratingReport(true);
-                            generateFullReportWithGemini(userName)
-                                .then(result => {
-                                    setFullReport(result);
-                                    setIsGeneratingReport(false);
-                                    // Cache for potential re-use
-                                    window.fullReportCache = result;
-                                })
-                                .catch(error => {
-                                    console.error('Error generating full report:', error);
-                                    const fallback = generateFullReportFallback(userName);
-                                    setFullReport(fallback);
-                                    setIsGeneratingReport(false);
-                                    window.fullReportCache = fallback;
-                                });
-                        }
-                    }, [userName]);
                     
                     const displayReport = fullReport || generateFullReportFallback(userName);
                     console.log('📧 Email confirmation - using full report:', displayReport);
@@ -4446,15 +4914,15 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                                 (() => {
                                                     const generateExpertAnalysis = () => {
                                                         const currentGlasses = answers[0] || '';
-                                                        const currentSetup = answers[1] || '';
-                                                        const eyewearNeeds = answers[2] || '';
-                                                        const lifestyle = answers[6] || '';
-                                                        const screenTime = answers[7] || '';
-                                                        const workEnv = answers[12] || '';  // Updated index after Q13 deletion
-                                                        const age = answers[10] || '';
-                                                        const visionIssues = answers[9] || '';
-                                                        const style = answers[16] || '';  // Updated index
-                                                        const currentFrames = answers[3] || '';
+                                                        const currentSetup = answers[1] || '';  // Combined question with steps
+                                                        const lifestyle = answers[5] || '';    // Shifted down by 1
+                                                        const screenTime = answers[6] || '';   // Shifted down by 1
+                                                        const workEnv = answers[11] || '';     // Shifted down by 1
+                                                        const age = answers[9] || '';          // Shifted down by 1
+                                                        const visionIssues = answers[8] || ''; // Shifted down by 1
+                                                        const style = answers[15] || '';       // Shifted down by 1
+                                                        const currentFrames = answers[2] || '';// Shifted down by 1
+                                                        const eyewearNeeds = answers[1] && Array.isArray(answers[1][1]) ? answers[1][1] : []; // Types of glasses owned
                                                         
                                                         let analysis = [];
                                                         
@@ -4465,8 +4933,10 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                                                                 let situation = "";
                                                                 if (currentGlasses.includes('glasses')) {
                                                                     situation += "I can see you're currently wearing glasses, which is great - you're already taking care of your vision. ";
-                                                                    if (currentSetup) {
+                                                                    if (currentSetup && typeof currentSetup === 'string') {
                                                                         situation += `From what you've shared about your setup: "${currentSetup.substring(0, 100)}..." - this gives me good insight into how you use your eyewear daily. `;
+                                                                    } else if (currentSetup && Array.isArray(currentSetup)) {
+                                                                        situation += `Based on your current eyewear setup - this gives me good insight into how you use your glasses daily. `;
                                                                     }
                                                                 } else if (currentGlasses.includes('contact')) {
                                                                     situation += "You're using contact lenses, which offers excellent peripheral vision and freedom for activities. ";
@@ -4873,12 +5343,36 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                             })()
                         )
                     )
-                ) // Close quiz-layout div
+                ), // Close quiz-layout div
+                
+                // Bottom Question Navigation (shown for all quiz steps)
+                currentStep < questions.length && React.createElement('div', { className: "question-nav" },
+                    React.createElement('div', { className: "question-nav-container" },
+                        React.createElement('h3', { style: { fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', margin: '0 0 0.75rem 0' } }, "Jump to Question"),
+                        React.createElement('div', { className: "nav-buttons" },
+                            questions.map((q, index) => {
+                                const isAnswered = answers[index] !== undefined && answers[index] !== null;
+                                const isCurrent = index === currentStep;
+                                
+                                return React.createElement('button', {
+                                    key: index,
+                                    onClick: () => {
+                                        if (isAnswered || index < currentStep) {
+                                            setCurrentStep(index);
+                                        }
+                                    },
+                                    disabled: !isAnswered && index > currentStep,
+                                    className: `nav-button ${isCurrent ? 'nav-button-current' : ''} ${isAnswered && !isCurrent ? 'nav-button-answered' : ''}`,
+                                    title: q.question
+                                }, index + 1);
+                            })
+                        )
+                    )
+                )
             );
         };
 
         // Google Maps already initialized at page head
-
         // Initialize Google Maps for opticians when the component mounts
         window.initOpticiansMap = function() {
             const mapElement = document.getElementById('opticians-map');

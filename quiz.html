@@ -898,13 +898,21 @@
                             setIsGeneratingReport(false);
                             window.fullReportCache = result;
                             
-                            // Now generate first teaser - using fallback for now to avoid undefined issues
-                            if (!initialTeaserResult && !isGeneratingInitial) {
-                                setIsGeneratingInitial(true);
-                                const fallbackTeaser = generateInitialTeaserFallback();
-                                setInitialTeaserResult(fallbackTeaser);
-                                setIsGeneratingInitial(false);
-                            }
+                            // Now generate first teaser using AI
+                            setIsGeneratingInitial(true);
+                            console.log('🔍 Generating AI teaser...');
+                            generateInitialTeaserWithGemini()
+                                .then(teaser => {
+                                    console.log('🔍 Generated teaser:', teaser);
+                                    setInitialTeaserResult(teaser);
+                                    setIsGeneratingInitial(false);
+                                })
+                                .catch(error => {
+                                    console.error('Error generating teaser:', error);
+                                    const fallbackTeaser = generateInitialTeaserFallback();
+                                    setInitialTeaserResult(fallbackTeaser);
+                                    setIsGeneratingInitial(false);
+                                });
                         })
                         .catch(error => {
                             console.error('Error generating full report:', error);
@@ -973,15 +981,34 @@
 
             const questions = [
                 {
-                    type: 'single',
-                    section: "What You Have",
-                    question: "Do you currently wear prescription glasses or lenses?",
-                    options: ["Yes, I wear glasses", "Yes, I wear both glasses and contact lenses", "No, but I think I need them", "No, and I don't think I need them"],
-                    textField: {
-                        question: "Tell us about your personal vision needs and specific concerns:",
-                        placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text, headaches, dry eyes, glare sensitivity...",
-                        alwaysVisible: true
-                    }
+                    type: 'multi-step',
+                    section: "About You",
+                    question: "First, let's get to know you better",
+                    steps: [
+                        {
+                            question: "Do you currently wear prescription glasses or lenses?",
+                            type: 'single',
+                            options: ["Yes, I wear glasses", "Yes, I wear both glasses and contact lenses", "No, but I think I need them", "No, and I don't think I need them"],
+                            fullWidth: true,
+                            textField: {
+                                question: "Tell us about your personal vision needs and specific concerns:",
+                                placeholder: "e.g., trouble seeing at night, eye strain from computers, difficulty reading small text, headaches, dry eyes, glare sensitivity...",
+                                alwaysVisible: true
+                            }
+                        },
+                        {
+                            question: "What's your age range?",
+                            type: 'single',
+                            options: ["18-25", "26-35", "36-45", "46-55", "56-65", "Over 65"],
+                            fullWidth: true
+                        },
+                        {
+                            question: "What's your gender?",
+                            type: 'single',
+                            options: ["Male", "Female", "Non-binary", "Prefer not to say"],
+                            fullWidth: true
+                        }
+                    ]
                 },
                 {
                     type: 'multi-step',
@@ -1933,50 +1960,70 @@
             const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
             const generatePersonalitySummary = async () => {
-                if (personalitySummary) return personalitySummary; // Return cached summary if already generated
+                console.log('🎯 generatePersonalitySummary called');
+                console.log('Current personalitySummary:', personalitySummary);
+                
+                if (personalitySummary) {
+                    console.log('🎯 Returning cached summary');
+                    return personalitySummary; // Return cached summary if already generated
+                }
                 
                 setIsGeneratingSummary(true);
+                console.log('🎯 Starting AI generation...');
                 
                 try {
-                    // Collect relevant answers for personality analysis, especially text fields
+                    // Collect ALL answers up to question 8 (halfway point)
                     const relevantAnswers = {
-                        currentGlasses: answers[0],
-                        glassesDetailsText: answers['0_text'], // Text field from Q1
-                        glassesSetupText: answers['1_text'], // Text field from Q2
-                        glassesTypesText: answers['2_text'], // Text field from Q3
-                        glassesHistory: answers[4],
-                        glassesHistoryText: answers[4]?.['1_text'], // Text from glasses history
-                        issues: answers[6],
-                        issuesText: answers['6_text'], // Text field from issues question
-                        glassesUsage: answers[7],
-                        glassesUsageText: answers['7_text'], // Text field from usage question
-                        freeTimeActivities: answers[9]?.[0], // Step 1 of multi-step
-                        freeTimeDetails: answers[9]?.['1_text'] // Text field from step 2
+                        currentGlasses: answers[0], // Q1: Do you wear glasses?
+                        glassesTypes: answers[1], // Q2: Types of glasses (multiple)
+                        glassesCount: answers[2], // Q3: How many pairs?
+                        prescriptionAge: answers[3], // Q4: When last updated?
+                        sunglassesAge: answers[4], // Q5: Sunglasses last updated?
+                        issues: answers[5], // Q6: Issues with glasses (multiple)
+                        usage: answers[6], // Q7: What you use glasses for (multiple)
+                        challenges: answers[7], // Q8: Main challenge
+                        // Include all text fields
+                        q1_text: answers['0_text'],
+                        q2_text: answers['1_text'],
+                        q3_text: answers['2_text'],
+                        q4_text: answers['3_text'],
+                        q5_text: answers['4_text'],
+                        q6_text: answers['5_text'],
+                        q7_text: answers['6_text'],
+                        q8_text: answers['7_text'],
+                        // Debug: log all answers
+                        allAnswers: answers
                     };
 
-                    const prompt = `You are a master optometrist with 20 years of experience. Based on all the quiz answers so far, create a short, insightful, personal observation that will add value to the user. user relevant facts or statistics. make is 1-2 short sentences maximum. Specifically consider any answer they have given in plain text beyond the multiple choice answers.
+                    const prompt = `You are a master optometrist with 30 years of experience. Analyze this patient's vision profile and provide ONE powerful, personalized insight that combines their specific situation with a relevant statistic or professional observation.
 
-Current glasses: ${relevantAnswers.currentGlasses}
-What they wrote about vision needs: "${relevantAnswers.glassesDetailsText}"
-What they wrote about their setup: "${relevantAnswers.glassesSetupText}" 
-What they wrote about their glasses types: "${relevantAnswers.glassesTypesText}"
-Glasses history: ${JSON.stringify(relevantAnswers.glassesHistory)}
-What they wrote about glasses history: "${relevantAnswers.glassesHistoryText}"
-Issues with current glasses: ${relevantAnswers.issues}
-What they wrote about their issues: "${relevantAnswers.issuesText}"
-How they use glasses: ${relevantAnswers.glassesUsage}
-What they wrote about usage: "${relevantAnswers.glassesUsageText}"
-Free time activities: ${relevantAnswers.freeTimeActivities}
-What they wrote about activities: "${relevantAnswers.freeTimeDetails}"
-PAY SPECIAL ATTENTION to what they wrote in text fields - their specific details, complaints, activities. Pick up on quirky details or contradictions.
+Patient Profile:
+- Current glasses: ${relevantAnswers.currentGlasses}
+- Types of glasses owned: ${JSON.stringify(relevantAnswers.glassesTypes)}
+- Number of pairs: ${relevantAnswers.glassesCount}
+- Prescription age: ${relevantAnswers.prescriptionAge}
+- Sunglasses age: ${relevantAnswers.sunglassesAge}
+- Current issues: ${JSON.stringify(relevantAnswers.issues)}
+- Primary usage: ${JSON.stringify(relevantAnswers.usage)}
+- Main challenge: ${relevantAnswers.challenges}
 
-Examples of the playful, observational tone I want:
-- If they wrote about gaming tournaments but have old glasses: "Gaming tournaments with 3-year-old glasses? That's like racing Formula 1 with bicycle brakes."
-- If they mentioned photography but can't see clearly: "A photographer who can't see clearly - the irony is not lost on us."
-- If they wrote about cooking but have scratched lenses: "Cooking with scratched lenses explains why the salt and sugar containers look identical."
+Additional notes from patient:
+${Object.entries(relevantAnswers).filter(([k,v]) => k.includes('_text') && v).map(([k,v]) => `- ${v}`).join('\n')}
 
-Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. Don't sell anything.`;
+You are a master optometrist with 20 years of experience.Based on this specific profile, provide ONE SHORT sentence that:
+1. Shows deep understanding of their unique situation
+2. Feels personal and insightful, not generic
+3. uses statistics or facts
+4. specifically take note of any answer they gave in a free text field!
 
+Make sure to be short, to the point and specific. 
+
+
+Write as a master optometrist would speak to a patient - professional, caring, and insightful.`;
+
+                    console.log('🎯 Collected answers:', relevantAnswers);
+                    console.log('🎯 Making API call to Gemini...');
+                    
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
                         method: "POST",
                         headers: {
@@ -1993,12 +2040,20 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                         })
                     });
 
+                    console.log('🎯 API Response status:', response.status);
+                    
                     if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('🎯 API Error response:', errorText);
                         throw new Error('Gemini API call failed');
                     }
 
                     const data = await response.json();
+                    console.log('🎯 API Response data:', data);
+                    
                     const summary = data.candidates[0].content.parts[0].text.trim();
+                    console.log('🎯 Generated summary:', summary);
+                    
                     setPersonalitySummary(summary);
                     setIsGeneratingSummary(false);
                     return summary;
@@ -3068,9 +3123,18 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
 
                 // Handle celebration slides
                 if (q.type === 'celebration') {
+                    console.log('🎯 Celebration slide rendered');
+                    console.log('🎯 personalitySummary:', personalitySummary);
+                    console.log('🎯 isGeneratingSummary:', isGeneratingSummary);
+                    
                     // Trigger AI generation when celebration slide is shown
                     if (!personalitySummary && !isGeneratingSummary) {
-                        generatePersonalitySummary().catch(console.error);
+                        console.log('🎯 Triggering generatePersonalitySummary...');
+                        generatePersonalitySummary().catch(error => {
+                            console.error('🎯 generatePersonalitySummary failed:', error);
+                        });
+                    } else {
+                        console.log('🎯 Not triggering generation - already have summary or generating');
                     }
 
                     return React.createElement('div', { className: "w-full flex items-center justify-center min-h-[80vh] px-4" },
@@ -4508,7 +4572,7 @@ Be FUNNY, OBSERVATIONAL, and pick up on their actual details. One sentence max. 
                 if (resultStep === 'result') {
                     
                     console.log('🔍 initialTeaserResult:', initialTeaserResult);
-                    const displayResult = generateInitialTeaserFallback();
+                    const displayResult = initialTeaserResult || generateInitialTeaserFallback();
                     console.log('🔍 displayResult:', displayResult);
                     
                     return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },

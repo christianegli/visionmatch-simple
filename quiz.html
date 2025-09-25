@@ -7,6 +7,8 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         // Configure Tailwind with VisionMatch brand colors
         tailwind.config = {
@@ -514,34 +516,6 @@
             min-height: 600px;
         }
 
-        .question-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            padding: 1rem 2rem;
-            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.05);
-            z-index: 40;
-        }
-        
-        .question-nav-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        /* Add padding to main content to account for fixed nav */
-        .quiz-layout {
-            padding-bottom: 80px;
-        }
-
-        .question-nav h3 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.75rem;
-        }
 
         .nav-buttons {
             display: flex;
@@ -671,12 +645,78 @@
             }
         }
 
+        /* Mobile progress indicator */
+        .mobile-progress-indicator {
+            display: none;
+            position: fixed;
+            top: 85px;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.06),
+                0 2px 12px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            z-index: 30;
+        }
+        
+        .mobile-progress-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .mobile-progress-text {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1e40af;
+            white-space: nowrap;
+        }
+        
+        .mobile-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(209, 213, 219, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .mobile-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
+        }
+
         @media (max-width: 768px) {
             .nav {
                 top: 1rem;
                 left: 1rem;
                 right: 1rem;
                 padding: 0.75rem 1.5rem;
+            }
+            
+            .quiz-sidebar {
+                order: 1 !important;
+                margin-top: 2rem;
+            }
+            
+            .mobile-progress-indicator {
+                display: block;
+            }
+            
+            .progress-section {
+                display: none;
+            }
+            
+            .quiz-layout {
+                margin-top: 2.5rem;
             }
             .nav-links {
                 display: none;
@@ -855,6 +895,141 @@
         const Clock = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('circle', { cx: 12, cy: 12, r: 10 }), React.createElement('polyline', { points: '12,6 12,12 16,14' }));
         const Phone = ({ className }) => React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' }));
 
+        // PDF Generation Function
+        const generatePDF = async (reportData, userName) => {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Set up styling
+                const primaryColor = [59, 130, 246]; // Blue
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                let yPosition = 30;
+                
+                // Helper function to add text with wrapping
+                const addWrappedText = (text, x, y, maxWidth, fontSize = 10) => {
+                    if (!text) return y;
+                    doc.setFontSize(fontSize);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    lines.forEach((line, index) => {
+                        if (y + (index * 6) > pageHeight - 30) {
+                            doc.addPage();
+                            y = 30;
+                        }
+                        doc.text(line, x, y + (index * 6));
+                    });
+                    return y + (lines.length * 6) + 5;
+                };
+                
+                // Header
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, pageWidth, 35, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.text('VISION ASSESSMENT REPORT', pageWidth/2, 23, { align: 'center' });
+                
+                yPosition = 55;
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+                doc.text(`Patient: ${userName || 'Patient'}`, margin, 45);
+                doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - margin - 50, 45);
+                
+                // Patient Information
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...primaryColor);
+                doc.text('PATIENT INFORMATION', margin, yPosition);
+                yPosition += 12;
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Age Range: ${reportData.patientInfo?.ageRange || 'Not specified'}`, margin, yPosition);
+                yPosition += 8;
+                doc.text(`Current Setup: ${reportData.patientInfo?.currentSetup || 'Not specified'}`, margin, yPosition);
+                yPosition += 8;
+                doc.text(`Last Update: ${reportData.patientInfo?.lastUpdate || 'Unknown'}`, margin, yPosition);
+                yPosition += 15;
+                
+                // Vision Profile
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...primaryColor);
+                doc.text('VISION PROFILE', margin, yPosition);
+                yPosition += 12;
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                if (reportData.visionProfile?.summary) {
+                    yPosition = addWrappedText(reportData.visionProfile.summary, margin, yPosition, pageWidth - 2 * margin, 9);
+                }
+                yPosition += 5;
+                
+                // Primary Needs
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('Primary Needs:', margin, yPosition);
+                yPosition += 10;
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(9);
+                if (reportData.visionProfile?.primaryNeeds) {
+                    reportData.visionProfile.primaryNeeds.forEach(need => {
+                        doc.text(`• ${need}`, margin + 5, yPosition);
+                        yPosition += 7;
+                    });
+                }
+                yPosition += 10;
+                
+                // Recommendations
+                if (yPosition > pageHeight - 80) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+                
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...primaryColor);
+                doc.text('RECOMMENDATIONS', margin, yPosition);
+                yPosition += 12;
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                if (reportData.recommendations?.primary) {
+                    yPosition = addWrappedText(`Primary: ${reportData.recommendations.primary}`, margin, yPosition, pageWidth - 2 * margin, 9);
+                }
+                
+                // Action Plan
+                yPosition += 10;
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...primaryColor);
+                doc.text('ACTION PLAN', margin, yPosition);
+                yPosition += 12;
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                if (reportData.actionPlan) {
+                    reportData.actionPlan.forEach((step, index) => {
+                        yPosition = addWrappedText(`${index + 1}. ${step}`, margin, yPosition, pageWidth - 2 * margin, 9);
+                        yPosition += 5;
+                    });
+                }
+                
+                // Save PDF
+                doc.save(`VisionMatch_Report_${userName || 'Patient'}.pdf`);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            }
+        };
+
         const GlassesFinderWizard = () => {
             console.log('GlassesFinderWizard component initializing');
             const [currentStep, setCurrentStep] = useState(0);
@@ -872,7 +1047,7 @@
             const [userName, setUserName] = useState('');
             const [userLastName, setUserLastName] = useState('');
             const [userEmail, setUserEmail] = useState('');
-            const [resultStep, setResultStep] = useState('transition');
+            const [resultStep, setResultStep] = useState('executiveSummary');
             const [selectedOptician, setSelectedOptician] = useState(null);
             const [userPhone, setUserPhone] = useState('');
             const [showAllBrands, setShowAllBrands] = useState(false);
@@ -1157,7 +1332,7 @@
                         {
                             question: "What are your main activities?",
                             type: 'multiple',
-                            options: ["Sports", "Outdoor", "Reading", "Watch shows", "Gaming", "Other"],
+                            options: ["Sports", "Outdoor", "Reading", "Watch shows", "Gaming", "Driving at night", "Other"],
                             fullWidth: true,
                             textField: {
                                 question: "Please specify your other activities:",
@@ -1176,7 +1351,8 @@
                                 "Sports": {
                                     "High Impact": ["Team sports", "Martial arts", "Tennis/racquet"],
                                     "Endurance": ["Running", "Cycling", "Swimming"],
-                                    "Precision": ["Golf", "Target sports", "Yoga/pilates"]
+                                    "Precision": ["Golf", "Target sports", "Yoga/pilates"],
+                                    "Fitness": ["Gym workouts", "CrossFit", "Weight training"]
                                 },
                                 "Outdoor": {
                                     "Active": ["Hiking", "Climbing", "Water activities"],
@@ -1197,6 +1373,11 @@
                                     "Screen Focus": ["PC gaming", "Console gaming", "Mobile gaming"],
                                     "Social Gaming": ["Board games", "Card games", "Tournaments"],
                                     "VR/Extended": ["VR gaming", "Long sessions", "Competitive gaming"]
+                                },
+                                "Driving at night": {
+                                    "Frequency": ["Regular commute", "Occasional trips", "Weekend driving"],
+                                    "Challenges": ["Glare from headlights", "Street light halos", "Poor visibility"],
+                                    "Distance": ["City driving", "Highway driving", "Mixed conditions"]
                                 },
                                 "Other": {
                                     "Detail Work": ["Arts/crafts", "Photography", "DIY projects"],
@@ -1240,7 +1421,7 @@
                         alwaysVisible: true
                     },
                     conditional: (answers) => {
-                        const wearsGlasses = answers[0] && answers[0].includes('glasses');
+                        const wearsGlasses = answers[0] && answers[0][0] && answers[0][0].includes('glasses');
                         const uses = answers[6] || [];
                         const freeTime = answers[8] || [];
                         const doesSports = uses.includes("Sports or outdoors") || freeTime.includes("Exercise or play sports") || freeTime.includes("Spend time outdoors");
@@ -1359,29 +1540,27 @@
                 {
                     type: 'multi-step',
                     section: "What You Need",
-                    question: "What style do you like the most?",
+                    question: "Style and Brands",
                     steps: [
                         {
-                            question: "What style do you like the most?",
+                            question: "Where do you usually buy your eyewear?",
                             type: 'multiple',
-                            options: ["Classic & Professional", "Modern & Minimalist", "Bold & Expressive", "Sporty & Functional", "No specific preference - I'm open to suggestions"],
+                            options: ["Boutique Opticians", "Eyewear chains", "Value for Money options"],
                             fullWidth: true
                         },
                         {
-                            question: "Which brands match your style preferences?",
+                            question: "Which brands do you like?",
                             type: 'multiple',
-                            options: ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "No brand preference"], // Default fallback options
+                            options: [
+                                "Ray-Ban", "Oakley", "Persol", "Tom Ford", "Gucci", "Prada", 
+                                "Oliver Peoples", "Lindberg", "Silhouette", "Etnia Barcelona",
+                                "Maui Jim", "Giorgio Armani", "Hugo Boss", "Mykita", "ic! berlin",
+                                "Face à Face", "Theo Eyewear", "Nike Vision", "Adidas Eyewear", "Smith Optics"
+                            ],
                             gridLayout: true,
-                            conditionalOptions: {
-                                "Classic & Professional": ["Ray-Ban", "Oliver Peoples", "Persol", "Silhouette", "Giorgio Armani", "Hugo Boss", "General Óptica", "Multiópticas", "No brand preference"],
-                                "Modern & Minimalist": ["Lindberg", "Mykita", "ic! berlin", "Warby Parker", "Ace & Tate", "JINS", "General Óptica", "Multiópticas", "No brand preference"],
-                                "Bold & Expressive": ["Tom Ford", "Gucci", "Prada", "Etnia Barcelona", "Face à Face", "Theo Eyewear", "Local boutique brands", "No brand preference"],
-                                "Sporty & Functional": ["Oakley", "Nike Vision", "Adidas Eyewear", "Maui Jim", "Rudy Project", "Smith Optics", "General Óptica", "Multiópticas", "No brand preference"],
-                                "No specific preference - I'm open to suggestions": ["Ray-Ban", "General Óptica", "Multiópticas", "Alain Afflelou", "Local independent opticians", "Best value options", "Comfort-focused brands", "No brand preference"]
-                            },
                             textField: {
-                                question: "Tell us more about your personal style and what you're really looking for:",
-                                placeholder: "e.g., I want to feel confident in meetings, need something that matches my personality, want frames that make me look approachable, prefer something that works with my face shape and lifestyle...",
+                                question: "Other brands:",
+                                placeholder: "e.g., local brands, specialty brands...",
                                 alwaysVisible: true
                             }
                         }
@@ -1391,7 +1570,7 @@
                     type: 'multiple',
                     section: "What You Need",
                     question: "What matters most to you in sunglasses?",
-                    options: ["UV protection", "Style and fashion", "Durability", "Comfort for all-day wear", "Clear vision while driving", "Sports performance", "Price/value", "Brand prestige", "Other"],
+                    options: ["UV protection", "Style and fashion", "Durability", "Comfort for all-day wear", "Clear vision while driving", "Sports performance", "Price/value", "Brand", "Other"],
                     textField: {
                         question: "Any specific sunglasses preferences or experiences?",
                         placeholder: "e.g., need polarized lenses for driving, prefer wraparound style for sports, had issues with cheap sunglasses breaking...",
@@ -1974,7 +2153,9 @@
                 try {
                     // Collect ALL answers up to question 8 (halfway point)
                     const relevantAnswers = {
-                        currentGlasses: answers[0], // Q1: Do you wear glasses?
+                        currentGlasses: answers[0] && answers[0][0], // Q1 Step 1: Do you wear glasses?
+                        age: answers[0] && answers[0][1], // Q1 Step 2: Age range
+                        gender: answers[0] && answers[0][2], // Q1 Step 3: Gender
                         glassesTypes: answers[1], // Q2: Types of glasses (multiple)
                         glassesCount: answers[2], // Q3: How many pairs?
                         prescriptionAge: answers[3], // Q4: When last updated?
@@ -1998,6 +2179,8 @@
                     const prompt = `You are a master optometrist with 30 years of experience. Analyze this patient's vision profile and provide ONE powerful, personalized insight that combines their specific situation with a relevant statistic or professional observation.
 
 Patient Profile:
+- Age: ${relevantAnswers.age}
+- Gender: ${relevantAnswers.gender}
 - Current glasses: ${relevantAnswers.currentGlasses}
 - Types of glasses owned: ${JSON.stringify(relevantAnswers.glassesTypes)}
 - Number of pairs: ${relevantAnswers.glassesCount}
@@ -2010,16 +2193,17 @@ Patient Profile:
 Additional notes from patient:
 ${Object.entries(relevantAnswers).filter(([k,v]) => k.includes('_text') && v).map(([k,v]) => `- ${v}`).join('\n')}
 
-You are a master optometrist with 20 years of experience.Based on this specific profile, provide ONE SHORT sentence that:
+You are a master optometrist with 20 years of experience.Based on this specific profile, provide ONE OR TWO VERY SHORT sentences that:
 1. Shows deep understanding of their unique situation
 2. Feels personal and insightful, not generic
-3. uses statistics or facts
-4. specifically take note of any answer they gave in a free text field!
+3. uses statistics or facts when appropriate
+4. specifically take note of any answer they gave in a free text field and include it in your response!
 
-Make sure to be short, to the point and specific. 
+Make sure to be funny, coloquial and witty. it should be surprising and a little cheeky, yet still insightful.
 
+never make it more that 1  short sentence!!
 
-Write as a master optometrist would speak to a patient - professional, caring, and insightful.`;
+`;
 
                     console.log('🎯 Collected answers:', relevantAnswers);
                     console.log('🎯 Making API call to Gemini...');
@@ -2087,7 +2271,8 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                     clearInterval(progressInterval);
                     setLoadingProgress(100);
                     setTimeout(() => {
-                        setAiInsights(generatePersonalizedFallback());
+                        const fallbackReport = generateFullReportFallback("User");
+                        setFullReport(fallbackReport);
                         setIsGeneratingInsights(false);
                     }, 500);
                 }, 8000); // Increased timeout for retries
@@ -2161,40 +2346,33 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                 };
                 
                 try {
-                    console.log("🤖 Starting Gemini AI analysis...");
+                    console.log("🤖 Starting comprehensive report generation...");
                     console.log("User answers:", answers);
                     
-                    let result;
-                    
-                    // Try Flash model first (faster)
-                    try {
-                        result = await tryGeminiAPI('gemini-1.5-flash');
-                    } catch (flashError) {
-                        console.log("🔄 Flash model failed, trying Pro model...");
-                        // Fallback to Pro model if Flash is overloaded
-                        result = await tryGeminiAPI('gemini-1.5-pro');
-                    }
+                    // Generate full report directly
+                    const result = await generateFullReportWithGemini("User");
                     
                     clearTimeout(timeoutId);
                     clearInterval(progressInterval);
                     setLoadingProgress(100);
                     
                     setTimeout(() => {
-                        setAiInsights(result);
+                        setFullReport(result);
                         setIsGeneratingInsights(false);
-                        console.log("🎉 Real AI insights generated!");
+                        console.log("🎉 Comprehensive report generated!");
                     }, 500);
                     
                 } catch (error) {
                     clearTimeout(timeoutId);
                     clearInterval(progressInterval);
-                    console.log("🔄 Both AI models failed, using intelligent fallback:", error.message);
+                    console.log("🔄 AI generation failed, using intelligent fallback:", error.message);
                     setLoadingProgress(100);
                     
                     setTimeout(() => {
-                        setAiInsights(generatePersonalizedFallback());
+                        const fallbackReport = generateFullReportFallback("User");
+                        setFullReport(fallbackReport);
                         setIsGeneratingInsights(false);
-                        console.log("✅ Smart recommendations generated from your answers!");
+                        console.log("✅ Comprehensive report generated from your answers!");
                     }, 1000);
                 }
             };
@@ -2205,6 +2383,32 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                     for (let i = 0; i < questions.length; i++) {
                         if (questions[i].question && questions[i].question.toLowerCase().includes(questionText.toLowerCase())) {
                             return answers[i];
+                        }
+                    }
+                    return null;
+                };
+
+                const findAnswerByText = (textFieldQuestion) => {
+                    for (let i = 0; i < questions.length; i++) {
+                        const answer = answers[i];
+                        if (answer && typeof answer === 'object' && !Array.isArray(answer) && answer.textField) {
+                            return answer.textField;
+                        }
+                        if (Array.isArray(answer)) {
+                            for (let j = 0; j < answer.length; j++) {
+                                if (answer[j] && typeof answer[j] === 'object' && answer[j].textField) {
+                                    return answer[j].textField;
+                                }
+                            }
+                        }
+                        // Also check multi-step answers
+                        if (questions[i].type === 'multi-step' && Array.isArray(answer)) {
+                            for (let stepIndex = 0; stepIndex < answer.length; stepIndex++) {
+                                const stepAnswer = answer[stepIndex];
+                                if (stepAnswer && typeof stepAnswer === 'object' && stepAnswer.textField) {
+                                    return stepAnswer.textField;
+                                }
+                            }
                         }
                     }
                     return null;
@@ -3137,24 +3341,37 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                         console.log('🎯 Not triggering generation - already have summary or generating');
                     }
 
-                    return React.createElement('div', { className: "w-full flex items-center justify-center min-h-[80vh] px-4" },
-                        React.createElement('div', { className: "celebration-screen text-center space-y-8 max-w-3xl w-full mx-auto" },
+                    return React.createElement('div', { className: "w-full flex items-center justify-center min-h-[60vh] py-8 px-4" },
+                        React.createElement('div', { className: "celebration-screen text-center space-y-8 max-w-4xl w-full mx-auto" },
                             React.createElement('div', { className: "w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6" },
                                 React.createElement('div', { className: "w-8 h-8 bg-green-500 rounded-full" })
                             ),
                             React.createElement('p', { className: "text-sm text-green-600 font-medium uppercase tracking-wide" }, q.progress),
                             React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-8" }, q.title),
-                            React.createElement('div', { className: "bg-blue-50 rounded-2xl p-8 mb-8 mx-auto border-2 border-blue-100 shadow-sm" },
+                            React.createElement('div', { 
+                                className: "bg-blue-50 rounded-2xl p-6 md:p-8 mb-8 mx-auto border-2 border-blue-100 shadow-sm flex items-center justify-center" 
+                            },
                                 isGeneratingSummary ? 
                                     React.createElement('div', { className: "flex items-center justify-center space-x-3" },
                                         React.createElement('div', { className: "animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" }),
                                         React.createElement('p', { className: "text-lg text-gray-600" }, "Reading between the lines...")
                                     ) :
-                                    React.createElement('p', { className: "text-xl text-gray-800 leading-relaxed font-medium" }, 
-                                        personalitySummary || "You are the kind of person that probably cleans their glasses more often than they clean their car."
+                                    React.createElement('div', { className: "w-full max-w-3xl mx-auto" },
+                                        React.createElement('p', { 
+                                            className: "text-base md:text-lg text-gray-800 leading-relaxed font-medium",
+                                            style: { 
+                                                wordWrap: 'break-word',
+                                                overflowWrap: 'break-word',
+                                                wordBreak: 'break-word',
+                                                hyphens: 'auto',
+                                                whiteSpace: 'normal'
+                                            }
+                                        }, 
+                                            personalitySummary || "You are the kind of person that probably cleans their glasses more often than they clean their car."
+                                        )
                                     )
                             ),
-                            React.createElement('p', { className: "text-xl font-semibold text-gray-800 mb-8" }, "Let's now find out how we can optimise your setup"),
+                            React.createElement('p', { className: "text-lg md:text-xl font-semibold text-gray-800 mb-8" }, "Let's now find out how we can optimise your setup"),
                             React.createElement('button', {
                                 onClick: nextStep,
                                 className: "visionmatch-button px-8 py-3 text-base font-semibold"
@@ -3376,15 +3593,9 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                     (stepIndex === 1 && stepAnswers[0]) ||
                                     (stepIndex === 2 && stepAnswers[0] && stepAnswers[1]);
                                 
-                                // Special logic for style question - skip step 2 if "No specific preference" or "I care about the fit" is selected
-                                if (q.question === "What style do you like the most?" && stepIndex === 1 && stepAnswers[0]) {
-                                    const firstStepAnswer = stepAnswers[0];
-                                    const skipSecondStep = Array.isArray(firstStepAnswer) && 
-                                        (firstStepAnswer.includes("No specific preference") || 
-                                         firstStepAnswer.includes("I care about the fit, not the style"));
-                                    if (skipSecondStep) {
-                                        shouldShowStep = false;
-                                    }
+                                // Special logic for style and brands question - always show step 2
+                                if (q.question === "Style and Brands" && stepIndex === 1) {
+                                    shouldShowStep = shouldShowStep; // No special skip logic needed
                                 }
                                 
                                 if (!shouldShowStep) return null;
@@ -3453,12 +3664,45 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                             })();
 
                                             if (isGroupedOptions) {
+                                                // Build a map of category to main category
+                                                const categoryToMainCategory = {};
+                                                const mainCategories = [];
+                                                if (stepIndex > 0) {
+                                                    const stepAnswers = answers[currentStep] || {};
+                                                    const previousAnswer = stepAnswers[stepIndex - 1];
+                                                    if (previousAnswer) {
+                                                        const selections = Array.isArray(previousAnswer) ? previousAnswer : [previousAnswer];
+                                                        selections.forEach(mainCat => {
+                                                            if (step.conditionalOptions[mainCat]) {
+                                                                mainCategories.push(mainCat);
+                                                                Object.keys(step.conditionalOptions[mainCat]).forEach(subCat => {
+                                                                    categoryToMainCategory[subCat] = mainCat;
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                }
+
                                                 // Render grouped options with categories
-                                                return Object.entries(optionsToRender).map(([category, items]) =>
-                                                    React.createElement('div', { 
+                                                let lastMainCategory = null;
+                                                return Object.entries(optionsToRender).map(([category, items]) => {
+                                                    const mainCategory = categoryToMainCategory[category];
+                                                    const showMainCategoryHeader = mainCategory && mainCategory !== lastMainCategory;
+                                                    lastMainCategory = mainCategory;
+
+                                                    return React.createElement('div', { 
                                                         key: category, 
                                                         className: 'col-span-full' 
                                                     },
+                                                        // Main category header (only when it changes)
+                                                        showMainCategoryHeader && React.createElement('div', { 
+                                                            className: 'border-b border-gray-200 pb-2 mb-4 mt-6'
+                                                        },
+                                                            React.createElement('h4', { 
+                                                                className: 'text-lg font-bold text-primary-blue' 
+                                                            }, mainCategory)
+                                                        ),
+                                                        // Subcategory header
                                                         React.createElement('h5', { 
                                                             className: 'text-sm font-semibold text-gray-700 mb-2 mt-3' 
                                                         }, category),
@@ -3486,8 +3730,8 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                                                 }, option)
                                                             )
                                                         )
-                                                    )
-                                                );
+                                                    );
+                                                });
                                             } else {
                                                 // Original flat rendering
                                                 return optionsToRender.map((option, optionIndex) =>
@@ -3507,7 +3751,15 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                                         setTimeout(() => {
                                                             const nextStep = document.getElementById(`step-${stepIndex + 1}`);
                                                             if (nextStep) {
-                                                                nextStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                                // Get the position of the next step
+                                                                const rect = nextStep.getBoundingClientRect();
+                                                                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                                                                // Account for mobile progress bar height (about 100px total with padding)
+                                                                const offset = window.innerWidth <= 768 ? 120 : 20;
+                                                                window.scrollTo({
+                                                                    top: rect.top + scrollTop - offset,
+                                                                    behavior: 'smooth'
+                                                                });
                                                             }
                                                         }, 300);
                                                     }
@@ -4202,35 +4454,74 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `You are a senior optometrist creating the definitive vision analysis for ${userName === "User" ? "this person" : userName}. This comprehensive report will be used to create teasers and the final email, so be thorough and insightful.\n\n` +
-                                        "COMPLETE USER PROFILE:\n" +
+                                    text: `You are creating a comprehensive vision assessment report for ${userName === "User" ? "this person" : userName}. Create a detailed, professional report following this structure.\n\n` +
+                                        "PATIENT PROFILE:\n" +
                                         JSON.stringify(answers, null, 2) + "\n\n" +
-                                        "EVIDENCE-BASED STATISTICS AVAILABLE:\n" +
+                                        "RELEVANT STATISTICS:\n" +
                                         getRelevantStats(answers).map(stat => 
                                             `- ${stat.category}: ${stat.stat} (${stat.explanation})`
                                         ).join('\n') + "\n\n" +
-                                        "COMPREHENSIVE ANALYSIS REQUIREMENTS:\n" +
-                                        "- Personal greeting addressing them specifically\n" +
-                                        "- Executive summary that captures their unique situation\n" +
-                                        "- 3-4 key findings that reveal surprising insights about THEIR specific setup\n" +
-                                        "- Each finding must include: specific observation + relevant statistic + personal impact\n" +
-                                        "- Actionable recommendations tailored to their exact needs\n" +
-                                        "- Clear next steps they can implement immediately\n" +
-                                        "- Reference their actual glasses, screen time, symptoms, activities\n" +
-                                        "- Be specific and fact-based, not generic\n\n" +
+                                        "Create a comprehensive report with these sections:\n\n" +
+                                        "1. PATIENT INFORMATION - Basic demographics and current setup\n" +
+                                        "2. VISION PROFILE SUMMARY - Overview of their vision needs and challenges\n" +
+                                        "3. CURRENT EYEWEAR ASSESSMENT - Analysis of their existing glasses/contacts\n" +
+                                        "4. LIFESTYLE & VISUAL DEMANDS - How their activities affect vision needs\n" +
+                                        "5. SYMPTOMS & CONCERNS - Issues they're experiencing\n" +
+                                        "6. RISK ASSESSMENT - Potential vision risks based on profile\n" +
+                                        "7. PERSONALIZED RECOMMENDATIONS - Specific solutions for their needs\n" +
+                                        "8. LENS TECHNOLOGY RECOMMENDATIONS - Specific lens features they need\n" +
+                                        "9. FRAME RECOMMENDATIONS - Style and fit suggestions\n" +
+                                        "10. ACTION PLAN - Immediate next steps\n\n" +
                                         "Return ONLY this JSON format:\n" +
                                         '{\n' +
-                                        '  "greeting": "Dear [Name], here\'s your comprehensive vision analysis",\n' +
-                                        '  "executiveSummary": "[2-3 sentence overview of their vision profile]",\n' +
-                                        '  "keyFindings": [\n' +
+                                        '  "patientInfo": {\n' +
+                                        '    "ageRange": "[Their age range]",\n' +
+                                        '    "currentSetup": "[Summary of current glasses/contacts]",\n' +
+                                        '    "lastUpdate": "[When glasses were last updated]"\n' +
+                                        '  },\n' +
+                                        '  "visionProfile": {\n' +
+                                        '    "summary": "[2-3 sentence overview]",\n' +
+                                        '    "primaryNeeds": ["Need 1", "Need 2", "Need 3"],\n' +
+                                        '    "visualDemands": "[Their main visual activities]"\n' +
+                                        '  },\n' +
+                                        '  "currentAssessment": {\n' +
+                                        '    "strengths": ["What works well"],\n' +
+                                        '    "gaps": ["What\'s missing"],\n' +
+                                        '    "issues": ["Current problems"]\n' +
+                                        '  },\n' +
+                                        '  "lifestyle": {\n' +
+                                        '    "screenTime": "[Daily screen hours]",\n' +
+                                        '    "activities": ["Main activities"],\n' +
+                                        '    "workEnvironment": "[Work setting]"\n' +
+                                        '  },\n' +
+                                        '  "symptoms": ["Symptom 1", "Symptom 2"],\n' +
+                                        '  "riskFactors": [\n' +
                                         '    {\n' +
-                                        '      "title": "[Finding title]",\n' +
-                                        '      "description": "[Detailed explanation with relevant statistics]",\n' +
-                                        '      "impact": "[Why this matters for them]"\n' +
+                                        '      "risk": "[Risk name]",\n' +
+                                        '      "level": "[Low/Medium/High]",\n' +
+                                        '      "explanation": "[Why this matters]"\n' +
                                         '    }\n' +
                                         '  ],\n' +
-                                        '  "recommendations": "[Specific actionable advice]",\n' +
-                                        '  "nextSteps": "[What they should do next]"\n' +
+                                        '  "recommendations": {\n' +
+                                        '    "primary": "[Main recommendation]",\n' +
+                                        '    "secondary": ["Additional recommendation"],\n' +
+                                        '    "preventive": "[Preventive measures]"\n' +
+                                        '  },\n' +
+                                        '  "lensRecommendations": {\n' +
+                                        '    "type": "[Lens type needed]",\n' +
+                                        '    "features": ["Feature 1", "Feature 2"],\n' +
+                                        '    "coatings": ["Coating 1", "Coating 2"]\n' +
+                                        '  },\n' +
+                                        '  "frameRecommendations": {\n' +
+                                        '    "style": "[Frame style]",\n' +
+                                        '    "material": "[Best material]",\n' +
+                                        '    "brands": ["Brand suggestions"]\n' +
+                                        '  },\n' +
+                                        '  "actionPlan": [\n' +
+                                        '    "Step 1: [Immediate action]",\n' +
+                                        '    "Step 2: [Next action]",\n' +
+                                        '    "Step 3: [Follow-up]"\n' +
+                                        '  ]\n' +
                                         '}'
                                 }]
                             }],
@@ -4306,7 +4597,7 @@ Write as a master optometrist would speak to a patient - professional, caring, a
 
             // Fallback function for optician descriptions
             const generateOpticianDescriptionFallback = (optician) => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const hasGlasses = answers[0] && answers[0][0] && answers[0][0].includes('glasses');
                 const currentGlasses = answers[1] || '';
                 const activities = answers[6] || [];
                 const hasProgressive = Array.isArray(currentGlasses) && currentGlasses.includes('Progressive');
@@ -4386,12 +4677,22 @@ Write as a master optometrist would speak to a patient - professional, caring, a
             // Legacy compatibility
             const generateTeaserWithGemini = generateInitialTeaserWithGemini;
 
+            // Helper function to find answers by question content consistently
+            const findAnswerByQuestion = (questionText) => {
+                for (let i = 0; i < questions.length; i++) {
+                    if (questions[i].question && questions[i].question.toLowerCase().includes(questionText.toLowerCase())) {
+                        return answers[i];
+                    }
+                }
+                return null;
+            };
+            
             // Fallback functions for each stage
             const generateInitialTeaserFallback = () => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const hasGlasses = answers[0] && answers[0][0] && answers[0][0].includes('glasses');
                 const currentGlasses = answers[1] || '';
-                const screenTime = answers[10] || '';
-                const symptoms = answers[11] || [];
+                const screenTime = findAnswerByQuestion('How many hours per day are you in front of a screen') || '';
+                const symptoms = findAnswerByQuestion('Do you ever experience any of the following') || [];
                 const activities = answers[6] || [];
                 const relevantStats = getRelevantStats(answers);
                 
@@ -4445,10 +4746,10 @@ Write as a master optometrist would speak to a patient - professional, caring, a
             };
 
             const generateSecondTeaserFallback = (userName) => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
+                const hasGlasses = answers[0] && answers[0][0] && answers[0][0].includes('glasses');
                 const currentGlasses = answers[1] || '';
-                const screenTime = answers[10] || '';
-                const symptoms = answers[11] || [];
+                const screenTime = findAnswerByQuestion('How many hours per day are you in front of a screen') || '';
+                const symptoms = findAnswerByQuestion('Do you ever experience any of the following') || [];
                 const activities = answers[6] || [];
                 const relevantStats = getRelevantStats(answers);
                 
@@ -4504,35 +4805,332 @@ Write as a master optometrist would speak to a patient - professional, caring, a
             };
 
             const generateFullReportFallback = (userName) => {
-                const hasGlasses = answers[0] && answers[0].includes('glasses');
-                const screenTime = answers[10] || 'Unknown';
-                const symptoms = answers[11] || [];
-                const relevantStats = getRelevantStats(answers);
-                
-                return {
-                    greeting: `Dear ${userName}, here's your comprehensive vision analysis`,
-                    executiveSummary: hasGlasses ?
-                        "Your vision profile reveals a common pattern: hardworking eyes managing multiple visual demands with suboptimal tools. Research shows you're likely experiencing more strain than necessary." :
-                        "Your profile shows good natural vision facing increasing digital demands. Early optimization can prevent the eye strain issues that affect 88% of computer users.",
-                    keyFindings: [
-                        {
-                            title: "Digital Eye Strain Assessment",
-                            description: `Your ${screenTime} of daily screen time means your eyes are doing the equivalent of 16,000 tiny push-ups every day. Research shows this level of screen use reduces your blink rate by 66%, causing tears to evaporate 5x faster.`,
-                            impact: "This explains why your eyes feel tired and dry, especially later in the day."
-                        },
-                        {
-                            title: "Vision Optimization Opportunity", 
-                            description: "Studies show that task-specific glasses can reduce eye muscle work by 68%. Think of it like using the right tool for the right job - your eyes will thank you.",
-                            impact: "This could eliminate that 3pm energy crash and improve your focus throughout the day."
-                        },
-                        {
-                            title: "Prevention Success Rate",
-                            description: "The good news? Research shows 94% of vision-related symptoms improve within 2 weeks of proper correction. You're catching this early.",
-                            impact: "Small changes now can prevent bigger vision issues down the road."
+                // Helper functions
+                const findAnswerByQuestion = (questionText) => {
+                    for (let i = 0; i < questions.length; i++) {
+                        const question = questions[i];
+                        // Check main question
+                        if (question.question && question.question.toLowerCase().includes(questionText.toLowerCase())) {
+                            return answers[i];
                         }
-                    ],
-                    recommendations: "Based on your profile, consider computer-specific glasses with blue light filtering and anti-reflective coating. These features address the specific challenges your eyes face during screen work.",
-                    nextSteps: "Schedule an eye exam and mention your screen time habits. Show them this report to ensure they address your specific visual environment and daily demands."
+                        // Check steps for multi-step questions
+                        if (question.type === 'multi-step' && question.steps) {
+                            for (let stepIndex = 0; stepIndex < question.steps.length; stepIndex++) {
+                                const step = question.steps[stepIndex];
+                                if (step.question && step.question.toLowerCase().includes(questionText.toLowerCase())) {
+                                    return answers[i] && answers[i][stepIndex] ? answers[i][stepIndex] : null;
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const findAnswerByText = (textFieldQuestion) => {
+                    for (let i = 0; i < questions.length; i++) {
+                        const question = questions[i];
+                        const answer = answers[i];
+                        
+                        // Check single-step text fields
+                        if (question.textField && question.textField.question === textFieldQuestion) {
+                            return answer && answer.textField ? answer.textField : null;
+                        }
+                        
+                        // Check multi-step text fields
+                        if (question.type === 'multi-step' && question.steps) {
+                            for (let stepIndex = 0; stepIndex < question.steps.length; stepIndex++) {
+                                const step = question.steps[stepIndex];
+                                if (step.textField && step.textField.question === textFieldQuestion) {
+                                    return answer && answer[stepIndex] && answer[stepIndex].textField ? answer[stepIndex].textField : null;
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                };
+                
+                // Debug: log all answers to understand structure
+                console.log('All answers for report generation:', answers);
+                
+                // Direct extraction using question indices (more reliable)
+                // Q0: About You - multi-step
+                const aboutYouAnswers = answers[0] || [];
+                const currentSetup = aboutYouAnswers[0] || "Not specified"; // Do you currently wear glasses
+                const visionNeeds = aboutYouAnswers[0] && aboutYouAnswers[0].textField ? aboutYouAnswers[0].textField : "";
+                const ageRange = aboutYouAnswers[1] || "Not specified"; // Age range
+                const gender = aboutYouAnswers[2] || "Not specified"; // Gender
+                
+                // Q1: What You Have - glasses count
+                const glassesSetupAnswers = answers[1] || [];
+                const glassesCount = glassesSetupAnswers[0] || "Not specified"; // How many pairs
+                const glassesTypes = glassesSetupAnswers[1] || []; // What types
+                const glassesDetails = glassesSetupAnswers[1] && glassesSetupAnswers[1].textField ? glassesSetupAnswers[1].textField : "";
+                
+                // Q2: Main glasses details
+                const mainGlassesAnswers = answers[2] || [];
+                const whereBought = mainGlassesAnswers[0] || "Not specified"; // Where bought
+                const currentBrand = mainGlassesAnswers[1] || "Not specified"; // Brand
+                const whyChosen = mainGlassesAnswers[2] || []; // Why chosen
+                
+                // Q3: Glasses history
+                const historyAnswers = answers[3] || [];
+                const lastGlassesUpdate = historyAnswers[0] || "Not specified"; // When bought current
+                const updateReason = historyAnswers[1] || []; // What prompted update
+                const updateDetails = historyAnswers[1] && historyAnswers[1].textField ? historyAnswers[1].textField : "";
+                
+                // Q4: Sunglasses update (conditional)
+                const sunglassesUpdate = answers[4] || "Not applicable";
+                
+                // Q5: Glasses issues
+                const glassesIssues = answers[5] || [];
+                const issuesDetails = answers[5] && answers[5].textField ? answers[5].textField : "";
+                
+                // Q6: Glasses usage
+                const glassesUsage = answers[6] || [];
+                const usageDetails = answers[6] && answers[6].textField ? answers[6].textField : "";
+                
+                // Q8: Activities (skipping celebration Q7)
+                const activitiesAnswers = answers[8] || [];
+                const activities = activitiesAnswers[0] || []; // Main activities
+                const activityDetails = activitiesAnswers[1] || []; // Specific activities
+                const activityChallenges = activitiesAnswers[1] && activitiesAnswers[1].textField ? activitiesAnswers[1].textField : "";
+                
+                // Q9: Screen time
+                const screenTime = answers[9] || 'Not specified';
+                const screenDetails = answers[9] && typeof answers[9] === 'object' && answers[9].details ? answers[9].details : {};
+                
+                // Q10: Avoid glasses (conditional)
+                const avoidGlasses = answers[10] || "Not applicable";
+                
+                // Q11: Work environment
+                const workAnswers = answers[11] || [];
+                const workEnvironment = workAnswers[0] || "Not specified";
+                const workSpecific = workAnswers[1] || [];
+                const workDetails = workAnswers[1] && workAnswers[1].textField ? workAnswers[1].textField : "";
+                
+                // Q12: Symptoms
+                const symptoms = answers[12] || [];
+                const symptomDetails = answers[12] && answers[12].textField ? answers[12].textField : "";
+                
+                // Q16: Purchase preferences & brands
+                const brandAnswers = answers[16] || [];
+                const purchasePrefs = brandAnswers[0] || [];
+                const preferredBrands = brandAnswers[1] || [];
+                const otherBrands = brandAnswers[1] && brandAnswers[1].textField ? brandAnswers[1].textField : "";
+                
+                // Q17: Sunglasses preferences
+                const sunglassesImportant = answers[17] || [];
+                const sunglassesPrefs = answers[17] && answers[17].textField ? answers[17].textField : "";
+                
+                // Process data for report
+                const hasGlasses = currentSetup && currentSetup.includes('glasses');
+                const symptomsArray = Array.isArray(symptoms) ? symptoms : [];
+                const activitiesArray = Array.isArray(activities) ? activities : [];
+                const hasNightDriving = activitiesArray.includes("Driving at night");
+                const hasSports = activitiesArray.includes("Sports") || glassesUsage.includes("Sports or outdoors");
+                const isOver40 = ageRange.includes('46') || ageRange.includes('56') || ageRange.includes('Over');
+                const highScreenTime = screenTime.includes('More than 8') || screenTime.includes('6-8');
+                
+                // Determine lifestyle factors
+                const sunExposure = activitiesArray.includes("Outdoor") || workEnvironment === "Outdoors" ? "High" : 
+                                  workEnvironment === "Office" || workEnvironment === "Indoors" ? "Low" : "Medium";
+                const sportsUse = hasSports ? "Yes" : "No";
+                const nightDriving = hasNightDriving ? "Yes" : "No";
+                
+                // Build comprehensive report
+                return {
+                    patientInfo: {
+                        age: ageRange,
+                        gender: gender
+                    },
+                    currentUsage: {
+                        glassesType: hasGlasses ? 
+                            (Array.isArray(glassesTypes) && glassesTypes.includes("Progressive") ? "Progressive" : 
+                             Array.isArray(glassesTypes) && glassesTypes.includes("Single vision") ? "Single vision" : "Prescription glasses") : 
+                            "None",
+                        usagePatterns: Array.isArray(glassesUsage) ? glassesUsage.join(", ") : (glassesUsage || "General use"),
+                        symptoms: symptomsArray
+                    },
+                    lifestyle: {
+                        screenTime: screenTime === 'More than 8 hours' ? '8+ hours/day' : 
+                                   screenTime === '6-8 hours' ? '6-8 hours/day' :
+                                   screenTime === '4-6 hours' ? '4-6 hours/day' :
+                                   screenTime === '2-4 hours' ? '2-4 hours/day' : 
+                                   screenTime === 'Less than 2 hours' ? 'Low (under 2 hours/day)' : screenTime,
+                        sunExposure: sunExposure,
+                        nightDriving: nightDriving,
+                        sportsUse: sportsUse,
+                        workEnvironment: workEnvironment || "Not specified",
+                        additionalNotes: [visionNeeds, workDetails, activityChallenges, issuesDetails, usageDetails].filter(Boolean).join("; ") || "—"
+                    },
+                    stressZones: [
+                        highScreenTime ? "Digital eye strain from screens" : null,
+                        sunExposure === "High" ? "UV / glare outdoors" : null,
+                        workEnvironment === "Mixed environments" ? "Visual transitions (indoor → outdoor)" : null,
+                        isOver40 ? "Focusing shifts (near / middle / distance)" : null,
+                        hasNightDriving ? "Night vision and glare challenges" : null,
+                        symptomsArray.includes("Headaches related to eyesight") ? "Headache-related vision strain" : null,
+                        symptomsArray.includes("Eye strain at screen") ? "Digital device eye strain" : null
+                    ].filter(Boolean),
+                    healthIndicators: [
+                        isOver40 ? "Age 40+ → presbyopia risk" : null,
+                        highScreenTime ? "High screen time → digital eye strain risk" : null,
+                        hasNightDriving ? "Night driving → possible anti-glare need" : null,
+                        symptomsArray.includes("Dry eyes") ? "Dry-eye symptoms → may require medical check" : null,
+                        symptomsArray.includes("Glare sensitivity") ? "Light sensitivity → possible underlying condition" : null,
+                        symptomsArray.length > 2 ? "Multiple symptoms → comprehensive eye exam recommended" : null
+                    ].filter(Boolean),
+                    stylePreferences: {
+                        frameShapes: Array.isArray(preferredBrands) && preferredBrands.includes("Ray-Ban") ? ["Aviator", "Wayfarer"] :
+                                    Array.isArray(preferredBrands) && preferredBrands.includes("Tom Ford") ? ["Rectangle", "Cat-eye"] :
+                                    Array.isArray(preferredBrands) && preferredBrands.includes("Oakley") ? ["Sport", "Wraparound"] : 
+                                    Array.isArray(whyChosen) && whyChosen.includes("Liked the style") ? ["Style-focused", "Fashion-forward"] : 
+                                    ["Classic", "Modern"],
+                        colors: ["Black", "Tortoise", "Clear", "Mixed"],
+                        occasions: workEnvironment === "Office" ? ["Professional", "Casual"] : 
+                                 hasSports ? ["Sports", "Active", "Casual"] : ["Casual", "Everyday"],
+                        brands: Array.isArray(preferredBrands) ? preferredBrands.slice(0, 5) : [],
+                        purchasePreference: Array.isArray(purchasePrefs) ? purchasePrefs.join(", ") : (purchasePrefs || "Not specified")
+                    },
+                    quickReference: {
+                        everyday: hasGlasses ? "Yes" : "Recommended",
+                        sunglasses: sunExposure === "High" || hasNightDriving ? "Yes" : "Optional",
+                        blueLight: highScreenTime ? "Yes" : "Optional",
+                        specialUse: hasSports || hasNightDriving ? "Yes" : "No"
+                    },
+                    // Add more detailed sections for the template
+                    currentGlassesDetails: {
+                        brand: currentBrand,
+                        whereBought: whereBought,
+                        lastUpdate: lastGlassesUpdate,
+                        count: glassesCount,
+                        issues: Array.isArray(glassesIssues) ? glassesIssues : []
+                    },
+                    // Executive summary insights - Quick Profile Format
+                    executiveSummary: {
+                        // Setup Profile
+                        setup: {
+                            currentGlasses: hasGlasses ? 
+                                `${glassesTypes.includes && glassesTypes.includes("Progressive") ? "Progressive" : "Single Vision"} glasses${currentBrand !== "Not specified" ? ` (${currentBrand})` : ""}` :
+                                "No prescription eyewear currently",
+                            dailyUsage: glassesUsage?.length > 0 ? glassesUsage.join(", ") : "Varies",
+                            screenTime: screenTime ? (screenTime === 'More than 8 hours' ? '8+ hours daily' : 
+                                       screenTime === '6-8 hours' ? '6-8 hours daily' :
+                                       screenTime === '4-6 hours' ? '4-6 hours daily' :
+                                       screenTime === '2-4 hours' ? '2-4 hours daily' : 
+                                       screenTime === 'Less than 2 hours' ? 'Under 2 hours daily' : screenTime) : "Not specified",
+                            lifestyle: activitiesArray?.length > 0 ? activitiesArray.slice(0, 2).join(", ") : "Mixed activities"
+                        },
+                        
+                        // Main Concerns
+                        mainConcerns: {
+                            primary: symptomsArray.length > 0 ? symptomsArray[0] :
+                                    highScreenTime ? "Digital eye strain prevention" :
+                                    hasNightDriving ? "Night vision optimization" : "Overall vision wellness",
+                            additional: symptomsArray.length > 1 ? symptomsArray.slice(1, 3) : [],
+                            urgency: glassesIssues?.includes("My prescription needs updating") || glassesIssues?.includes("Lenses are scratched") ? "High - immediate attention needed" :
+                                    symptomsArray.length > 2 ? "Medium - multiple symptoms present" : "Low - preventive care"
+                        },
+                        
+                        // Next Steps
+                        nextSteps: {
+                            immediate: (() => {
+                                if (glassesIssues?.includes("My prescription needs updating")) return "Schedule comprehensive eye exam - prescription update needed";
+                                if (symptomsArray.includes("Headaches related to eyesight")) return "Book eye exam to address headaches";
+                                if (glassesIssues?.includes("Lenses are scratched")) return "Replace scratched lenses immediately";
+                                if (symptomsArray.includes("Eye strain at screen") && !glassesTypes?.includes("Blue light")) return "Consider blue light protection for screen use";
+                                return "Schedule routine eye exam for comprehensive assessment";
+                            })(),
+                            shortTerm: hasGlasses && !glassesTypes?.includes("Prescription sunglasses") && sunExposure === "High" ? 
+                                "Add prescription sunglasses for UV protection" :
+                                highScreenTime && !glassesTypes?.includes("Computer glasses") ?
+                                "Consider dedicated computer glasses" : "Review current eyewear efficiency with optician",
+                            planning: glassesCount === "One" && glassesUsage?.includes("I always wear glasses") ?
+                                "Consider backup pair for daily wear security" : "Explore optimization opportunities with professional"
+                        }
+                    },
+                    // Personalized optimization recommendations
+                    optimizationPlan: {
+                        immediate: [
+                            // Immediate actions based on symptoms
+                            symptomsArray.includes("Eye strain at screen") && !glassesTypes.includes("Blue light") ? 
+                                "Add blue light filtering to reduce digital eye strain" : null,
+                            symptomsArray.includes("Headaches related to eyesight") ? 
+                                "Schedule comprehensive eye exam - headaches may indicate prescription change needed" : null,
+                            symptomsArray.includes("Dry eyes") && highScreenTime ? 
+                                "Implement 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds" : null,
+                            glassesIssues.includes("Lenses are scratched") ? 
+                                "Replace scratched lenses immediately - scratches reduce vision quality and increase eye strain" : null,
+                            glassesIssues.includes("My prescription needs updating") ? 
+                                "Update prescription urgently - outdated prescriptions cause unnecessary strain" : null
+                        ].filter(Boolean),
+                        shortTerm: [
+                            // 1-3 month recommendations
+                            hasGlasses && !glassesTypes.includes("Prescription sunglasses") && (sunExposure === "High" || hasNightDriving) ?
+                                "Add prescription sunglasses for UV protection and glare reduction" : null,
+                            highScreenTime && !glassesTypes.includes("Computer glasses") ?
+                                "Consider dedicated computer glasses optimized for your screen distance" : null,
+                            glassesCount === "One" && (glassesIssues.includes("Need backup/additional pairs") || glassesUsage.includes("I always wear glasses")) ?
+                                "Add backup pair to avoid emergencies - essential for daily wearers" : null,
+                            lastGlassesUpdate === "3+ years" ?
+                                "Update frames and lenses - technology has improved significantly" : null
+                        ].filter(Boolean),
+                        longTerm: [
+                            // 3-12 month optimization
+                            hasGlasses && glassesTypes.includes("Single vision") && isOver40 ?
+                                "Consider progressive lenses for seamless near/far vision" : null,
+                            workEnvironment === "Mixed environments" || activitiesArray.includes("Outdoor") ?
+                                "Explore photochromic lenses that adapt to light conditions" : null,
+                            preferredBrands.length === 0 && whyChosen.includes("Good price") ?
+                                "Research quality brands - investing in better frames/lenses pays off in comfort and durability" : null
+                        ].filter(Boolean)
+                    },
+                    // Specific risks and solutions
+                    riskMitigation: {
+                        risks: [
+                            {
+                                condition: highScreenTime && !symptomsArray.includes("Eye strain at screen"),
+                                risk: "Digital Eye Strain",
+                                severity: "Preventable",
+                                solution: "Proactive blue light protection before symptoms develop"
+                            },
+                            {
+                                condition: isOver40 && glassesTypes.includes("Single vision"),
+                                risk: "Presbyopia Impact",
+                                severity: "Progressive",
+                                solution: "Transition to progressive lenses for all-distance clarity"
+                            },
+                            {
+                                condition: hasNightDriving && !glassesTypes.includes("Anti-reflective"),
+                                risk: "Night Vision Challenges",
+                                severity: "Safety Concern",
+                                solution: "Anti-reflective coating essential for night driving safety"
+                            },
+                            {
+                                condition: glassesIssues.includes("Fit isn't perfect") || glassesIssues.includes("They're uncomfortable"),
+                                risk: "Chronic Discomfort",
+                                severity: "Daily Impact",
+                                solution: "Professional fitting adjustment or frame replacement"
+                            },
+                            {
+                                condition: sunExposure === "High" && !glassesTypes.includes("Prescription sunglasses"),
+                                risk: "UV Damage",
+                                severity: "Long-term Health",
+                                solution: "Prescription sunglasses crucial for eye health protection"
+                            }
+                        ].filter(item => item.condition).map(({risk, severity, solution}) => ({risk, severity, solution}))
+                    },
+                    // Money-saving tips
+                    savingsTips: [
+                        glassesCount === "Three or more" ? 
+                            "Consider a vision subscription plan for multiple pairs - could save 30-50%" : null,
+                        purchasePrefs.includes("Value for Money options") && preferredBrands.includes("Ray-Ban") ?
+                            "Look for last season's models of premium brands - same quality, better price" : null,
+                        symptomsArray.length > 0 && !hasGlasses ?
+                            "Investing in proper eyewear now prevents costly health issues later" : null,
+                        glassesTypes.includes("Progressive") ?
+                            "Ask about digital progressive lenses - wider viewing zones worth the upgrade" : null
+                    ].filter(Boolean)
                 };
             };
 
@@ -4553,6 +5151,820 @@ Write as a master optometrist would speak to a patient - professional, caring, a
             };
 
             const renderResults = () => {
+                // Executive Summary first
+                if (resultStep === 'executiveSummary') {
+                    const reportData = generateFullReportFallback("User");
+                    
+                    return React.createElement('div', { className: "space-y-8 max-w-3xl mx-auto" },
+                        React.createElement('div', { className: "text-center mb-8" },
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, "Your Vision Match™ Summary"),
+                            React.createElement('div', { className: "bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg text-left" },
+                                React.createElement('p', { className: "text-lg text-blue-800 mb-3 font-medium" }, 
+                                    reportData.currentUsage?.glassesType === "None" ? 
+                                        "You're currently managing without prescription eyewear." :
+                                        `You're using ${reportData.executiveSummary?.setup?.currentGlasses || "prescription glasses"} with ${reportData.executiveSummary?.setup?.screenTime || "regular screen time"}.`
+                                ),
+                                React.createElement('p', { className: "text-blue-700 mb-4" }, 
+                                    reportData.executiveSummary?.mainConcerns?.urgency === "High - immediate attention needed" ?
+                                        "Your responses indicate some immediate vision concerns that would benefit from professional attention." :
+                                        reportData.executiveSummary?.mainConcerns?.primary !== "Overall vision wellness" ?
+                                            `Your main focus area is ${reportData.executiveSummary?.mainConcerns?.primary?.toLowerCase() || "optimizing your current setup"}.` :
+                                            "Your vision setup appears to be working well overall."
+                                ),
+                                React.createElement('div', { className: "bg-white p-4 rounded border-l-2 border-blue-300" },
+                                    React.createElement('p', { className: "font-semibold text-blue-900 mb-1" }, "Next Step:"),
+                                    React.createElement('p', { className: "text-blue-800" }, reportData.executiveSummary?.nextSteps?.immediate || "Schedule routine eye exam for comprehensive assessment")
+                                )
+                            )
+                        ),
+                        
+                        // Stress zones
+                        reportData.stressZones && reportData.stressZones.length > 0 ? 
+                            React.createElement('div', { className: "bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg mb-6" },
+                                React.createElement('h3', { className: "text-xl font-bold text-yellow-900 mb-4" }, "Areas That May Need Attention"),
+                                React.createElement('ul', { className: "list-disc list-inside space-y-2" },
+                                    reportData.stressZones.map((zone, i) => 
+                                        React.createElement('li', { key: i, className: "text-yellow-800" }, zone)
+                                    )
+                                )
+                            ) : null,
+                        
+                        // Personalized action plan
+                        reportData.optimizationPlan?.immediate?.length > 0 ?
+                            React.createElement('div', { className: "bg-red-50 border-l-4 border-red-400 p-6 rounded-lg mb-6" },
+                                React.createElement('h3', { className: "text-xl font-bold text-red-900 mb-4" }, "🚨 Immediate Actions Needed"),
+                                React.createElement('ul', { className: "space-y-2" },
+                                    reportData.optimizationPlan.immediate.map((action, i) => 
+                                        React.createElement('li', { key: i, className: "flex items-start" },
+                                            React.createElement('span', { className: "text-red-600 mr-2" }, "•"),
+                                            React.createElement('span', { className: "text-red-800" }, action)
+                                        )
+                                    )
+                                )
+                            ) : null,
+                        
+                        // Optimization opportunities
+                        React.createElement('div', { className: "bg-green-50 border-l-4 border-green-400 p-6 rounded-lg mb-8" },
+                            React.createElement('h3', { className: "text-xl font-bold text-green-900 mb-4" }, "Your Optimization Opportunities"),
+                            reportData.optimizationPlan?.shortTerm?.length > 0 ?
+                                React.createElement('div', { className: "mb-4" },
+                                    React.createElement('h4', { className: "font-semibold text-green-800 mb-2" }, "Next 1-3 Months:"),
+                                    React.createElement('ul', { className: "space-y-1" },
+                                        reportData.optimizationPlan.shortTerm.map((rec, i) => 
+                                            React.createElement('li', { key: i, className: "text-green-700 ml-4" }, `• ${rec}`)
+                                        )
+                                    )
+                                ) : null,
+                            React.createElement('div', { className: "grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-green-200" },
+                                React.createElement('div', null,
+                                    React.createElement('p', { className: "font-semibold text-green-800" }, "Everyday Glasses"),
+                                    React.createElement('p', { className: "text-green-700" }, reportData.quickReference?.everyday || "Recommended")
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('p', { className: "font-semibold text-green-800" }, "Sunglasses"),
+                                    React.createElement('p', { className: "text-green-700" }, reportData.quickReference?.sunglasses || "Optional")
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('p', { className: "font-semibold text-green-800" }, "Blue Light Protection"),
+                                    React.createElement('p', { className: "text-green-700" }, reportData.quickReference?.blueLight || "Optional")
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('p', { className: "font-semibold text-green-800" }, "Special Use"),
+                                    React.createElement('p', { className: "text-green-700" }, reportData.quickReference?.specialUse || "No")
+                                )
+                            )
+                        ),
+                        
+                        // Name capture section at bottom
+                        React.createElement('div', { className: "bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-8 text-center" },
+                            React.createElement('h3', { className: "text-2xl font-bold text-gray-800 mb-4" }, "Get Your Complete Personalized Report"),
+                            React.createElement('p', { className: "text-gray-600 mb-6" }, "Enter your name below to unlock your full Vision Match™ Report with detailed recommendations, optimization timeline, and personalized action plan."),
+                            
+                            React.createElement('div', { className: "max-w-md mx-auto space-y-4" },
+                                React.createElement('input', {
+                                    type: "text",
+                                    placeholder: "Enter your first name",
+                                    value: userName,
+                                    onChange: (e) => setUserName(e.target.value),
+                                    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-center text-lg",
+                                    onKeyPress: (e) => {
+                                        if (e.key === 'Enter' && userName.trim()) {
+                                            setResultStep('fullReport');
+                                        }
+                                    }
+                                }),
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        if (userName.trim()) {
+                                            setResultStep('fullReport');
+                                        }
+                                    },
+                                    disabled: !userName.trim(),
+                                    className: "w-full visionmatch-button px-8 py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                }, userName.trim() ? "View My Full Report" : "Enter Your Name Above")
+                            )
+                        )
+                    );
+                }
+                
+                // Full report
+                if (resultStep === 'fullReport') {
+                    const displayReport = fullReport || generateFullReportFallback(userName);
+                    
+                    return React.createElement('div', { className: "space-y-8 max-w-4xl mx-auto" },
+                        // Loading state
+                        isGeneratingInsights ? 
+                            React.createElement('div', { className: "text-center py-16" },
+                                React.createElement('div', { className: "w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-8 relative" },
+                                    React.createElement('div', { className: "text-4xl" }, "🔍"),
+                                    React.createElement('div', { 
+                                        className: "absolute inset-0 rounded-full border-4 border-blue-200",
+                                        style: {
+                                            borderTopColor: '#3b82f6',
+                                            animation: 'spin 1.5s linear infinite'
+                                        }
+                                    })
+                                ),
+                                React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4" }, "Generating Your Comprehensive Vision Analysis"),
+                                React.createElement('div', { className: "max-w-md mx-auto" },
+                                    React.createElement('div', { className: "mb-4" },
+                                        React.createElement('div', { className: "text-sm text-gray-600 mb-2" }, `Analyzing your responses... ${Math.round(loadingProgress)}%`),
+                                        React.createElement('div', { className: "h-3 bg-gray-200 rounded-full overflow-hidden" },
+                                            React.createElement('div', {
+                                                className: "h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300",
+                                                style: { width: `${loadingProgress}%` }
+                                            })
+                                        )
+                                    ),
+                                    React.createElement('p', { className: "text-gray-500 text-sm" }, "This detailed analysis typically takes 15-20 seconds to personalize for your unique vision profile.")
+                                )
+                            ) : 
+                            React.createElement(React.Fragment, null,
+                                // PDF Download Button
+                                React.createElement('div', { className: "text-right mb-4" },
+                                    React.createElement('button', {
+                                        onClick: () => generatePDF(displayReport, userName || "User"),
+                                        className: "inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    },
+                                        React.createElement('svg', { className: "w-5 h-5 mr-2", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                                            React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" })
+                                        ),
+                                        "Download PDF Report"
+                                    )
+                                ),
+                                
+                                // Main report content with ID for PDF generation
+                                React.createElement('div', { id: "vision-report", className: "bg-white rounded-xl shadow-lg p-8 mb-8" },
+                                    // Header - Vision Match™ Report
+                                    React.createElement('div', { className: "text-center mb-8 border-b-2 border-gray-200 pb-6" },
+                                        React.createElement('h1', { className: "text-3xl font-bold text-gray-800 mb-2" }, "Vision Match™ Report"),
+                                        React.createElement('p', { className: "text-lg text-gray-600 mb-2" }, "Personalized Vision & Lifestyle Assessment"),
+                                        React.createElement('p', { className: "text-sm text-gray-500" }, `Report Date: ${new Date().toLocaleDateString()} • Generated by SeQura Vision Match™ AI`)
+                                    ),
+                                    
+                                    // 1. Patient & Report Information
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "1. Patient & Report Information"),
+                                        React.createElement('div', { className: "grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded" },
+                                            React.createElement('div', null,
+                                                React.createElement('p', { className: "text-sm font-semibold text-gray-700" }, "Name"),
+                                                React.createElement('p', { className: "text-gray-800" }, userName || "[Customer Name]")
+                                            ),
+                                            React.createElement('div', null,
+                                                React.createElement('p', { className: "text-sm font-semibold text-gray-700" }, "Date of Birth / Age"),
+                                                React.createElement('p', { className: "text-gray-800" }, displayReport.patientInfo?.age || "[Age not specified]")
+                                            ),
+                                            React.createElement('div', null,
+                                                React.createElement('p', { className: "text-sm font-semibold text-gray-700" }, "Report Date"),
+                                                React.createElement('p', { className: "text-gray-800" }, new Date().toLocaleDateString())
+                                            ),
+                                            React.createElement('div', null,
+                                                React.createElement('p', { className: "text-sm font-semibold text-gray-700" }, "Referring Optician / Clinic"),
+                                                React.createElement('p', { className: "text-gray-800" }, "[To be determined]")
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // 2. Executive Summary
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "2. Executive Summary"),
+                                        React.createElement('p', { className: "text-gray-700 mb-4" }, 
+                                            displayReport.currentUsage?.glassesType === "None" ? 
+                                                "Based on your Vision Match™ assessment, you may benefit from professional vision care. This report analyzes your visual demands and provides personalized recommendations." :
+                                                `As someone who currently uses ${displayReport.currentUsage.glassesType.toLowerCase()} glasses with ${displayReport.lifestyle?.screenTime} screen time, this comprehensive analysis identifies opportunities to optimize your vision care.`
+                                        ),
+                                        React.createElement('div', { className: "bg-gray-50 p-4 rounded-lg" },
+                                            React.createElement('h4', { className: "font-semibold text-gray-800 mb-2" }, "This personalized report provides:"),
+                                            React.createElement('ul', { className: "list-disc list-inside text-gray-700 space-y-1 ml-4" },
+                                                React.createElement('li', null, `Analysis of your ${displayReport.currentUsage?.glassesType === "None" ? "vision needs" : "current eyewear effectiveness"}`),
+                                                React.createElement('li', null, `Recommendations based on ${displayReport.lifestyle?.screenTime} daily screen exposure`),
+                                                React.createElement('li', null, displayReport.stressZones?.length > 0 ? 
+                                                    `${displayReport.stressZones.length} specific areas requiring attention` :
+                                                    "Assessment of potential vision stress factors"
+                                                ),
+                                                React.createElement('li', null, displayReport.stylePreferences?.brands?.length > 0 ?
+                                                    `Style guidance based on your brand preferences` :
+                                                    "Professional styling recommendations"
+                                                )
+                                            )
+                                        ),
+                                        React.createElement('p', { className: "text-gray-600 text-sm mt-4 italic" }, "This summary is meant to guide your optician and help you make informed decisions.")
+                                    ),
+                                    
+                                    // 3. Current Usage & Symptoms
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "3. Current Usage & Symptoms"),
+                                        React.createElement('ul', { className: "space-y-2 text-gray-700" },
+                                            React.createElement('li', null,
+                                                React.createElement('strong', null, "Current glasses type: "),
+                                                displayReport.currentUsage?.glassesType || "Not specified"
+                                            ),
+                                            displayReport.currentGlassesDetails?.brand !== "Not specified" ? 
+                                                React.createElement('li', null,
+                                                    React.createElement('strong', null, "Brand: "),
+                                                    displayReport.currentGlassesDetails?.brand,
+                                                    displayReport.currentGlassesDetails?.whereBought !== "Not specified" ? 
+                                                        ` (purchased from ${displayReport.currentGlassesDetails.whereBought})` : ""
+                                                ) : null,
+                                            React.createElement('li', null,
+                                                React.createElement('strong', null, "Number of pairs: "),
+                                                displayReport.currentGlassesDetails?.count || "Not specified"
+                                            ),
+                                            displayReport.currentGlassesDetails?.lastUpdate !== "Not specified" ?
+                                                React.createElement('li', null,
+                                                    React.createElement('strong', null, "Last updated: "),
+                                                    displayReport.currentGlassesDetails?.lastUpdate
+                                                ) : null,
+                                            React.createElement('li', null,
+                                                React.createElement('strong', null, "Usage patterns: "),
+                                                displayReport.currentUsage?.usagePatterns || "Not specified"
+                                            ),
+                                            displayReport.currentGlassesDetails?.issues?.length > 0 ?
+                                                React.createElement('li', null,
+                                                    React.createElement('strong', null, "Current issues: "),
+                                                    displayReport.currentGlassesDetails.issues.join(", ")
+                                                ) : null,
+                                            React.createElement('li', null,
+                                                React.createElement('strong', null, "Comfort / strain feedback: "),
+                                                displayReport.currentUsage?.symptoms?.join(", ") || "No specific symptoms reported"
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // 4. Lifestyle Profile & Key Demands
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "4. Lifestyle Profile & Key Demands"),
+                                        React.createElement('div', { className: "overflow-x-auto" },
+                                            React.createElement('table', { className: "w-full border border-gray-300" },
+                                                React.createElement('thead', { className: "bg-gray-50" },
+                                                    React.createElement('tr', null,
+                                                        React.createElement('th', { className: "border border-gray-300 px-4 py-2 text-left font-semibold" }, "Aspect"),
+                                                        React.createElement('th', { className: "border border-gray-300 px-4 py-2 text-left font-semibold" }, "Your Profile")
+                                                    )
+                                                ),
+                                                React.createElement('tbody', null,
+                                                    React.createElement('tr', null,
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Screen time"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.lifestyle?.screenTime || "~ X hours / day")
+                                                    ),
+                                                    React.createElement('tr', { className: "bg-gray-50" },
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Outdoor / Sun exposure"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.lifestyle?.sunExposure || "Medium")
+                                                    ),
+                                                    React.createElement('tr', null,
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Driving (night)"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.lifestyle?.nightDriving || "No")
+                                                    ),
+                                                    React.createElement('tr', { className: "bg-gray-50" },
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Active / sports use"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.lifestyle?.sportsUse || "No")
+                                                    ),
+                                                    React.createElement('tr', null,
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Additional notes"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.lifestyle?.additionalNotes || "—")
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        React.createElement('div', { className: "mt-4" },
+                                            React.createElement('p', { className: "font-semibold text-gray-800 mb-2" }, "Likely stress zones needing correction:"),
+                                            React.createElement('ul', { className: "list-disc list-inside text-gray-700 space-y-1" },
+                                                displayReport.stressZones?.map((zone, i) => 
+                                                    React.createElement('li', { key: i }, zone)
+                                                ) || [
+                                                    React.createElement('li', { key: 1 }, "Digital eye strain from screens"),
+                                                    React.createElement('li', { key: 2 }, "UV / glare outdoors"),
+                                                    React.createElement('li', { key: 3 }, "Visual transitions (indoor → outdoor)"),
+                                                    React.createElement('li', { key: 4 }, "Focusing shifts (near / middle / distance)")
+                                                ]
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // 5. Recommended Eyewear Strategy
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "5. Recommended Eyewear Strategy"),
+                                        
+                                        // Personalized optimization timeline
+                                        displayReport.optimizationPlan?.immediate?.length > 0 ?
+                                            React.createElement('div', { className: "bg-red-50 border-l-4 border-red-400 p-4 mb-6" },
+                                                React.createElement('h3', { className: "font-bold text-red-900 mb-3" }, "🚨 Immediate Actions Required"),
+                                                React.createElement('ul', { className: "space-y-2" },
+                                                    displayReport.optimizationPlan.immediate.map((action, i) => 
+                                                        React.createElement('li', { key: i, className: "text-red-800" }, `• ${action}`)
+                                                    )
+                                                )
+                                            ) : null,
+                                        
+                                        displayReport.optimizationPlan?.shortTerm?.length > 0 ?
+                                            React.createElement('div', { className: "bg-orange-50 border-l-4 border-orange-400 p-4 mb-6" },
+                                                React.createElement('h3', { className: "font-bold text-orange-900 mb-3" }, "📅 1-3 Month Optimization Plan"),
+                                                React.createElement('ul', { className: "space-y-2" },
+                                                    displayReport.optimizationPlan.shortTerm.map((rec, i) => 
+                                                        React.createElement('li', { key: i, className: "text-orange-800" }, `• ${rec}`)
+                                                    )
+                                                )
+                                            ) : null,
+                                        
+                                        displayReport.optimizationPlan?.longTerm?.length > 0 ?
+                                            React.createElement('div', { className: "bg-green-50 border-l-4 border-green-400 p-4 mb-6" },
+                                                React.createElement('h3', { className: "font-bold text-green-900 mb-3" }, "🎯 Long-term Vision Goals"),
+                                                React.createElement('ul', { className: "space-y-2" },
+                                                    displayReport.optimizationPlan.longTerm.map((goal, i) => 
+                                                        React.createElement('li', { key: i, className: "text-green-800" }, `• ${goal}`)
+                                                    )
+                                                )
+                                            ) : null,
+                                        
+                                        React.createElement('p', { className: "text-gray-700 mb-4" }, "Based on your profile, your optimal eyewear strategy includes:"),
+                                        React.createElement('div', { className: "grid grid-cols-2 gap-4 mb-6" },
+                                            React.createElement('div', { 
+                                                className: displayReport.quickReference?.everyday === "Yes" || displayReport.quickReference?.everyday === "Recommended" ? 
+                                                    "bg-blue-100 p-4 rounded-lg border-2 border-blue-300" : "bg-gray-100 p-4 rounded-lg"
+                                            },
+                                                React.createElement('h4', { className: "font-bold text-gray-800 mb-2" }, "Everyday Glasses"),
+                                                React.createElement('p', { className: "text-sm" }, displayReport.quickReference?.everyday === "Yes" ? "Currently using" : "Recommended"),
+                                                React.createElement('p', { className: "text-xs text-gray-600 mt-1" }, "Baseline prescription for daily use")
+                                            ),
+                                            React.createElement('div', { 
+                                                className: displayReport.quickReference?.sunglasses === "Yes" ? 
+                                                    "bg-blue-100 p-4 rounded-lg border-2 border-blue-300" : "bg-gray-100 p-4 rounded-lg"
+                                            },
+                                                React.createElement('h4', { className: "font-bold text-gray-800 mb-2" }, "Prescription Sunglasses"),
+                                                React.createElement('p', { className: "text-sm" }, displayReport.quickReference?.sunglasses || "Optional"),
+                                                React.createElement('p', { className: "text-xs text-gray-600 mt-1" }, "UV/glare protection")
+                                            ),
+                                            React.createElement('div', { 
+                                                className: displayReport.quickReference?.blueLight === "Yes" ? 
+                                                    "bg-blue-100 p-4 rounded-lg border-2 border-blue-300" : "bg-gray-100 p-4 rounded-lg"
+                                            },
+                                                React.createElement('h4', { className: "font-bold text-gray-800 mb-2" }, "Blue Light Glasses"),
+                                                React.createElement('p', { className: "text-sm" }, displayReport.quickReference?.blueLight || "Optional"),
+                                                React.createElement('p', { className: "text-xs text-gray-600 mt-1" }, "Digital device protection")
+                                            ),
+                                            React.createElement('div', { 
+                                                className: displayReport.quickReference?.specialUse === "Yes" ? 
+                                                    "bg-blue-100 p-4 rounded-lg border-2 border-blue-300" : "bg-gray-100 p-4 rounded-lg"
+                                            },
+                                                React.createElement('h4', { className: "font-bold text-gray-800 mb-2" }, "Special-use Pair"),
+                                                React.createElement('p', { className: "text-sm" }, displayReport.quickReference?.specialUse || "No"),
+                                                React.createElement('p', { className: "text-xs text-gray-600 mt-1" }, "Activity-specific needs")
+                                            )
+                                        ),
+                                        
+                                        displayReport.savingsTips?.length > 0 ?
+                                            React.createElement('div', { className: "bg-green-50 border-l-4 border-green-400 p-4 mb-6" },
+                                                React.createElement('p', { className: "font-semibold text-green-900 mb-2" }, "💰 Money-Saving Tips:"),
+                                                React.createElement('ul', { className: "list-disc list-inside text-green-800 space-y-1" },
+                                                    displayReport.savingsTips.map((tip, i) => 
+                                                        React.createElement('li', { key: i }, tip)
+                                                    )
+                                                )
+                                            ) : null,
+                                        
+                                        React.createElement('div', { className: "bg-blue-50 border-l-4 border-blue-400 p-4" },
+                                            React.createElement('p', { className: "font-semibold text-blue-900 mb-2" }, "Vision Plan benefits (optional):"),
+                                            React.createElement('ul', { className: "list-disc list-inside text-blue-800 space-y-1" },
+                                                React.createElement('li', null, "2–3 pairs tailored to lifestyle"),
+                                                React.createElement('li', null, "Free lens updates when eyesight changes"),
+                                                React.createElement('li', null, "One new frame per year included"),
+                                                React.createElement('li', null, "Monthly fee starting at 14€/month")
+                                            ),
+                                            React.createElement('p', { className: "text-blue-700 text-sm mt-2 italic" }, "This report helps you make an informed decision. It is not designed to sell products you don't need.")
+                                        )
+                                    ),
+                                    
+                                    // 6. Health Indicators & Pre-Check Notes
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "6. Health Indicators & Pre-Check Notes"),
+                                        React.createElement('p', { className: "text-red-600 text-sm font-semibold mb-4" }, "⚠️ Informational only — not a diagnosis. Must be confirmed by optician/eye doctor."),
+                                        
+                                        // Risk mitigation table
+                                        displayReport.riskMitigation?.risks?.length > 0 ?
+                                            React.createElement('div', { className: "mb-6" },
+                                                React.createElement('h3', { className: "font-bold text-gray-800 mb-3" }, "Identified Risk Factors & Solutions"),
+                                                React.createElement('div', { className: "space-y-3" },
+                                                    displayReport.riskMitigation.risks.map((risk, i) => 
+                                                        React.createElement('div', { key: i, className: "bg-gray-50 p-4 rounded-lg" },
+                                                            React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                                                React.createElement('h4', { className: "font-semibold text-gray-800" }, risk.risk),
+                                                                React.createElement('span', { 
+                                                                    className: `px-2 py-1 rounded text-xs font-semibold ${
+                                                                        risk.severity === 'Safety Concern' ? 'bg-red-100 text-red-700' :
+                                                                        risk.severity === 'Progressive' ? 'bg-orange-100 text-orange-700' :
+                                                                        risk.severity === 'Daily Impact' ? 'bg-yellow-100 text-yellow-700' :
+                                                                        risk.severity === 'Long-term Health' ? 'bg-purple-100 text-purple-700' :
+                                                                        'bg-blue-100 text-blue-700'
+                                                                    }`
+                                                                }, risk.severity)
+                                                            ),
+                                                            React.createElement('p', { className: "text-sm text-gray-700" }, 
+                                                                React.createElement('strong', null, "Solution: "), risk.solution
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ) : null,
+                                        
+                                        React.createElement('ul', { className: "list-disc list-inside text-gray-700 space-y-2" },
+                                            displayReport.healthIndicators?.map((indicator, i) => 
+                                                React.createElement('li', { key: i }, indicator)
+                                            ) || [
+                                                React.createElement('li', { key: 1 }, "Age 40+ → presbyopia risk"),
+                                                React.createElement('li', { key: 2 }, "High screen time → digital eye strain risk"),
+                                                React.createElement('li', { key: 3 }, "Night driving → possible anti-glare need"),
+                                                React.createElement('li', { key: 4 }, "Dry-eye symptoms or frequent prescription changes → may require medical check")
+                                            ]
+                                        )
+                                    ),
+                                    
+                                    // 7. Style & Aesthetic Preferences
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "7. Style & Aesthetic Preferences"),
+                                        React.createElement('ul', { className: "list-disc list-inside text-gray-700 space-y-2" },
+                                            React.createElement('li', null, React.createElement('strong', null, "Frame shapes: "), displayReport.stylePreferences?.frameShapes?.join(", ") || "Classic, Modern"),
+                                            React.createElement('li', null, React.createElement('strong', null, "Colors: "), displayReport.stylePreferences?.colors?.join(", ") || "Black, Tortoise, Clear, Mixed"),
+                                            React.createElement('li', null, React.createElement('strong', null, "Occasions: "), displayReport.stylePreferences?.occasions?.join(", ") || "Casual, Everyday"),
+                                            displayReport.stylePreferences?.brands?.length > 0 ?
+                                                React.createElement('li', null, React.createElement('strong', null, "Preferred brands: "), displayReport.stylePreferences.brands.join(", ")) : null,
+                                            displayReport.stylePreferences?.purchasePreference !== "Not specified" ?
+                                                React.createElement('li', null, React.createElement('strong', null, "Purchase preference: "), displayReport.stylePreferences.purchasePreference) : null
+                                        )
+                                    ),
+                                    
+                                    // 8. Next Steps & Action Plan  
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "8. Next Steps & Action Plan"),
+                                        React.createElement('ol', { className: "list-decimal list-inside text-gray-700 space-y-2" },
+                                            React.createElement('li', null, "Bring this Vision Match™ Report to your eye care provider."),
+                                            React.createElement('li', null, "Free extended eye exam if you choose an optician from the list below."),
+                                            React.createElement('li', null, "Review and refine lens options with your optician."),
+                                            React.createElement('li', null, "Decide whether to add another pair of glasses, enroll in Vision Subscription Plan, or simply complete the exam — no strings attached.")
+                                        )
+                                    ),
+                                    
+                                    // 9. Notes for the Optician / Eye Doctor
+                                    React.createElement('div', { className: "mb-8 bg-yellow-50 p-4 rounded border-l-4 border-yellow-400" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-yellow-800 mb-4" }, "9. Notes for the Optician / Eye Doctor"),
+                                        React.createElement('p', { className: "text-yellow-700" }, "This report is a summary of patient's self-reported needs and preferences. Please use it as input for examination and prescription validation. Confirm any health or risk indicators with proper testing.")
+                                    ),
+                                    
+                                    // 10. Vision Match™ Summary (Quick Reference)
+                                    React.createElement('div', { className: "mb-8" },
+                                        React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-4" }, "10. Vision Match™ Summary (Quick Reference)"),
+                                        React.createElement('div', { className: "overflow-x-auto" },
+                                            React.createElement('table', { className: "w-full border border-gray-300" },
+                                                React.createElement('thead', { className: "bg-gray-50" },
+                                                    React.createElement('tr', null,
+                                                        React.createElement('th', { className: "border border-gray-300 px-4 py-2 text-left font-semibold" }, "Glass Type"),
+                                                        React.createElement('th', { className: "border border-gray-300 px-4 py-2 text-left font-semibold" }, "Recommended"),
+                                                        React.createElement('th', { className: "border border-gray-300 px-4 py-2 text-left font-semibold" }, "Notes")
+                                                    )
+                                                ),
+                                                React.createElement('tbody', null,
+                                                    React.createElement('tr', null,
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Everyday / All-purpose"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.quickReference?.everyday || "Yes"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, "—")
+                                                    ),
+                                                    React.createElement('tr', { className: "bg-gray-50" },
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Prescription Sunglasses"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.quickReference?.sunglasses || "Yes"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, "Outdoor / UV / glare use")
+                                                    ),
+                                                    React.createElement('tr', null,
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Blue Light / Screen glasses"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.quickReference?.blueLight || "Yes"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, "Digital strain protection")
+                                                    ),
+                                                    React.createElement('tr', { className: "bg-gray-50" },
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2 font-medium" }, "Special-use Pair"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, displayReport.quickReference?.specialUse || "No"),
+                                                        React.createElement('td', { className: "border border-gray-300 px-4 py-2" }, "Driving / Sport / Reading")
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // Footer
+                                    React.createElement('div', { className: "text-center pt-6 border-t-2 border-gray-200 text-gray-500 text-sm" },
+                                        React.createElement('p', null, "SeQura Vision Match™ • www.sequraeyewear.com • Page 1 of 1")
+                                    )
+                                ),
+                                
+                                // Call to action at bottom  
+                                React.createElement('div', { className: "bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-8 text-center" },
+                                    React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4" }, "Ready for Your Free Eye Exam?"),
+                                    React.createElement('p', { className: "text-gray-600 mb-6" }, "Complete your Vision Match™ experience by scheduling a complimentary eye exam with one of our partner opticians."),
+                                    React.createElement('button', {
+                                        onClick: () => setResultStep('contactDetails'),
+                                        className: "visionmatch-button px-8 py-4 text-lg font-semibold"
+                                    }, "Get My Free Eye Exam")
+                                )
+                            )
+                    );
+                }
+                
+                // Contact Details step
+                if (resultStep === 'contactDetails') {
+                    return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto" },
+                        React.createElement('div', { className: "text-center mb-8" },
+                            React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4" }, `Hi ${userName}! Ready for Your Free Eye Exam?`),
+                            React.createElement('p', { className: "text-gray-600" }, "Enter your contact details below to receive your Vision Match™ Report via email and connect with a partner optician for your complimentary comprehensive eye exam.")
+                        ),
+                        
+                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8" },
+                            React.createElement('h3', { className: "text-xl font-semibold text-gray-800 mb-6" }, "Contact Information"),
+                            
+                            React.createElement('div', { className: "space-y-4" },
+                                React.createElement('div', { className: "grid grid-cols-2 gap-4" },
+                                    React.createElement('div', null,
+                                        React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "First Name"),
+                                        React.createElement('input', {
+                                            type: "text",
+                                            value: userName,
+                                            onChange: (e) => setUserName(e.target.value),
+                                            className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                                            disabled: true
+                                        })
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Last Name"),
+                                        React.createElement('input', {
+                                            type: "text",
+                                            placeholder: "Last name",
+                                            value: userLastName,
+                                            onChange: (e) => setUserLastName(e.target.value),
+                                            className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        })
+                                    )
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Email Address"),
+                                    React.createElement('input', {
+                                        type: "email",
+                                        placeholder: "your.email@example.com",
+                                        value: userEmail,
+                                        onChange: (e) => setUserEmail(e.target.value),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    })
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Zip Code"),
+                                    React.createElement('input', {
+                                        type: "text",
+                                        placeholder: "12345",
+                                        value: userZipCode,
+                                        onChange: (e) => setUserZipCode(e.target.value),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    }),
+                                    React.createElement('p', { className: "text-sm text-gray-500 mt-1" }, "We'll find partner opticians in your area")
+                                ),
+                                
+                                React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg" },
+                                    React.createElement('p', { className: "text-sm text-blue-800" },
+                                        React.createElement('span', { className: "font-semibold" }, "What happens next?"),
+                                        React.createElement('br'),
+                                        "• You'll receive your personalized Vision Match™ Report by email",
+                                        React.createElement('br'),
+                                        "• We'll connect you with qualified partner opticians in your area",
+                                        React.createElement('br'),
+                                        "• Schedule your complimentary comprehensive eye exam",
+                                        React.createElement('br'),
+                                        "• No obligation - just professional vision care"
+                                    )
+                                ),
+                                
+                                React.createElement('button', {
+                                    onClick: () => {
+                                        if (userName.trim() && userLastName.trim() && userEmail.trim() && userZipCode.trim()) {
+                                            // Here you would normally submit to backend
+                                            setResultStep('opticiansMap');
+                                        }
+                                    },
+                                    disabled: !userName.trim() || !userLastName.trim() || !userEmail.trim() || !userZipCode.trim(),
+                                    className: "w-full bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                }, "Send My Report & Schedule Eye Exam")
+                            )
+                        )
+                    );
+                }
+                
+                // Opticians Map step
+                if (resultStep === 'opticiansMap') {
+                    const sampleOpticians = [
+                        {
+                            id: 1,
+                            name: "VisionPro Optical Center",
+                            address: "123 Main Street, Suite 100",
+                            city: userZipCode || "Your City",
+                            phone: "(555) 123-4567",
+                            distance: "0.5 miles",
+                            rating: 4.8,
+                            reviews: 124,
+                            lat: 40.7128,
+                            lng: -74.0060,
+                            availableSlots: ["9:00 AM", "10:30 AM", "2:00 PM", "4:30 PM"]
+                        },
+                        {
+                            id: 2,
+                            name: "EyeCare Express",
+                            address: "456 Oak Avenue",
+                            city: userZipCode || "Your City",
+                            phone: "(555) 234-5678",
+                            distance: "1.2 miles",
+                            rating: 4.6,
+                            reviews: 89,
+                            lat: 40.7260,
+                            lng: -73.9897,
+                            availableSlots: ["11:00 AM", "1:00 PM", "3:30 PM"]
+                        },
+                        {
+                            id: 3,
+                            name: "Modern Vision Clinic",
+                            address: "789 Eye Street",
+                            city: userZipCode || "Your City",
+                            phone: "(555) 345-6789",
+                            distance: "2.0 miles",
+                            rating: 4.9,
+                            reviews: 201,
+                            lat: 40.7489,
+                            lng: -73.9680,
+                            availableSlots: ["9:30 AM", "2:30 PM", "5:00 PM"]
+                        }
+                    ];
+                    
+                    return React.createElement('div', { className: "space-y-8 max-w-6xl mx-auto" },
+                        React.createElement('div', { className: "text-center mb-8" },
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, `Great news, ${userName}!`),
+                            React.createElement('p', { className: "text-lg text-gray-600" }, "Your Vision Match™ Report has been sent to your email. Here are partner opticians near you offering free comprehensive eye exams.")
+                        ),
+                        
+                        React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
+                            // Map section
+                            React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-4" },
+                                React.createElement('div', { 
+                                    id: "opticians-map",
+                                    className: "w-full h-96 bg-gray-200 rounded-lg",
+                                    style: { minHeight: '400px' }
+                                }, 
+                                    React.createElement('div', { className: "flex items-center justify-center h-full text-gray-500" },
+                                        "Map loading..."
+                                    )
+                                )
+                            ),
+                            
+                            // Opticians list
+                            React.createElement('div', { className: "space-y-4" },
+                                React.createElement('h3', { className: "text-xl font-bold text-gray-800 mb-4" }, "Available Opticians"),
+                                sampleOpticians.map(optician => 
+                                    React.createElement('div', { 
+                                        key: optician.id,
+                                        className: "bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-200"
+                                    },
+                                        React.createElement('div', { className: "flex justify-between items-start mb-3" },
+                                            React.createElement('div', null,
+                                                React.createElement('h4', { className: "font-bold text-lg text-gray-800" }, optician.name),
+                                                React.createElement('p', { className: "text-sm text-gray-600" }, optician.address),
+                                                React.createElement('p', { className: "text-sm text-gray-600" }, optician.city)
+                                            ),
+                                            React.createElement('div', { className: "text-right" },
+                                                React.createElement('p', { className: "text-sm font-semibold text-blue-600" }, optician.distance),
+                                                React.createElement('div', { className: "flex items-center mt-1" },
+                                                    React.createElement('span', { className: "text-yellow-500" }, "★"),
+                                                    React.createElement('span', { className: "text-sm text-gray-700 ml-1" }, `${optician.rating} (${optician.reviews})`)
+                                                )
+                                            )
+                                        ),
+                                        
+                                        React.createElement('div', { className: "mt-4" },
+                                            React.createElement('p', { className: "text-sm font-semibold text-gray-700 mb-2" }, "Available Today:"),
+                                            React.createElement('div', { className: "flex flex-wrap gap-2 mb-4" },
+                                                optician.availableSlots.map(slot => 
+                                                    React.createElement('button', {
+                                                        key: slot,
+                                                        onClick: () => {
+                                                            if (confirm(`Book appointment at ${optician.name} for ${slot} today?`)) {
+                                                                alert(`Appointment booked! ${optician.name} will contact you at ${userEmail} to confirm your ${slot} appointment.`);
+                                                                setResultStep('complete');
+                                                            }
+                                                        },
+                                                        className: "px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                                                    }, slot)
+                                                )
+                                            ),
+                                            
+                                            React.createElement('div', { className: "flex items-center justify-between" },
+                                                React.createElement('a', {
+                                                    href: `tel:${optician.phone}`,
+                                                    className: "text-blue-600 hover:text-blue-700 text-sm flex items-center"
+                                                },
+                                                    React.createElement('span', { className: "mr-1" }, "📞"),
+                                                    optician.phone
+                                                ),
+                                                React.createElement('button', {
+                                                    onClick: () => {
+                                                        alert(`Calling ${optician.name}...`);
+                                                    },
+                                                    className: "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"
+                                                }, "Book by Phone")
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: "text-center mt-8" },
+                            React.createElement('button', {
+                                onClick: () => setResultStep('complete'),
+                                className: "text-gray-500 hover:text-gray-700 underline"
+                            }, "Skip and finish later")
+                        )
+                    );
+                }
+                
+                // Initialize map when component mounts
+                React.useEffect(() => {
+                    if (resultStep === 'opticiansMap' && window.google && window.google.maps) {
+                        const mapElement = document.getElementById('opticians-map');
+                        if (mapElement) {
+                            const map = new google.maps.Map(mapElement, {
+                                center: { lat: 40.7128, lng: -74.0060 },
+                                zoom: 12,
+                                styles: [
+                                    {
+                                        featureType: "poi",
+                                        elementType: "labels",
+                                        stylers: [{ visibility: "off" }]
+                                    }
+                                ]
+                            });
+                            
+                            // Add markers for opticians
+                            const sampleOpticians = [
+                                { lat: 40.7128, lng: -74.0060, name: "VisionPro Optical Center" },
+                                { lat: 40.7260, lng: -73.9897, name: "EyeCare Express" },
+                                { lat: 40.7489, lng: -73.9680, name: "Modern Vision Clinic" }
+                            ];
+                            
+                            sampleOpticians.forEach(optician => {
+                                new google.maps.Marker({
+                                    position: { lat: optician.lat, lng: optician.lng },
+                                    map: map,
+                                    title: optician.name
+                                });
+                            });
+                        }
+                    }
+                }, [resultStep]);
+                
+                // Completion step
+                if (resultStep === 'complete') {
+                    return React.createElement('div', { className: "space-y-8 max-w-2xl mx-auto text-center" },
+                        React.createElement('div', { className: "w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6" },
+                            React.createElement('div', { className: "text-4xl" }, "✅")
+                        ),
+                        React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, `Thank you, ${userName}!`),
+                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8" },
+                            React.createElement('p', { className: "text-lg text-gray-700 mb-6" }, 
+                                `Your personalized Vision Match™ Report has been sent to ${userEmail}.`
+                            ),
+                            React.createElement('div', { className: "bg-green-50 border border-green-200 rounded-lg p-6 mb-6" },
+                                React.createElement('h3', { className: "font-semibold text-green-800 mb-2" }, "What's Next?"),
+                                React.createElement('ul', { className: "text-left text-green-700 space-y-2" },
+                                    React.createElement('li', null, "• Check your email for your complete Vision Match™ Report"),
+                                    React.createElement('li', null, "• We'll contact you within 24 hours to discuss partner opticians in your area"),
+                                    React.createElement('li', null, "• Schedule your complimentary comprehensive eye exam"),
+                                    React.createElement('li', null, "• Bring your report to help your optician understand your needs")
+                                )
+                            ),
+                            React.createElement('p', { className: "text-sm text-gray-500" }, "Questions? Contact us at support@sequraeyewear.com")
+                        )
+                    );
+                }
+                
                 // Step 1: Transition screen  
                 if (resultStep === 'transition') {
                     return React.createElement('div', { className: "text-center space-y-8 max-w-2xl mx-auto" },
@@ -4590,6 +6002,15 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                     React.createElement('p', { className: "text-lg text-blue-800 mb-4" }, displayResult.insight),
                                     React.createElement('p', { className: "text-blue-700 font-medium" }, displayResult.hook)
                                 )
+                        ),
+                        
+                        // Health reminder section
+                        React.createElement('div', { className: "bg-green-50 p-6 rounded-xl border border-green-200 mb-6" },
+                            React.createElement('h4', { className: "font-semibold text-green-800 mb-3 flex items-center" },
+                                React.createElement('span', { className: "mr-2" }, "🏥"),
+                                "Important Health Reminder"
+                            ),
+                            React.createElement('p', { className: "text-green-700 text-sm" }, "Regular comprehensive eye exams can detect early signs of serious conditions like glaucoma, diabetic retinopathy, macular degeneration, and even high blood pressure or diabetes before you notice any symptoms. Early detection helps preserve your vision and overall health.")
                         ),
                         
                         // Name input section
@@ -4716,9 +6137,63 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                     className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent text-lg"
                                 }),
                                 React.createElement('button', {
-                                    onClick: () => {
+                                    onClick: async () => {
                                         if (userEmail.trim() && userName.trim()) {
-                                            setResultStep('optician');
+                                            try {
+                                                // Submit customer data to backend
+                                                const response = await fetch('http://localhost:3001/api/customers/quiz-submit', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        email: userEmail.trim(),
+                                                        firstName: userName.trim(),
+                                                        lastName: userLastName.trim(),
+                                                        zipCode: userZipCode.trim(),
+                                                        consentGiven: true,
+                                                        quizAnswers: answers,
+                                                        aiInsights: {
+                                                            initialTeaser: initialTeaserResult,
+                                                            secondTeaser: secondTeaserResult,
+                                                            fullReport: fullReport
+                                                        }
+                                                    })
+                                                });
+                                                
+                                                if (!response.ok) {
+                                                    throw new Error('Failed to submit data');
+                                                }
+                                                
+                                                const data = await response.json();
+                                                console.log('✅ Customer data submitted successfully:', data);
+                                                
+                                                // Store consent ID for future requests
+                                                window.customerConsentId = data.consentId;
+                                                
+                                                setResultStep('optician');
+                                            } catch (error) {
+                                                console.error('❌ Error submitting customer data:', error);
+                                                console.log('⚠️ Using fallback mode - continuing without backend');
+                                                
+                                                // Store data locally as fallback
+                                                window.customerDataFallback = {
+                                                    personalData: {
+                                                        firstName: userName,
+                                                        lastName: userLastName,
+                                                        email: userEmail,
+                                                        zipCode: userZipCode
+                                                    },
+                                                    quizAnswers: answers,
+                                                    consentId: 'fallback-' + Date.now()
+                                                };
+                                                
+                                                // Show a soft warning but continue
+                                                console.log('📝 Data saved locally. Continuing to next step...');
+                                                
+                                                // Continue to optician selection
+                                                setResultStep('optician');
+                                            }
                                         }
                                     },
                                     disabled: !userEmail.trim() || !userName.trim(),
@@ -4977,10 +6452,10 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                                                 // Detailed expert analysis function
                                                 (() => {
                                                     const generateExpertAnalysis = () => {
-                                                        const currentGlasses = answers[0] || '';
+                                                        const currentGlasses = (answers[0] && answers[0][0]) || '';
                                                         const currentSetup = answers[1] || '';  // Combined question with steps
                                                         const lifestyle = answers[5] || '';    // Shifted down by 1
-                                                        const screenTime = answers[6] || '';   // Shifted down by 1
+                                                        const screenTime = findAnswerByQuestion('How many hours per day are you in front of a screen') || '';
                                                         const workEnv = answers[11] || '';     // Shifted down by 1
                                                         const age = answers[9] || '';          // Shifted down by 1
                                                         const visionIssues = answers[8] || ''; // Shifted down by 1
@@ -5319,6 +6794,24 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                 React.createElement('div', { className: "text-center mb-8" },
                     React.createElement('div', { className: "max-w-2xl mx-auto px-4" })
                 ),
+                
+                // Mobile Progress Indicator
+                currentStep < questions.length && React.createElement('div', { className: "mobile-progress-indicator" },
+                    React.createElement('div', { className: "mobile-progress-content" },
+                        React.createElement('span', { className: "mobile-progress-text" }, 
+                            `Q${currentStep + 1}/${questions.length}`
+                        ),
+                        React.createElement('div', { className: "mobile-progress-bar" },
+                            React.createElement('div', { 
+                                className: "mobile-progress-fill",
+                                style: { width: `${((currentStep + 1) / questions.length) * 100}%` }
+                            })
+                        ),
+                        React.createElement('span', { className: "mobile-progress-text" }, 
+                            `${Math.round(((currentStep + 1) / questions.length) * 100)}%`
+                        )
+                    )
+                ),
                 React.createElement('div', { className: currentStep >= questions.length ? "max-w-4xl mx-auto px-4" : (questions[currentStep]?.type === 'celebration' ? "w-full" : "quiz-layout") },
                     currentStep >= questions.length ? React.createElement('div', { className: "w-full" },
                         renderResults()
@@ -5407,32 +6900,7 @@ Write as a master optometrist would speak to a patient - professional, caring, a
                             })()
                         )
                     )
-                ), // Close quiz-layout div
-                
-                // Bottom Question Navigation (shown for all quiz steps)
-                currentStep < questions.length && React.createElement('div', { className: "question-nav" },
-                    React.createElement('div', { className: "question-nav-container" },
-                        React.createElement('h3', { style: { fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.75rem', margin: '0 0 0.75rem 0' } }, "Jump to Question"),
-                        React.createElement('div', { className: "nav-buttons" },
-                            questions.map((q, index) => {
-                                const isAnswered = answers[index] !== undefined && answers[index] !== null;
-                                const isCurrent = index === currentStep;
-                                
-                                return React.createElement('button', {
-                                    key: index,
-                                    onClick: () => {
-                                        if (isAnswered || index < currentStep) {
-                                            setCurrentStep(index);
-                                        }
-                                    },
-                                    disabled: !isAnswered && index > currentStep,
-                                    className: `nav-button ${isCurrent ? 'nav-button-current' : ''} ${isAnswered && !isCurrent ? 'nav-button-answered' : ''}`,
-                                    title: q.question
-                                }, index + 1);
-                            })
-                        )
-                    )
-                )
+                ) // Close quiz-layout div
             );
         };
 

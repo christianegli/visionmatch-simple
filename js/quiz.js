@@ -25,6 +25,14 @@ const { useState } = React;
             const [availableTimes, setAvailableTimes] = useState([]);
             const [userZipCode, setUserZipCode] = useState('');
             const [showAllBrands, setShowAllBrands] = useState(false);
+            const [userInfo, setUserInfo] = useState({
+                firstName: '',
+                lastName: '',
+                email: '',
+                zipCode: ''
+            });
+            const [showUserForm, setShowUserForm] = useState(true);
+            const [showReportPreview, setShowReportPreview] = useState(false);
 
             const questions = [
                 {
@@ -170,6 +178,12 @@ const { useState } = React;
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                             <h1 style="color: #3b82f6; text-align: center; margin-bottom: 30px;">Your Personalized Vision Plan</h1>
                             
+                            <div style="background: #e0e7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                                <h3 style="margin: 0 0 10px 0; color: #4f46e5;">Vision Profile for ${userInfo.firstName} ${userInfo.lastName}</h3>
+                                <p style="margin: 0; color: #6366f1; font-size: 14px;">${userInfo.email} • ${userInfo.zipCode}</p>
+                                <p style="margin: 5px 0 0 0; color: #818cf8; font-size: 12px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </div>
+                            
                             <div style="background: #f8fafc; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                                 <h2 style="color: #1f2937; margin-bottom: 15px;">📊 Your Answers Summary</h2>
                                 ${Object.entries(answers).map(([key, value]) => {
@@ -234,7 +248,7 @@ const { useState } = React;
                     try {
                         console.log(`🤖 Trying ${model} (attempt ${retryCount + 1})...`);
                         
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=AIzaSyBwPLk8BhFMmAMWSAlKC3DOgPMNqL6BJXA`, {
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=AIzaSyDSODbW_LTVeJ8gpLFhY3fquwN0g3G9wf0`, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -256,9 +270,28 @@ const { useState } = React;
                         const data = await response.json();
                         console.log(`✅ ${model} success!`, data);
                         
-                        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-                            return data.candidates[0].content.parts[0].text;
+                        // Handle the actual Gemini API response structure
+                        if (data.candidates && data.candidates[0]) {
+                            const candidate = data.candidates[0];
+                            
+                            if (candidate.finishReason === 'MAX_TOKENS') {
+                                console.warn('🎯 Response was truncated due to max tokens');
+                            }
+                            
+                            if (candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text) {
+                                return candidate.content.parts[0].text;
+                            } else if (candidate.output) {
+                                return candidate.output;
+                            } else if (candidate.text) {
+                                return candidate.text;
+                            } else {
+                                console.error('🎯 No text content found in candidate:', candidate);
+                                throw new Error('No text content in API response');
+                            }
+                        } else if (data.text) {
+                            return data.text;
                         } else {
+                            console.error('🎯 Unexpected response structure:', data);
                             throw new Error('Invalid response format');
                         }
                         
@@ -285,11 +318,11 @@ const { useState } = React;
                     
                     // Try Flash model first (faster)
                     try {
-                        result = await tryGeminiAPI('gemini-1.5-flash');
+                        result = await tryGeminiAPI('gemini-pro');
                     } catch (flashError) {
                         console.log("🔄 Flash model failed, trying Pro model...");
                         // Fallback to Pro model if Flash is overloaded
-                        result = await tryGeminiAPI('gemini-1.5-pro');
+                        result = await tryGeminiAPI('gemini-pro');
                     }
                     
                     clearTimeout(timeoutId);
@@ -1195,6 +1228,197 @@ const { useState } = React;
                     );
                 }
 
+                // Show user form first
+                if (showUserForm && !showReportPreview) {
+                    return React.createElement('div', { className: "max-w-2xl mx-auto space-y-8" },
+                        React.createElement('div', { className: "text-center" },
+                            React.createElement('div', { className: "w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6" },
+                                React.createElement(Sparkles, { className: "w-10 h-10 text-white" })
+                            ),
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, "Complete Your Vision Profile"),
+                            React.createElement('p', { className: "text-lg text-gray-600 mb-8" }, 
+                                "We'll email your personalized vision report so you can share it with your optician"
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: "bg-white rounded-xl p-8 shadow-lg border border-gray-200" },
+                            React.createElement('form', { 
+                                onSubmit: (e) => {
+                                    e.preventDefault();
+                                    setShowReportPreview(true);
+                                },
+                                className: "space-y-6"
+                            },
+                                React.createElement('div', { className: "grid md:grid-cols-2 gap-6" },
+                                    React.createElement('div', null,
+                                        React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "First Name"),
+                                        React.createElement('input', {
+                                            type: "text",
+                                            value: userInfo.firstName,
+                                            onChange: (e) => setUserInfo(prev => ({ ...prev, firstName: e.target.value })),
+                                            className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                            required: true,
+                                            placeholder: "John"
+                                        })
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Last Name"),
+                                        React.createElement('input', {
+                                            type: "text",
+                                            value: userInfo.lastName,
+                                            onChange: (e) => setUserInfo(prev => ({ ...prev, lastName: e.target.value })),
+                                            className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                            required: true,
+                                            placeholder: "Doe"
+                                        })
+                                    )
+                                ),
+                                
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Email Address"),
+                                    React.createElement('input', {
+                                        type: "email",
+                                        value: userInfo.email,
+                                        onChange: (e) => setUserInfo(prev => ({ ...prev, email: e.target.value })),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                        required: true,
+                                        placeholder: "john.doe@email.com"
+                                    })
+                                ),
+                                
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Zip Code"),
+                                    React.createElement('input', {
+                                        type: "text",
+                                        value: userInfo.zipCode,
+                                        onChange: (e) => setUserInfo(prev => ({ ...prev, zipCode: e.target.value.replace(/\D/g, '').slice(0, 5) })),
+                                        className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                        required: true,
+                                        placeholder: "28001",
+                                        maxLength: 5
+                                    })
+                                ),
+                                
+                                React.createElement('button', {
+                                    type: "submit",
+                                    className: "w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                }, "Preview My Report")
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: "bg-blue-50 rounded-lg p-6 border border-blue-100" },
+                            React.createElement('div', { className: "flex items-start space-x-3" },
+                                React.createElement('svg', { 
+                                    className: "w-5 h-5 text-blue-600 mt-0.5",
+                                    fill: "none",
+                                    strokeLinecap: "round",
+                                    strokeLinejoin: "round",
+                                    strokeWidth: "2",
+                                    viewBox: "0 0 24 24",
+                                    stroke: "currentColor"
+                                },
+                                    React.createElement('path', { d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" })
+                                ),
+                                React.createElement('div', { className: "flex-1 text-sm text-blue-800" },
+                                    React.createElement('p', { className: "font-medium mb-1" }, "What happens next:"),
+                                    React.createElement('ul', { className: "list-disc list-inside space-y-1 text-blue-700" },
+                                        React.createElement('li', null, "You'll see a preview of your personalized vision report"),
+                                        React.createElement('li', null, "We'll email the complete report to your address"),
+                                        React.createElement('li', null, "Take the report to any optician for professional guidance"),
+                                        React.createElement('li', null, "Book a comprehensive eye exam for accurate prescriptions")
+                                    )
+                                )
+                            )
+                        )
+                    );
+                }
+                
+                // Show report preview
+                if (showReportPreview && showUserForm) {
+                    return React.createElement('div', { className: "max-w-4xl mx-auto space-y-8" },
+                        React.createElement('div', { className: "text-center" },
+                            React.createElement('h2', { className: "text-3xl font-bold text-gray-800 mb-4" }, "Report Preview"),
+                            React.createElement('p', { className: "text-lg text-gray-600" }, 
+                                `Hi ${userInfo.firstName}, here's your personalized vision report:`
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: "bg-white rounded-xl p-8 shadow-lg border border-gray-200" },
+                            React.createElement('div', { className: "border-b pb-6 mb-6" },
+                                React.createElement('h3', { className: "text-xl font-bold text-gray-800 mb-2" }, 
+                                    `Vision Profile for ${userInfo.firstName} ${userInfo.lastName}`
+                                ),
+                                React.createElement('p', { className: "text-gray-600" }, 
+                                    new Date().toLocaleDateString('en-US', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })
+                                )
+                            ),
+                            
+                            React.createElement('div', { className: "prose max-w-none" },
+                                React.createElement('div', { 
+                                    className: "bg-blue-50 rounded-lg p-6 mb-6" 
+                                },
+                                    React.createElement('h4', { className: "text-lg font-semibold text-gray-800 mb-3" }, 
+                                        "📋 Your Assessment Summary"
+                                    ),
+                                    React.createElement('p', { className: "text-gray-700" }, 
+                                        "This preview shows a sample of your personalized recommendations. The complete report includes detailed analysis and specific product suggestions."
+                                    )
+                                ),
+                                
+                                React.createElement('div', { className: "text-gray-700 space-y-4" },
+                                    aiInsights.split('\n').slice(0, 10).map((line, index) => {
+                                        const trimmedLine = line.trim();
+                                        if (!trimmedLine) return null;
+                                        
+                                        if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+                                            return React.createElement('h4', { 
+                                                key: index, 
+                                                className: "text-lg font-semibold text-gray-800 mt-4" 
+                                            }, trimmedLine.slice(2, -2));
+                                        }
+                                        
+                                        if (trimmedLine.startsWith('•')) {
+                                            return React.createElement('p', { 
+                                                key: index, 
+                                                className: "ml-6" 
+                                            }, trimmedLine);
+                                        }
+                                        
+                                        return React.createElement('p', { key: index }, trimmedLine);
+                                    }),
+                                    
+                                    React.createElement('p', { 
+                                        className: "text-gray-500 italic text-center py-4 border-t border-b" 
+                                    }, "... Full report continues in email ...")
+                                )
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: "flex space-x-4" },
+                            React.createElement('button', {
+                                onClick: () => {
+                                    // Here you would normally send the email
+                                    alert(`Report will be sent to ${userInfo.email}`);
+                                    setShowUserForm(false);
+                                    setShowReportPreview(false);
+                                },
+                                className: "flex-1 bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                            }, "Send Report & Continue"),
+                            
+                            React.createElement('button', {
+                                onClick: () => setShowReportPreview(false),
+                                className: "px-8 py-4 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                            }, "Edit Info")
+                        )
+                    );
+                }
+                
+                // Show full results after email confirmation
                 return React.createElement('div', { className: "space-y-8" },
                     React.createElement('div', { className: "text-center" },
                         React.createElement('div', { className: "w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6" },
@@ -1273,9 +1497,253 @@ const { useState } = React;
                         )
                     ),
 
-                    !hasBookedExam ? renderBookingCalendar() : renderOpticiansList(),
+                    // VisionMatch Subscription CTA
+                    React.createElement('div', { className: "bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 text-white shadow-xl mt-8" },
+                        React.createElement('div', { className: "max-w-4xl mx-auto" },
+                            React.createElement('h2', { className: "text-3xl font-bold mb-4 text-center" }, 
+                                "You're Not Covering All Your Eyewear Needs"
+                            ),
+                            React.createElement('p', { className: "text-lg mb-6 text-center opacity-90" },
+                                "Based on your results, there's a gap between what you need and what you actually have."
+                            ),
+                            
+                            React.createElement('div', { className: "bg-white/10 backdrop-blur rounded-xl p-6 mb-8" },
+                                React.createElement('h3', { className: "text-xl font-bold mb-3" }, 
+                                    "Here's what most people don't know:"
+                                ),
+                                React.createElement('p', { className: "text-lg mb-4" },
+                                    "You don't have to buy eyewear anymore. There's a smarter way."
+                                ),
+                                React.createElement('h3', { className: "text-2xl font-bold mb-4 text-center" },
+                                    "One Subscription. All Your Vision Needs. Sorted."
+                                ),
+                                React.createElement('p', { className: "text-lg mb-4" },
+                                    "With VisionMatch, you get everything in one simple monthly plan:"
+                                ),
+                                React.createElement('ul', { className: "space-y-3 mb-6" },
+                                    React.createElement('li', { className: "flex items-start" },
+                                        React.createElement('span', { className: "text-green-300 mr-2 mt-1" }, "✓"),
+                                        React.createElement('span', null, "2-3 products included – prescription glasses, sunglasses, contact lenses")
+                                    ),
+                                    React.createElement('li', { className: "flex items-start" },
+                                        React.createElement('span', { className: "text-green-300 mr-2 mt-1" }, "✓"),
+                                        React.createElement('span', null, "Free lens updates when your vision changes (>0.5 diopters)")
+                                    ),
+                                    React.createElement('li', { className: "flex items-start" },
+                                        React.createElement('span', { className: "text-green-300 mr-2 mt-1" }, "✓"),
+                                        React.createElement('span', null, "Annual product exchange – swap styles, no questions asked")
+                                    ),
+                                    React.createElement('li', { className: "flex items-start" },
+                                        React.createElement('span', { className: "text-green-300 mr-2 mt-1" }, "✓"),
+                                        React.createElement('span', null, "Full protection against theft, loss, or damage")
+                                    ),
+                                    React.createElement('li', { className: "flex items-start" },
+                                        React.createElement('span', { className: "text-green-300 mr-2 mt-1" }, "✓"),
+                                        React.createElement('span', null, "No surprises – one predictable monthly payment")
+                                    )
+                                ),
+                                React.createElement('p', { className: "text-2xl font-bold text-center" },
+                                    "Starting from just €9.90/month"
+                                )
+                            ),
+                            
+                            React.createElement('div', { className: "space-y-6" },
+                                React.createElement('h3', { className: "text-2xl font-bold mb-4" }, 
+                                    "Here's What Happens Next:"
+                                ),
+                                React.createElement('div', { className: "space-y-4" },
+                                    React.createElement('div', { className: "flex items-start" },
+                                        React.createElement('div', { className: "w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4" },
+                                            React.createElement('span', { className: "font-bold" }, "1")
+                                        ),
+                                        React.createElement('div', null,
+                                            React.createElement('h4', { className: "font-bold mb-1" }, "Book Your Free Eye Exam"),
+                                            React.createElement('p', { className: "opacity-90" }, 
+                                                "Get a comprehensive vision check at no cost. We'll identify exactly what you need."
+                                            )
+                                        )
+                                    ),
+                                    React.createElement('div', { className: "flex items-start" },
+                                        React.createElement('div', { className: "w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4" },
+                                            React.createElement('span', { className: "font-bold" }, "2")
+                                        ),
+                                        React.createElement('div', null,
+                                            React.createElement('h4', { className: "font-bold mb-1" }, "Choose Your Products"),
+                                            React.createElement('p', { className: "opacity-90" }, 
+                                                "Select 2-3 pieces from hundreds of frames and lens options. Premium brands included."
+                                            )
+                                        )
+                                    ),
+                                    React.createElement('div', { className: "flex items-start" },
+                                        React.createElement('div', { className: "w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4" },
+                                            React.createElement('span', { className: "font-bold" }, "3")
+                                        ),
+                                        React.createElement('div', null,
+                                            React.createElement('h4', { className: "font-bold mb-1" }, "Start Your Subscription"),
+                                            React.createElement('p', { className: "opacity-90" }, 
+                                                "Walk out with everything you need. Pay monthly. Change annually. Stay protected always."
+                                            )
+                                        )
+                                    )
+                                ),
+                                
+                                React.createElement('div', { className: "text-center mt-8" },
+                                    React.createElement('button', {
+                                        onClick: () => {
+                                            const bookingSection = document.querySelector('#booking-section');
+                                            if (bookingSection) {
+                                                bookingSection.scrollIntoView({ behavior: 'smooth' });
+                                            }
+                                        },
+                                        className: "bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
+                                    }, "Book Free Eye Exam & Consultation"),
+                                    React.createElement('p', { className: "mt-3 opacity-90" }, 
+                                        "Takes 30 seconds to book. No payment required."
+                                    )
+                                )
+                            )
+                        )
+                    ),
 
-                    React.createElement('div', { className: "text-center text-gray-500 text-sm" },
+                    // Call to Action Section
+                    React.createElement('div', { className: "bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100 shadow-lg mt-8" },
+                        React.createElement('div', { className: "text-center mb-6" },
+                            React.createElement('h3', { className: "text-2xl font-bold text-gray-800 mb-3" }, "Ready to Improve Your Vision?"),
+                            React.createElement('p', { className: "text-lg text-gray-600" }, "Take action on your personalized recommendations today")
+                        ),
+                        
+                        React.createElement('div', { className: "grid md:grid-cols-2 gap-6 mb-6" },
+                            // Book an Exam CTA
+                            React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-sm border border-gray-100" },
+                                React.createElement('div', { className: "flex items-start space-x-4" },
+                                    React.createElement('div', { className: "w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0" },
+                                        React.createElement('svg', { className: "w-6 h-6 text-blue-600", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                                            React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" })
+                                        )
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('h4', { className: "font-semibold text-gray-800 mb-2" }, "Book Your Eye Exam"),
+                                        React.createElement('p', { className: "text-gray-600 text-sm mb-3" }, 
+                                            "Get a professional assessment and prescription update based on your specific needs"
+                                        ),
+                                        React.createElement('button', {
+                                            onClick: () => {
+                                                if (!hasBookedExam) {
+                                                    const bookingSection = document.querySelector('#booking-section');
+                                                    if (bookingSection) {
+                                                        bookingSection.scrollIntoView({ behavior: 'smooth' });
+                                                    }
+                                                }
+                                            },
+                                            className: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                        }, hasBookedExam ? "✓ Exam Booked" : "Schedule Now")
+                                    )
+                                )
+                            ),
+                            
+                            // Find Opticians CTA
+                            React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-sm border border-gray-100" },
+                                React.createElement('div', { className: "flex items-start space-x-4" },
+                                    React.createElement('div', { className: "w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0" },
+                                        React.createElement(MapPin, { className: "w-6 h-6 text-green-600" })
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('h4', { className: "font-semibold text-gray-800 mb-2" }, "Find Certified Opticians"),
+                                        React.createElement('p', { className: "text-gray-600 text-sm mb-3" }, 
+                                            "Discover trusted professionals near you who can implement your recommendations"
+                                        ),
+                                        React.createElement('button', {
+                                            onClick: () => {
+                                                const opticiansSection = document.querySelector('#opticians-section');
+                                                if (opticiansSection) {
+                                                    opticiansSection.scrollIntoView({ behavior: 'smooth' });
+                                                }
+                                            },
+                                            className: "bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                                        }, "View Locations")
+                                    )
+                                )
+                            )
+                        ),
+                        
+                        // Additional Actions
+                        React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-sm border border-gray-100" },
+                            React.createElement('h4', { className: "font-semibold text-gray-800 mb-4" }, "What to Do Next"),
+                            React.createElement('div', { className: "space-y-3" },
+                                React.createElement('div', { className: "flex items-center space-x-3" },
+                                    React.createElement('div', { className: "w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0" },
+                                        React.createElement('span', { className: "text-purple-600 font-semibold text-sm" }, "1")
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('p', { className: "text-gray-700" }, 
+                                            React.createElement('strong', null, "Download your report"),
+                                            " - Save it to bring to your appointment"
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: "flex items-center space-x-3" },
+                                    React.createElement('div', { className: "w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0" },
+                                        React.createElement('span', { className: "text-purple-600 font-semibold text-sm" }, "2")
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('p', { className: "text-gray-700" }, 
+                                            React.createElement('strong', null, "Schedule your exam"),
+                                            " - Book within 2 weeks for best results"
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: "flex items-center space-x-3" },
+                                    React.createElement('div', { className: "w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0" },
+                                        React.createElement('span', { className: "text-purple-600 font-semibold text-sm" }, "3")
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('p', { className: "text-gray-700" }, 
+                                            React.createElement('strong', null, "Bring your current glasses"),
+                                            " - For comparison and analysis"
+                                        )
+                                    )
+                                ),
+                                React.createElement('div', { className: "flex items-center space-x-3" },
+                                    React.createElement('div', { className: "w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0" },
+                                        React.createElement('span', { className: "text-purple-600 font-semibold text-sm" }, "4")
+                                    ),
+                                    React.createElement('div', { className: "flex-1" },
+                                        React.createElement('p', { className: "text-gray-700" }, 
+                                            React.createElement('strong', null, "Discuss your lifestyle"),
+                                            " - Share your specific activities and needs"
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        
+                        // Urgency Message
+                        React.createElement('div', { className: "mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4" },
+                            React.createElement('div', { className: "flex items-center space-x-3" },
+                                React.createElement('div', { className: "flex-shrink-0" },
+                                    React.createElement('svg', { className: "w-5 h-5 text-yellow-600", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                                        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" })
+                                    )
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('p', { className: "text-yellow-800 font-medium" }, "Don't Wait Too Long"),
+                                    React.createElement('p', { className: "text-yellow-700 text-sm" }, 
+                                        "Vision problems can worsen over time. Taking action now prevents future complications and improves your daily quality of life."
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    React.createElement('div', { id: "booking-section" }, 
+                        !hasBookedExam ? renderBookingCalendar() : null
+                    ),
+                    
+                    React.createElement('div', { id: "opticians-section" }, 
+                        hasBookedExam ? renderOpticiansList() : null
+                    ),
+
+                    React.createElement('div', { className: "text-center text-gray-500 text-sm mt-8" },
                         React.createElement('p', null, "💡 Tip: Bring your current glasses and this report to your appointment for the best experience!")
                     )
                 );
@@ -1284,7 +1752,8 @@ const { useState } = React;
             const currentQuestion = questions[currentStep];
             const currentSection = currentStep >= questions.length ? "Your Personalized Results" : currentQuestion?.section;
 
-            return React.createElement('div', { className: "quiz-wizard" },
+            return React.createElement(React.Fragment, null,
+                React.createElement('div', { className: "quiz-wizard" },
                 React.createElement('div', { className: "quiz-header" },
                     React.createElement('a', { 
                         href: "index.html", 
@@ -1292,7 +1761,7 @@ const { useState } = React;
                     }, "VisionMatch"),
                     React.createElement('p', { className: "text-light" }, "Professional Vision Assessment")
                 ),
-                React.createElement('div', { className: "quiz-content" },
+                React.createElement('div', { className: "quiz-content", style: { paddingBottom: '80px' } },
                     currentStep > 0 && React.createElement('div', { className: "progress-bar-container" },
                         React.createElement('div', { className: "progress-bar-track" },
                             React.createElement('div', { 
@@ -1320,6 +1789,14 @@ const { useState } = React;
                                     disabled: currentStep === 0,
                                     className: "nav-btn"
                                 }, "Previous"),
+                                window.location.search.includes('test=true') && 
+                                    React.createElement('button', {
+                                        onClick: () => {
+                                            setCurrentStep(questions.length - 1);
+                                        },
+                                        className: "nav-btn",
+                                        style: { backgroundColor: '#ff6b6b', color: 'white', margin: '0 10px' }
+                                    }, "Jump to Last Q"),
                                 currentStep < questions.length && 
                                     React.createElement('button', {
                                         onClick: nextStep,
@@ -1328,6 +1805,68 @@ const { useState } = React;
                                     }, currentStep === questions.length - 1 ? 'Get My Results' : 'Next')
                             )
                     )
+                )),
+                
+                // Testing bar - remove in production
+                React.createElement('div', { 
+                    className: "testing-bar",
+                    style: {
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: '#1e293b',
+                        padding: '10px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '10px',
+                        borderTop: '2px solid #ff6b6b',
+                        zIndex: 9999
+                    }
+                },
+                    React.createElement('span', { 
+                        style: { color: '#94a3b8', fontSize: '12px', fontWeight: 'bold' } 
+                    }, "🧪 TESTING MODE:"),
+                    React.createElement('button', {
+                        onClick: () => setCurrentStep(questions.length - 1),
+                        style: {
+                            backgroundColor: '#ff6b6b',
+                            color: 'white',
+                            padding: '6px 16px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    }, "Jump to Last Question"),
+                    React.createElement('button', {
+                        onClick: () => {
+                            setCurrentStep(0);
+                            setAnswers({});
+                            setShowUserForm(true);
+                            setShowReportPreview(false);
+                            setAiInsights('');
+                        },
+                        style: {
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            padding: '6px 16px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    }, "Reset Quiz"),
+                    React.createElement('span', {
+                        style: {
+                            color: '#94a3b8',
+                            fontSize: '12px',
+                            marginLeft: '20px'
+                        }
+                    }, `Current Step: ${currentStep + 1}/${questions.length}`)
                 )
             );
         };
